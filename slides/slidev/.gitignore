@@ -5,3 +5,9 @@ dist
 .vite-inspect
 .remote-assets
 components.d.ts
+
+# export artifacts - rebuild with `npm run export`
+slides-export.pdf
+slides-export.pptx
+*.png
+!public/**/*.png
