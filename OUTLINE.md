@@ -267,7 +267,9 @@ source you forgot about. The rest of the talk is about paying that cost on purpo
 
 ## Slide Content
 
-**Full-bleed code slide.** No headline — the code is the slide.
+**Headline:** The same problem, three generations
+
+**Full-bleed code slide.** Score each era against the five reasons.
 
 ```csharp
 // 2002
@@ -403,7 +405,7 @@ HANDLE TWO OBJECTIONS OUT LOUD - both are fair:
 
 Beneath the title, the map the rest of the talk follows:
 
-> **my machine** → **the team's baseline** → **a shared dev server** → **production**
+> **the team's baseline** → **my machine** → **a shared dev server** → **production**
 
 Each boundary changes *who supplies the value* and *what it costs to get it wrong*. The
 application does not change. Only the answer to "where did this come from?" does.
@@ -496,7 +498,7 @@ That's the win condition for this slide.
 60-min: keep, 30 seconds
 
 FIRST BOUNDARY. Everything from here to the end is one application moving:
-my laptop -> a shared dev server -> production. Say that out loud once.
+the baseline everyone shares -> my machine -> a shared dev server -> production.
 
 The baseline is the part everyone agrees on. It is checked in, it is reviewed,
 and it travels with the artifact. Nothing here is secret and nothing here is
@@ -779,7 +781,9 @@ Storage paths, for the record - and tell them NOT to write code against these:
 
 ## Slide Content
 
-**Full-bleed code slide.** No headline — the code is the slide.
+**Headline:** User secrets live outside the repo
+
+**Full-bleed code slide.** The whole lifecycle is five commands.
 
 ```bash
 dotnet user-secrets init
@@ -982,7 +986,9 @@ thirteen.
 
 ## Slide Content
 
-**Full-bleed code slide.** No headline — the code is the slide.
+**Headline:** The host reads configuration in two passes
+
+**Full-bleed code slide.** One command, two effects — note the provider listed twice.
 
 ```text
 $ dotnet run --environment Staging
@@ -1148,7 +1154,9 @@ takes one thing home, make it this.
 
 ## Slide Content
 
-**Full-bleed code slide.** No headline — the code is the slide.
+**Headline:** The provider is why 10 won
+
+**Full-bleed code slide.** The cold open, resolved.
 Gold marker on line(s) 6–7.
 
 ```text
@@ -1273,63 +1281,6 @@ most common version.
 
 ALSO SAY (it comes back in S8): changing an environment variable on a running
 container does NOTHING. Env vars are read once at startup. Restart the container.
-```
-
----
-
-# Slide 33
-
-## Slide Content
-
-**Headline:** Four became eleven
-
-A count, not a catalogue. Big gold **4 -> 11** with the seven new prefixes listed small
-beneath, and the four that also set a `_ProviderName` marked:
-
-```text
-.NET 9      CUSTOMCONNSTR_   MYSQLCONNSTR_*   SQLCONNSTR_*   SQLAZURECONNSTR_*
-
-.NET 10     + POSTGRESQLCONNSTR_*   DOCDBCONNSTR_        REDISCACHECONNSTR_
-            + SERVICEBUSCONNSTR_    EVENTHUBCONNSTR_     NOTIFICATIONHUBCONNSTR_
-            + APIHUBCONNSTR_
-
-            * also sets ConnectionStrings:{KEY}_ProviderName
-```
-
-The full mapping table stays in the notes. On screen, the number is the point.
-
-## Notes
-
-```text
-[51-59 min] CONNSTR PREFIXES - S4.2 - .NET 10 DELTA
-Snippet: lifted from d05
-60-min: keep as one line on the deployment slide - it's a good "new in 10" beat
-
-Certain prefixed environment variables are rewritten into the ConnectionStrings:
-section. This is an App Service compatibility behavior that most people have
-never heard of.
-
-.NET 9 recognized FOUR. .NET 10 recognizes ELEVEN.
-
-  CUSTOMCONNSTR_{KEY}       -> ConnectionStrings:{KEY}
-  MYSQLCONNSTR_{KEY}        -> + _ProviderName MySql.Data.MySqlClient
-  SQLCONNSTR_{KEY}          -> + _ProviderName System.Data.SqlClient
-  SQLAZURECONNSTR_{KEY}     -> + _ProviderName System.Data.SqlClient
-
-  NEW IN 10:
-  POSTGRESQLCONNSTR_{KEY}   -> + _ProviderName Npgsql
-  DOCDBCONNSTR_{KEY}        (Cosmos DB)
-  REDISCACHECONNSTR_{KEY}
-  SERVICEBUSCONNSTR_{KEY}
-  EVENTHUBCONNSTR_{KEY}
-  NOTIFICATIONHUBCONNSTR_{KEY}
-  APIHUBCONNSTR_{KEY}
-
-d05 SHOWS: set POSTGRESQLCONNSTR_Default, then
-Configuration.GetConnectionString("Default") resolving on .NET 10 where it
-wouldn't have on .NET 9.
-
-Short, concrete, and it's a genuinely new thing - good energy beat here.
 ```
 
 ---
@@ -1541,6 +1492,8 @@ just inside the codebase instead of between teams.
 
 ## Slide Content
 
+**Headline:** Define the contract, then enforce it
+
 **Full-bleed code slide.** The options type, then the registration.
 
 ```csharp
@@ -1596,6 +1549,8 @@ referenced implicitly by the web SDK - so it just works and people wonder why.
 # Slide 29
 
 ## Slide Content
+
+**Headline:** An invalid environment fails before traffic
 
 **Setup / reveal.** The registration, then what a bad value actually does.
 
@@ -2905,12 +2860,70 @@ remember you made it.&quot;
 Do not walk these. They are here so the answer exists when someone asks, and so
 the PDF is complete for whoever reads it later.
 
+  connection-string prefixes          "we moved to Postgres and the name changed"
   named options + source generators   "how do I bind the same shape twice?"
   a custom provider                   "how would I read config from X?"
   .NET 10 null preservation           "we upgraded and a default came back null"
 
 Each one is technically sound and each one interrupts the laptop -> shared dev ->
 production story, which is why they are back here.
+```
+
+---
+
+# Slide 33
+
+## Slide Content
+
+**Headline:** Four became eleven
+
+A count, not a catalogue. Big gold **4 -> 11** with the seven new prefixes listed small
+beneath, and the four that also set a `_ProviderName` marked:
+
+```text
+.NET 9      CUSTOMCONNSTR_   MYSQLCONNSTR_*   SQLCONNSTR_*   SQLAZURECONNSTR_*
+
+.NET 10     + POSTGRESQLCONNSTR_*   DOCDBCONNSTR_        REDISCACHECONNSTR_
+            + SERVICEBUSCONNSTR_    EVENTHUBCONNSTR_     NOTIFICATIONHUBCONNSTR_
+            + APIHUBCONNSTR_
+
+            * also sets ConnectionStrings:{KEY}_ProviderName
+```
+
+The full mapping table stays in the notes. On screen, the number is the point.
+
+## Notes
+
+```text
+[51-59 min] CONNSTR PREFIXES - S4.2 - .NET 10 DELTA
+Snippet: lifted from d05
+60-min: keep as one line on the deployment slide - it's a good "new in 10" beat
+
+Certain prefixed environment variables are rewritten into the ConnectionStrings:
+section. This is an App Service compatibility behavior that most people have
+never heard of.
+
+.NET 9 recognized FOUR. .NET 10 recognizes ELEVEN.
+
+  CUSTOMCONNSTR_{KEY}       -> ConnectionStrings:{KEY}
+  MYSQLCONNSTR_{KEY}        -> + _ProviderName MySql.Data.MySqlClient
+  SQLCONNSTR_{KEY}          -> + _ProviderName System.Data.SqlClient
+  SQLAZURECONNSTR_{KEY}     -> + _ProviderName System.Data.SqlClient
+
+  NEW IN 10:
+  POSTGRESQLCONNSTR_{KEY}   -> + _ProviderName Npgsql
+  DOCDBCONNSTR_{KEY}        (Cosmos DB)
+  REDISCACHECONNSTR_{KEY}
+  SERVICEBUSCONNSTR_{KEY}
+  EVENTHUBCONNSTR_{KEY}
+  NOTIFICATIONHUBCONNSTR_{KEY}
+  APIHUBCONNSTR_{KEY}
+
+d05 SHOWS: set POSTGRESQLCONNSTR_Default, then
+Configuration.GetConnectionString("Default") resolving on .NET 10 where it
+wouldn't have on .NET 9.
+
+Short, concrete, and it's a genuinely new thing - good energy beat here.
 ```
 
 ---

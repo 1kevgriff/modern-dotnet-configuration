@@ -263,11 +263,22 @@ const LAYOUTS = {
     return { front: { layout: 'statement' }, body: chunks(s.quote, footnote(s, cfg)) }
   },
 
+  /**
+   * The numbered list comes from OUTLINE.md, NOT the sidecar.
+   *
+   * It used to live in `cfg.items`, which meant the outline and the sidecar both held a
+   * copy - so editing the outline changed nothing and the deck kept promising the old
+   * agenda. The sidecar must never duplicate content the outline already owns.
+   */
   roadmap(s, cfg) {
-    const items = cfg.items.map((t, i) => `${i + 1}. ${t}`).join(NL)
+    const items = s.residualProse
+      .flatMap(p => p.split(NL))
+      .filter(l => /^\d+\.\s/.test(l.trim()))
+      .map(l => l.trim())
+    if (!items.length) throw new Error(`slide ${s.id}: roadmap has no numbered list in OUTLINE.md`)
     return {
       front: { layout: 'roadmap', panelTitle: cfg.panelTitle },
-      body: chunks(provenance(cfg.from), items),
+      body: chunks(items.join(NL), footnote(s, cfg)),
     }
   },
 

@@ -33,7 +33,7 @@ const ORDER = [
 
   // ACT 3 — shared dev environment. 25 keeps its binding claim and opens the
   // binding/validation half of the act.
-  '31', '32', '33', '34', '35', '25', '26', '27', '29', '36',
+  '31', '32', '34', '35', '25', '26', '27', '29', '36',
 
   // ACT 4 — production
   '36a', '36b', '28', '28a', '28b', '40',
@@ -45,7 +45,7 @@ const ORDER = [
 
   // close, then appendix
   '53', '54',
-  '54a', '30', '37', '52',
+  '54a', '33', '30', '37', '52',
 ]
 
 /** Slides that did not exist before this pass. */
@@ -61,7 +61,7 @@ const NEW = {
       '60-min: keep, 30 seconds',
       '',
       'FIRST BOUNDARY. Everything from here to the end is one application moving:',
-      'my laptop -> a shared dev server -> production. Say that out loud once.',
+      'the baseline everyone shares -> my machine -> a shared dev server -> production.',
       '',
       'The baseline is the part everyone agrees on. It is checked in, it is reviewed,',
       'and it travels with the artifact. Nothing here is secret and nothing here is',
@@ -168,6 +168,7 @@ const NEW = {
       'Do not walk these. They are here so the answer exists when someone asks, and so',
       'the PDF is complete for whoever reads it later.',
       '',
+      '  connection-string prefixes          "we moved to Postgres and the name changed"',
       '  named options + source generators   "how do I bind the same shape twice?"',
       '  a custom provider                   "how would I read config from X?"',
       '  .NET 10 null preservation           "we upgraded and a default came back null"',
@@ -232,6 +233,9 @@ const doc = out.join(NL).replace(/\n{4,}/g, NL + NL + NL) + NL
 
 // ---- prove nothing was lost --------------------------------------------------------------
 for (const [id, body] of blocks) {
+  // Slides in NEW are regenerated from their template on every run, so their old text is
+  // expected to change. Every OTHER slide must survive byte-identical.
+  if (NEW[id]) continue
   if (!doc.includes(body)) {
     console.error(`  REFUSING: slide ${id}'s text did not survive reassembly`)
     process.exit(1)

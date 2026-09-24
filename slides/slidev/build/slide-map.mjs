@@ -45,16 +45,10 @@ export const map = {
 
   5: {
     layout: 'roadmap',
-    panelTitle: "What we'll cover",
-    items: [
-      'The provider chain and precedence',
-      'Local dev → deployment → shared',
-      'Binding, options, and validation',
-      'Feature flags and flag debt',
-      'Choosing a strategy',
-    ],
-    from: 'OUTLINE.md slide 5',
-    prose: 'drop'
+    panelTitle: 'Following one value',
+    // The five acts themselves live in OUTLINE.md. Keeping a copy here is what let the
+    // deck keep showing the old agenda after the outline was rewritten.
+    footnote: 'The same key, `Weather:TimeoutSeconds`, crosses all five.',
   },
 
   6: {

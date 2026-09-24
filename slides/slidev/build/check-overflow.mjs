@@ -1,7 +1,12 @@
-// Renders the built deck and fails if any slide's content overflows its 980x552 frame.
+// Renders the built deck and fails if any slide's content overflows its frame OR is
+// invisible against its own background.
 //
 // `slidev build` succeeding proves almost nothing: it happily compiles a slide whose code
-// block runs off the bottom of the screen. This is the gate that actually catches that.
+// block runs off the bottom of the screen. The geometry half of this gate catches that.
+//
+// The CONTRAST half exists because geometry is not enough either: `appsettings.json` on an
+// act divider rendered as cream text on Slidev's light inline-code chip - a blank white
+// rectangle where a filename should be - and every existing check passed.
 //
 //   node build/check-overflow.mjs        (run against ./dist, so build first)
 
@@ -85,6 +90,48 @@ for (let n = 1; n <= total; n++) {
       if (el.tagName === 'PRE' && el.scrollWidth > el.clientWidth + TOL)
         out.push(`pre clips ${el.scrollWidth - el.clientWidth}px of code horizontally`)
     }
+    // ---- contrast -------------------------------------------------------------------
+    const lin = c => { c /= 255; return c <= 0.04045 ? c / 12.92 : ((c + 0.055) / 1.055) ** 2.4 }
+    const lum = ([r, g, b]) => 0.2126 * lin(r) + 0.7152 * lin(g) + 0.0722 * lin(b)
+    const rgb = s => (s.match(/[\d.]+/g) || []).slice(0, 4).map(Number)
+    const opaque = c => c.length < 4 || c[3] === 1
+
+    /** Composite up the ancestor chain until something is actually opaque. */
+    const groundOf = el => {
+      for (let n = el; n; n = n.parentElement) {
+        const c = rgb(getComputedStyle(n).backgroundColor)
+        if (c.length && opaque(c) && getComputedStyle(n).backgroundColor !== 'rgba(0, 0, 0, 0)')
+          return c.slice(0, 3)
+      }
+      return [255, 255, 255]
+    }
+
+    // Block code is Shiki-themed: the visible colour lives on each <span>, not on <code>,
+    // so measure the spans. Inline code is the case that actually broke, and is included.
+    const targets = [
+      ...slide.querySelectorAll('h1, h2, p, li, td, th, .caption, .card-title'),
+      ...slide.querySelectorAll(':not(pre) > code'),
+      ...slide.querySelectorAll('pre .line > span'),
+    ]
+    for (const el of targets) {
+      const text = (el.textContent || '').trim()
+      if (!text) continue
+      // only leaf-ish nodes, so a wrapper is not blamed for its children
+      if (el.querySelector('h1, h2, p, li, td, code, .caption, span')) continue
+      const r = el.getBoundingClientRect()
+      if (r.width < 4 || r.height < 4) continue
+      const st = getComputedStyle(el)
+      if (st.visibility === 'hidden' || st.opacity === '0') continue
+      const fg = rgb(st.color).slice(0, 3)
+      const bg = groundOf(el)
+      const a = lum(fg), b = lum(bg)
+      const ratio = (Math.max(a, b) + 0.05) / (Math.min(a, b) + 0.05)
+      if (ratio < 3) {
+        out.push(`"${text.slice(0, 32)}" is ${ratio.toFixed(2)}:1 against its background ` +
+                 `(${st.color} on rgb(${bg.join(',')})) - effectively invisible`)
+      }
+    }
+
     const id = document.querySelector('.slidev-page')?.dataset?.slideNo
     return { id, out: [...new Set(out)] }
   })
@@ -104,4 +151,4 @@ if (problems.length) {
   console.error('')
   process.exit(1)
 }
-console.log(`  no overflow: ${total} slides fit their frame`)
+console.log(`  ${total} slides: nothing overflows, clips, or falls below 3:1 contrast`)

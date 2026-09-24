@@ -46,9 +46,5 @@ defineProps<{ kicker?: string }>()
   color: var(--cream);
   border-left-color: var(--gold);
 }
-.layout-section :deep(.caption code) {
-  background: rgba(247, 246, 243, 0.14);
-  color: var(--cream);
-}
 .layout-section :deep(.caption strong) { color: var(--cream); }
 </style>

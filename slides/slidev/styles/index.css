@@ -228,3 +228,19 @@
 .slidev-layout.table-dense tbody td { padding: 0.28rem 0.7rem; }
 .slidev-layout.table-dense thead th { padding: 0.3rem 0.7rem; }
 .slidev-layout.table-dense table { font-size: 0.84rem; }
+
+/* ---- inline code on dark grounds ----------------------------------------------- */
+/*
+   Slidev styles inline code with a LIGHT chip background. On a navy divider the text
+   inherits the cream heading colour and lands cream-on-light: the word vanishes and the
+   slide shows a blank white rectangle. `appsettings.json` and `launchSettings` both
+   disappeared this way in act dividers.
+
+   Set BOTH halves wherever the ground is dark, never just the background.
+*/
+.slidev-layout.layout-section :not(pre) > code,
+.slidev-layout .card.accent :not(pre) > code,
+.slidev-layout .panel.dark :not(pre) > code {
+  background: rgba(247, 246, 243, 0.16);
+  color: var(--cream);
+}
