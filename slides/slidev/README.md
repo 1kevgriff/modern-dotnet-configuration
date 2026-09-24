@@ -108,8 +108,12 @@ npm run export:png      # one PNG per slide
 npm run export:pptx     # PowerPoint, native shapes and selectable text
 ```
 
-Needs `playwright-chromium` (already a dev dependency). All pass `--wait` — without it the
-first slide exports as a "Loading slide…" placeholder.
+Needs `playwright-chromium` (already a dev dependency).
+
+All three pass `--wait 6000 --wait-until networkidle`, and that is not cosmetic: at the
+old `--wait 1500` the PPTX export captured the "Loading slide…" placeholder for **all 64
+slides** and still produced a valid-looking file. Always check the output, not the exit
+code. Speaker notes do survive the PPTX export — all 64 of them.
 
 ## Known gaps
 
