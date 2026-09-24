@@ -1,0 +1,59 @@
+# Solo commands for this talk. Repo-controlled, so the setup travels with the checkout.
+#
+# The morning-of loop is: edit OUTLINE.md -> "Outline watch" regenerates -> "Slides" hot-reloads.
+# Never hand-edit slides/slidev/slides.md; it is generated and will be overwritten.
+
+name: modern-dotnet-configuration
+icon_initials: MC
+
+processes:
+  Slides:
+    # The deck. Regenerates from OUTLINE.md first so it can never serve a stale slides.md.
+    # Presenter mode with speaker notes is at /presenter, or press `p`.
+    # No --port: with one pinned, Slidev exits if it is taken. Left alone it picks a free
+    # port and Solo shows the URL in the command's ports.
+    command: npm run generate && npx slidev
+    working_dir: slides/slidev
+    auto_start: false
+    auto_restart: false
+    env: {}
+
+  Outline watch:
+    # Re-runs the generator whenever the outline or the sidecar changes, so the running
+    # deck picks the edit up over HMR without restarting the server.
+    command: node build/outline-to-slidev.mjs
+    working_dir: slides/slidev
+    auto_start: false
+    auto_restart: false
+    restart_when_changed:
+      - OUTLINE.md
+      - slides/slidev/build/slide-map.mjs
+    env: {}
+
+  Verify deck:
+    # Run before presenting. `slidev build` alone proves nothing: it happily compiles a slide
+    # whose code runs off the bottom, because panels clip in silence. This renders all 59 and
+    # fails on any overflow.
+    command: npm run verify
+    working_dir: slides/slidev
+    auto_start: false
+    auto_restart: false
+    env: {}
+
+  Export PDF:
+    command: npm run export
+    working_dir: slides/slidev
+    auto_start: false
+    auto_restart: false
+    env: {}
+
+  Verify demos:
+    # The repo's own pre-talk gate: builds all 35 demo projects, checks formatting, and
+    # asserts the invariants the demos rely on. Every snippet on a slide comes from one of
+    # them. Add -SkipFormat for the fast path.
+    # (`dotnet build` here does not work - demos/ has no solution file.)
+    command: pwsh -NoProfile -File ./verify.ps1
+    working_dir: demos
+    auto_start: false
+    auto_restart: false
+    env: {}
