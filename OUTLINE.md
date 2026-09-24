@@ -554,8 +554,7 @@ var dump = ((IConfigurationRoot)app.Configuration).GetDebugView(ctx =>
         ? "***"
         : ctx.Value);
 
-app.Logger.LogInformation("Configuration:
-{Dump}", dump);
+app.Logger.LogInformation("Configuration:\n{Dump}", dump);
 ```
 
 ## Notes
@@ -648,8 +647,21 @@ loud, because someone is about to go add GetDebugView to a production app.
 
 **Headline:** Default provider order
 
-Eight-row table, highest priority first, alternating row tint.
-Rows 5 and 6 are the `{ApplicationName}.settings*.json` files almost nobody knows about.
+Table, highest priority first, alternating row tint. **Deliberate table exception.**
+
+| | Source | |
+| --- | --- | --- |
+| 1 | Host / chained configuration | added LAST, so it wins |
+| 2 | Command-line arguments | the provider runs twice |
+| 3 | Environment variables | unprefixed |
+| 4 | User secrets | Development only |
+| 5 | `{ApplicationName}.settings.{Environment}.json` | |
+| 6 | `{ApplicationName}.settings.json` | |
+| 7 | `appsettings.{Environment}.json` | |
+| 8 | `appsettings.json` | |
+
+Rows 5 and 6 are the ones almost nobody knows exist, and they apply to web apps too.
+Row 1 is the other surprise: read first, applied last.
 
 ## Notes
 
@@ -746,9 +758,18 @@ once; someone in the room is writing a worker this week.
 
 **Headline:** Same key. Four winners.
 
-Four rows, source on the left and the value it yields on the right.
-The last row (`--Weather:TimeoutSeconds` → 5) is bold navy with a large gold value.
-Caption beneath: *last one wins*.
+Four rows, source on the left, the value it yields on the right.
+
+| | |
+| --- | --- |
+| `appsettings.json` | 30 |
+| `appsettings.Development.json` | 120 |
+| `Weather__TimeoutSeconds` | 10 |
+| **`--Weather:TimeoutSeconds`** | **5** |
+
+The last row is bold navy with a large gold value. Caption beneath: *last one wins*.
+
+Failure-mode badge, top right: `ORDER`.
 
 ## Notes
 
@@ -756,6 +777,8 @@ Caption beneath: *last one wins*.
 [layering] PRECEDENCE, SHOWN
 Snippets: lifted from d02 and d03
 60-min: keep this; the array slide is the FIRST thing to cut if you run long
+Do not read the slide aloud. Walk down the four rows, name the source each
+time, and let the numbers do the work.
 
 THE LAYERS - JSON, then the environment file, then an env var, then a CLI arg.
 Same key, four different winners, one at a time. Call out failure mode #1: ORDER.
@@ -804,9 +827,6 @@ pushes you to stage two.
 
 ON SCREEN: the four sources and what each one yields, so the room can follow
 the terminal without squinting. The last row is gold because it is the winner.
-
-Do not read the slide aloud. Walk down the four rows, name the source each
-time, and let the numbers do the work.
 ```
 
 ---
@@ -1031,17 +1051,20 @@ file changes the hash, and therefore changes which secrets it sees.
 
 Two panels, side by side:
 
-| you did this | and this file exists |
+| you set this, in this shell | and this file exists |
 | --- | --- |
 | `$env:Weather__TimeoutSeconds = "10"` | `Properties/launchSettings.json` |
-| | `"environmentVariables": { "Weather__TimeoutSeconds": "45" }` |
+| `dotnet run` | `"environmentVariables": { "Weather__TimeoutSeconds": "45" }` |
 
-Ask: **"F5. What timeout does the app see?"**
+Ask: **"Which one wins?"**
 
-Then advance. The reveal is a one-line output slide: `Weather timeout is 45 seconds.`
-with the caption *launchSettings.json is a development-only file that never deploys*.
+Then advance to **24a**.
 
-Failure-mode badges, top right: `ORDER` and `SHAPE`.
+Failure-mode badge, top right: `ORDER`.
+
+> Deliberately `dotnet run` in the same shell, not F5. A `$env:` assignment only
+> affects that PowerShell process and its children — an already-running Visual
+> Studio never sees it, so an F5 version of this would prove nothing.
 
 ## Notes
 
@@ -1068,6 +1091,48 @@ CLOSE THE STAGE HERE:
 letting the platform supply the values. That's stage two."
 
 Failure mode #1 (ORDER) and #2 (SHAPE) both live here.
+```
+
+---
+
+# Slide 24a
+
+## Slide Content
+
+**Reveal.** One line of output, full-bleed.
+
+```text
+$ dotnet run
+  Weather timeout is 45 seconds.
+```
+
+Caption, gold: **`launchSettings.json` is a development-only file that never deploys.**
+
+So the value you carefully set is beaten locally by a file that will not exist in
+production — where your environment variable is the only thing left.
+
+## Notes
+
+```text
+[STAGE 1 REVEAL] THE launchSettings TRAP
+Snippet: lifted from d07
+60-min: keep - this is the whole payoff of the stage
+
+Let them sit on 45 for a second before you explain it.
+
+THE TWO-SIDED FAILURE, and both sides bite:
+- Locally it works when it should not. launchSettings quietly wins, so you never
+  find out your environment variable was not being read.
+- In production it breaks when it should not. launchSettings is not deployed, so
+  the value that was silently winning is simply gone.
+
+That is why this is the number one "works on my machine" configuration story. It
+is not that the machine is different. It is that a development-only file is in
+the chain locally and absent everywhere else.
+
+CLOSE THE STAGE HERE:
+"That is stage one's signature failure. The fix is not a better laptop - it is
+letting the platform supply the values. That is stage two."
 ```
 
 ---
@@ -1107,7 +1172,7 @@ knowable than a constant.
 Two code panels on cream, captioned **DON'T** and **DO**.
 
 ```csharp
-// DON'T - stringly typed, unvalidated, untestable, re-parsed every call
+// DON'T - over-broad dependency, stringly typed, unvalidated, re-parsed
 public sealed class WeatherClient(IConfiguration config)
 {
     public Task<Forecast> GetAsync() =>
@@ -1287,7 +1352,23 @@ Ask the room which of the three move. Then advance.
 ## Notes
 
 ```text
-(to write — see the parent slide's notes)
+[OPTIONS] THE SETUP - BEFORE THE EDIT
+Snippet: lifted from d13
+60-min: NEVER CUT
+
+All three interfaces, same key, same value. Nothing interesting yet - and that
+is the point. Establish the baseline so the reveal has something to move
+against.
+
+ASK THE ROOM, and wait for an answer:
+"I am about to change appsettings.json to 90 while this is running.
+ Which of these three change?"
+
+Most rooms say all three. Some say none. Both are wrong, and being wrong out
+loud is what makes the next slide land.
+
+Do not explain lifetimes yet. The table two slides back already told them; this
+is the check on whether they believed it.
 ```
 
 ---
@@ -1299,19 +1380,45 @@ Ask the room which of the three move. Then advance.
 **Reveal.** Identical layout so only the values appear to move.
 
 ```text
-IOptions<T>          30   <- did not move
-IOptionsSnapshot<T>  90
-IOptionsMonitor<T>   90
+                          same request      next request
+IOptions<T>          30        30                30      <- never moves
+IOptionsSnapshot<T>  30        30                90      <- new scope only
+IOptionsMonitor<T>   30        90                90      <- immediately
 ```
 
-`IOptions` row stays muted; the two that changed go gold.
+`IOptions` row stays muted; the values that changed go gold.
+
+The middle column matters: a snapshot already resolved in the current request
+stays at 30. It is scoped, so it only picks up the change in a **new scope** —
+normally the next request.
 
 This is the longest beat in the talk and the one people remember. Do not rush it.
 
 ## Notes
 
 ```text
-(to write — see the parent slide's notes)
+[OPTIONS] THE REVEAL - AFTER THE EDIT
+Snippet: lifted from d13
+60-min: NEVER CUT. This is the longest beat in the talk.
+
+Three columns, because the honest answer has a middle state:
+
+  IOptions          never moves. Bound once at startup, forever.
+  IOptionsSnapshot  moves, but only in a NEW SCOPE - normally the next request.
+                    A snapshot already resolved in the current request stays at 30.
+  IOptionsMonitor   moves immediately. It is a singleton holding a change token.
+
+THE MIDDLE COLUMN IS THE ONE PEOPLE GET WRONG. "Scoped" does not mean "fresh
+whenever you ask" - it means fresh per scope. Within one request it is stable,
+which is exactly the property you want for per-request consistency.
+
+THEN NAME THE TWO CLASSIC BUGS while this is up:
+- IOptionsSnapshot<T> injected into a singleton. It is scoped: the container
+  either throws, or you capture the first scope's value forever.
+- _monitor.CurrentValue cached in a constructor field, which quietly turns a
+  monitor back into an IOptions<T>. Read CurrentValue at the point of use.
+
+Failure mode #3: LIFETIME. Badge is on the table slide; name it here.
 ```
 
 ---
@@ -1519,7 +1626,7 @@ container does NOTHING. Env vars are read once at startup. Restart the container
 **Headline:** Four became eleven
 
 A count, not a catalogue. Big gold **4 -> 11** with the seven new prefixes listed small
-beneath, and the three that carry a `_ProviderName` marked:
+beneath, and the four that also set a `_ProviderName` marked:
 
 ```text
 .NET 9      CUSTOMCONNSTR_   MYSQLCONNSTR_*   SQLCONNSTR_*   SQLAZURECONNSTR_*
@@ -1748,17 +1855,15 @@ without a file.
 **Full-bleed code slide.** No headline — the code is the slide.
 
 ```csharp
-public sealed class SqlConfigurationSource(string connectionString)
-    : IConfigurationSource
+public sealed class DotEnvConfigurationSource(string path) : IConfigurationSource
 {
     public IConfigurationProvider Build(IConfigurationBuilder builder) =>
-        new SqlConfigurationProvider(connectionString);
+        new DotEnvConfigurationProvider(path);
 }
 
-public sealed class SqlConfigurationProvider(string connectionString)
-    : ConfigurationProvider
+public sealed class DotEnvConfigurationProvider(string path) : ConfigurationProvider
 {
-    public override void Load() => Data = QuerySettings(connectionString);
+    public override void Load() => Data = ParseDotEnv(path);
 }
 ```
 
@@ -1838,7 +1943,9 @@ The sentinel pattern, drawn as a sequence — this is the slide people take back
 2.  edit  Weather:Retries      ->  5
 3.  edit  Weather:Sentinel     ->  v4      <-- last, always
                                              |
-        app refreshes on the next request --+  reloads all three together
+   next request TRIGGERS a refresh ---------+  it may still serve the OLD
+                                               values; later requests see
+                                               all three change together
 ```
 
 ```csharp
@@ -1901,7 +2008,8 @@ THE SIX THINGS WORTH SAYING:
 6. KEY VAULT REFERENCES live in the store as pointers with a distinct content
    type; ConfigureKeyVault dereferences them. Give them their OWN cadence with
    SetSecretRefreshInterval(key, TimeSpan) - a rotated secret is otherwise cached
-   forever. MINIMUM is one minute; anything shorter is floored. This is the
+   forever. MINIMUM is one minute - a shorter interval throws ArgumentOutOfRangeException
+   rather than being silently floored. This is the
    App Configuration provider resolving Key Vault REFERENCES, not the
    standalone Key Vault provider, which has its own ReloadInterval. (Same rotation argument as the Key Vault slide.)
 
@@ -1927,7 +2035,7 @@ mechanism matrix and it is reference material people photograph.
 | Command line | **No** | read once at startup |
 | Azure Key Vault | Only if `ReloadInterval` set | polling |
 | Azure App Configuration | Yes, with `ConfigureRefresh` | polling on activity |
-| Key-per-file | **Only the 4-arg overload** | file watcher |
+| Key-per-file | **Only when `reloadOnChange` is enabled** | file watcher |
 | In-memory | No | — |
 | Custom | Your call | `OnReload()` |
 
@@ -2072,7 +2180,8 @@ builder.Services.AddFeatureManagement();
 if (await features.IsEnabledAsync("NewCheckout", ct)) { ... }
 ```
 
-That is the entire setup. No service, no SDK, no account.
+That is the entire setup. No cloud service, no cloud account, no network dependency
+— just a NuGet package and a JSON section.
 
 ## Notes
 
@@ -2188,16 +2297,20 @@ with .AddFeatureFilter<TenantFilter>(). Good example: a flag enabled per tenant.
 
 **Reveal.** The captured output.
 
+One user. One process. Ten consecutive checks — this is `d29`'s actual output shape,
+with the targeting row underneath for contrast.
+
 ```text
-request 1   IsEnabledAsync("NewCheckout")  ->  true
-request 2   IsEnabledAsync("NewCheckout")  ->  false
-request 3   IsEnabledAsync("NewCheckout")  ->  true
+  D29 - Microsoft.Percentage is per-call, not per-user
+
+  percentage   true  false true  true  false false true  false true  true
+  targeting    true  true  true  true  true  true  true  true  true  true
 ```
 
 Caption, gold: **`Microsoft.Percentage` is evaluated per call, not per user.**
 
-The nav bar says new checkout, the checkout page says old. This is the most common
-feature-flag bug in the wild.
+The nav bar says new checkout, the checkout page says old. It is a common and
+genuinely nasty flag bug, and it is invisible in a single test run.
 
 The fix, one line beneath: targeting, or variant allocation with a `seed` — that is
 what gives a stable per-user assignment.
@@ -2205,7 +2318,25 @@ what gives a stable per-user assignment.
 ## Notes
 
 ```text
-(to write — see the parent slide's notes)
+[FLAGS] THE REVEAL - PER CALL, NOT PER USER
+Snippet: lifted from d29
+60-min: KEEP THE GOTCHA even if you cut the filter catalogue. Never-cut list.
+
+Ten checks. One user. One process. The percentage row flickers; the targeting
+row does not. That contrast is the slide.
+
+SAY IT PLAINLY:
+"Microsoft.Percentage does not know who you are. It rolls the dice on every
+ call. Fifty percent means half the CALLS, not half the USERS."
+
+WHY IT IS NASTY: it is invisible in a single test run and invisible in code
+review. It shows up as a user watching a feature flicker between page loads -
+nav bar says new checkout, checkout page says old.
+
+THE FIX, and say it immediately so nobody leaves with only the problem:
+targeting with an ITargetingContextAccessor, or variant allocation with a seed.
+Either gives a stable per-user assignment. A shared seed keeps that assignment
+consistent across flags, which is what you want for a coherent experiment.
 ```
 
 ---
@@ -2330,21 +2461,46 @@ Turning it off in the portal and walking away leaves the dead branch compiling f
 The health endpoint, which is the thing people actually steal:
 
 ```csharp
-app.MapGet("/flags", async (IVariantFeatureManager fm, CancellationToken ct) =>
+// internal diagnostics - authorize it; this leaks operational state
+app.MapGet("/flags", async (IVariantFeatureManager features, CancellationToken ct) =>
 {
-    var flags = new Dictionary<string, bool>();
-    await foreach (var name in fm.GetFeatureNamesAsync(ct))
-        flags[name] = await fm.IsEnabledAsync(name, ct);
-    return flags;
-});
+    List<FlagRecord> inventory = [];
+    await foreach (string name in features.GetFeatureNamesAsync(ct))
+        inventory.Add(new FlagRecord(name, Category(name), Owner(name), Expiry(name),
+                                     await features.IsEnabledAsync(name, ct)));
+    return inventory;
+}).RequireAuthorization();
 ```
+
+Name and a boolean would not be enough — slide 46 just argued that **owner** and
+**expiry** are the things that matter. And say the caveat out loud: for a percentage
+or targeting flag that boolean is *this* evaluation, for *this* context. Slide 44 just
+proved it can differ on the next call.
 
 One line beneath: *ten live flags is up to 1,024 nominal combinations. You test three.*
 
 ## Notes
 
 ```text
-(to write — see the parent slide's notes)
+[FLAGS] DELETION AND INVENTORY
+Snippet: lifted from d32
+60-min: keep the first line; the endpoint is optional
+
+THE SENTENCE PEOPLE NEED TO HEAR:
+"Turning a flag off in the portal is not deleting it. The dead branch is still
+ there, still compiling, still something the next person has to reason about."
+
+Deleting a flag is a pull request, not a portal click. If that is not on
+someone's board, it does not happen.
+
+THE ENDPOINT IS THE THING PEOPLE STEAL. Two caveats, say both:
+- Name and a boolean is not enough. The previous slide argued owner and expiry
+  are what matter, so the record carries them.
+- For a percentage or targeting flag that boolean is THIS evaluation, for THIS
+  context. Slide 44 just proved it can differ on the very next call. It is an
+  inventory of what exists, not a global on/off state.
+- Authorize it. An open /flags endpoint hands an attacker your roadmap and your
+  operational posture.
 ```
 
 ---
@@ -2555,14 +2711,14 @@ Desktop falls off the model, and saying so is more honest than pretending otherw
 | --- | --- | --- |
 | Local dev | yes | yes |
 | Deployment | a deploy | an **install** |
-| Shared | App Configuration | **there is no stage three** |
+| Shared | App Configuration | **no directly trusted shared provider in the client** |
 
 Three lines beneath, muted:
 
 - `SetBasePath(AppContext.BaseDirectory)` — the working directory of a double-clicked
   EXE is not the install directory
-- `IConfiguration` is read-optimised and has **no write API** — user preferences are a
-  different problem
+- `IConfiguration` has an indexer setter but **no persistence API** — nothing writes
+  back to the JSON. User preferences are a different problem
 - **No cloud secrets in a client binary.** Authenticate the user, call a backend
 
 ## Notes
@@ -2621,6 +2777,9 @@ and it **differs by type**, which is the part usually got wrong.
 ```json
 { "StringProperty": null, "IntProperty": null, "Array1": [null, null], "Array2": [] }
 ```
+
+All rows below are **the JSON provider specifically** — providers that already carried
+real nulls, such as in-memory, did not all behave this way.
 
 | Property | .NET 9 | .NET 10 |
 | --- | --- | --- |
