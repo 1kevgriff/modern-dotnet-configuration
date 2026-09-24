@@ -355,7 +355,12 @@ COMES BACK TWICE:
 
 **Headline-only slide.**
 
-> If it could ever differ, it belongs in configuration. / If it could ever change without a deploy, it belongs behind a flag.
+> **If an operational value can differ by environment, deployment, or time, configure it.**
+> **If a code path must be switchable without a deploy, flag it.**
+
+Two lines, stacked. The word *operational* is doing real work: user preferences,
+tenant data and business rules all vary without belonging in application
+configuration — and slide 51 says exactly that about desktop.
 
 ## Notes
 
@@ -512,7 +517,10 @@ Show that these are all the same read:
 
 **Headline-only slide.**
 
-> Every value is a string.
+> Every scalar is text — or null.
+
+The contract is `string?`. Saying "always a string" here contradicts slide 52,
+where .NET 10 preserves a real `null` instead of flattening it to `""`.
 
 ## Notes
 
