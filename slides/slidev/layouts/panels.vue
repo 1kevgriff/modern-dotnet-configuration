@@ -7,7 +7,7 @@
 
 <style scoped>
 .layout-panels {
-  padding: 3.2rem 2rem 2rem;
+  padding: 3.2rem 2rem 3.2rem;
   height: 100%;
   display: flex;
   flex-direction: column;

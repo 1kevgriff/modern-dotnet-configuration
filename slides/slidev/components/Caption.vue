@@ -8,15 +8,15 @@ defineProps<{ gold?: boolean }>()
 
 <style scoped>
 .caption {
-  margin-top: 0.7rem;
-  font-size: 0.86rem;
+  margin-top: 0.75rem;
+  font-size: 1rem;          /* several captions ARE the takeaway; 0.86rem vanished in a room */
   color: var(--muted);
-  line-height: 1.4;
+  line-height: 1.45;
 }
 .caption.gold {
   color: var(--navy);
   font-weight: 800;
-  font-size: 0.98rem;
+  font-size: 1.08rem;
   border-left: 4px solid var(--gold);
   padding-left: 0.8rem;
 }

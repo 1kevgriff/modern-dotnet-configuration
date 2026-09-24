@@ -125,15 +125,16 @@ const PRE_PAD_Y = 16     // pre's top+bottom padding
 const PANEL_LABEL = 29   // the small uppercase caption above a panel, incl. margin
 const GAP = 14           // gap between panels / stacked code blocks
 const H1 = 52            // headline height incl. margin-bottom
-const CAPTION_LINE = 22
-const CAPTION_MARGIN = 11
+const PAD_Y = 102        // layout padding: 3.2rem top + 3.2rem bottom
+const CAPTION_LINE = 24   // 1rem at 1.45 line-height
+const CAPTION_MARGIN = 12
 
 const lineCount = body => String(body).split(NL).length
 const longestLine = body => Math.max(1, ...String(body).split(NL).map(l => l.length))
 
 /** Rough height of a caption, which wraps at roughly 95 characters on a full-width slide. */
 const captionHeight = text =>
-  text ? Math.ceil(String(text).length / 95) * CAPTION_LINE + CAPTION_MARGIN : 0
+  text ? Math.ceil(String(text).length / 88) * CAPTION_LINE + CAPTION_MARGIN : 0
 
 /** Largest font size at which `lines` of `maxLen` characters fit in the given box. */
 const fitBox = (maxLen, lines, w, h, max) =>
@@ -149,7 +150,7 @@ const fitBox = (maxLen, lines, w, h, max) =>
 function fitPanels(list, wanted, { heading, caption, arrow } = {}) {
   const maxLen = Math.max(...list.map(p => longestLine(p.body)))
   const availW = 980 - 64
-  const availH = FRAME_H - 83 - (heading ? H1 : 0) - captionHeight(caption)
+  const availH = FRAME_H - PAD_Y - (heading ? H1 : 0) - captionHeight(caption)
   // the arrow sits in a widened gutter, which is width the panels no longer have
   const colGap = arrow ? 54 : GAP
 
@@ -227,9 +228,10 @@ const LAYOUTS = {
   code(s, cfg) {
     return {
       front: { layout: 'code',
-               codeSize: fitCode(s, { availW: 848, pad: 58, max: 17,
+               codeSize: fitCode(s, { availW: 848, pad: 70, max: 17,
+                                      heading: Boolean(s.headline),
                                       caption: captionText(s, cfg) }) },
-      body: chunks(outlineBlocks(s), goldCaption(s), footnote(s, cfg)),
+      body: chunks(heading(s), outlineBlocks(s), goldCaption(s), footnote(s, cfg)),
     }
   },
 
@@ -311,7 +313,7 @@ const LAYOUTS = {
     const head = cfg.headline || s.headline
     return {
       front: { layout: 'reveal',
-               codeSize: fitCode(s, { availW: 916, pad: 83, max: 17,
+               codeSize: fitCode(s, { availW: 916, pad: PAD_Y, max: 17,
                                       heading: Boolean(head),
                                       caption: captionText(s, cfg) }) },
       body: chunks(head ? `# ${head}` : '', outlineBlocks(s), goldCaption(s), footnote(s, cfg)),
@@ -325,7 +327,7 @@ const LAYOUTS = {
                ...(cfg.markRow
                  ? { class: `mark-row-${cfg.markRow}${cfg.markValue ? ' mark-value' : ''}` }
                  : {}),
-               codeSize: fitCode(s, { availW: 884, pad: 83, max: 15,
+               codeSize: fitCode(s, { availW: 884, pad: PAD_Y, max: 15,
                                       heading: Boolean(s.headline),
                                       caption: captionText(s, cfg) }) },
       body: chunks(

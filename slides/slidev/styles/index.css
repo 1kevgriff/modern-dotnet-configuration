@@ -7,7 +7,8 @@
   --cream: #F7F6F3;
   --gold:  #F4C233;
   --code:  #011627;   /* night-owl ground, same as the carbon panels */
-  --muted: #6B7B84;
+  --muted: #44535A;   /* 7.4:1 on cream. #6B7B84 was 4.06:1 - under WCAG AA and
+                         far too faint projected, per audience review */
   --rule:  #DDD9D2;
 }
 

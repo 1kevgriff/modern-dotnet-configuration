@@ -816,7 +816,7 @@ fine if ASPNETCORE_ENVIRONMENT=QA-East.
 
 ## Slide Content
 
-**Section divider.** Kicker `STAGE 1`, title **Local dev**. Navy ground.
+**Section divider.** Kicker `STAGE 1 · LOCAL DEV`, title **Clone the repo and it runs — and no secret ever touches git.**. Navy ground.
 
 ## Notes
 
@@ -1149,7 +1149,7 @@ letting the platform supply the values. That is stage two."
 
 ## Slide Content
 
-**Section divider.** Kicker `OPTIONS`, title **Binding, and the three interfaces**. Navy ground.
+**Section divider.** Kicker `OPTIONS`, title **Binding turns loose strings into an application contract.**. Navy ground.
 
 ## Notes
 
@@ -1549,7 +1549,7 @@ Niche. At 60 minutes this is one slide.
 
 ## Slide Content
 
-**Section divider.** Kicker `STAGE 2`, title **Deployment**. Navy ground.
+**Section divider.** Kicker `STAGE 2 · DEPLOYMENT`, title **Deployment changes how values arrive — not the model.**. Navy ground.
 
 ## Notes
 
@@ -1917,7 +1917,7 @@ read the code later.
 
 ## Slide Content
 
-**Section divider.** Kicker `STAGE 3`, title **Shared**. Navy ground.
+**Section divider.** Kicker `STAGE 3 · SHARED`, title **Shared configuration adds coordination — and new failure modes.**. Navy ground.
 
 ## Notes
 
@@ -2090,7 +2090,7 @@ problem wearing a config hat.
 
 ## Slide Content
 
-**Section divider.** Kicker `FEATURE FLAGS`, title **The second half of the thesis**. Navy ground.
+**Section divider.** Kicker `FEATURE FLAGS`, title **Flags are configuration that changes behaviour, not just values.**. Navy ground.
 
 ## Notes
 

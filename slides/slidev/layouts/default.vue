@@ -17,7 +17,7 @@ defineProps<{ codeSize?: string }>()
   height: 100%;
   display: flex;
   flex-direction: column;
-  padding: 3.2rem 3rem 2rem;
+  padding: 3.2rem 3rem 3.2rem;
 }
 /* Content is top-anchored at the same Y on every slide, so the deck has a steady horizon
    line instead of each slide centring its own block at a different height. */

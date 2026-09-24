@@ -855,12 +855,12 @@ fine if ASPNETCORE_ENVIRONMENT=QA-East.
 
 ---
 layout: "section"
-kicker: "STAGE 1"
+kicker: "STAGE 1 · LOCAL DEV"
 ---
 
 <!-- OUTLINE.md # Slide 19 -->
 
-# Local dev
+# Clone the repo and it runs — and no secret ever touches git.
 
 <!--
 [31-39 min] STAGE 1 - LOCAL DEV
@@ -1280,7 +1280,7 @@ kicker: "OPTIONS"
 
 <!-- OUTLINE.md # Slide 25 -->
 
-# Binding, and the three interfaces
+# Binding turns loose strings into an application contract.
 
 <!--
 [39-51 min] OPTIONS - S5
@@ -1306,7 +1306,7 @@ layout: "panels"
 
 # Stop injecting IConfiguration
 
-<PanelRow :cols="1" size="13.3">
+<PanelRow :cols="1" size="12.3">
 
 <Panel caption="DON'T">
 
@@ -1677,12 +1677,12 @@ Niche. At 60 minutes this is one slide.
 
 ---
 layout: "section"
-kicker: "STAGE 2"
+kicker: "STAGE 2 · DEPLOYMENT"
 ---
 
 <!-- OUTLINE.md # Slide 31 -->
 
-# Deployment
+# Deployment changes how values arrive — not the model.
 
 <!--
 [51-59 min] STAGE 2 - DEPLOYMENT
@@ -2031,12 +2031,12 @@ read the code later.
 
 ---
 layout: "section"
-kicker: "STAGE 3"
+kicker: "STAGE 3 · SHARED"
 ---
 
 <!-- OUTLINE.md # Slide 38 -->
 
-# Shared
+# Shared configuration adds coordination — and new failure modes.
 
 <!--
 [59-64 min] STAGE 3 - SHARED
@@ -2202,7 +2202,7 @@ kicker: "FEATURE FLAGS"
 
 <!-- OUTLINE.md # Slide 41 -->
 
-# The second half of the thesis
+# Flags are configuration that changes behaviour, not just values.
 
 <!--
 [64-84 min] FEATURE FLAGS - S6

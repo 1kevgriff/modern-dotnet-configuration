@@ -19,7 +19,7 @@ defineProps<{ codeSize?: string }>()
   flex-direction: column;
   justify-content: flex-start;   /* NOT centred: a centred pair shifts when the reveal has
                                     one more row, which is exactly what must not move */
-  padding: 3.2rem 2rem 2rem;
+  padding: 3.2rem 2rem 3.2rem;
 }
 .layout-reveal :deep(h1) { font-size: 2rem; margin-bottom: 1.3rem; }
 .layout-reveal :deep(.slidev-code),
