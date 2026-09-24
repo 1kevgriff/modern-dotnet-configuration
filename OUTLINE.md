@@ -1025,9 +1025,23 @@ file changes the hash, and therefore changes which secrets it sees.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** The launchSettings trap
 
-> The launchSettings trap
+**Setup / reveal pair.** This slide is the setup only — do not show the answer yet.
+
+Two panels, side by side:
+
+| you did this | and this file exists |
+| --- | --- |
+| `$env:Weather__TimeoutSeconds = "10"` | `Properties/launchSettings.json` |
+| | `"environmentVariables": { "Weather__TimeoutSeconds": "45" }` |
+
+Ask: **"F5. What timeout does the app see?"**
+
+Then advance. The reveal is a one-line output slide: `Weather timeout is 45 seconds.`
+with the caption *launchSettings.json is a development-only file that never deploys*.
+
+Failure-mode badges, top right: `ORDER` and `SHAPE`.
 
 ## Notes
 
@@ -1088,9 +1102,29 @@ knowable than a constant.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Stop injecting IConfiguration
 
-> Stop injecting IConfiguration
+Two code panels on cream, captioned **DON'T** and **DO**.
+
+```csharp
+// DON'T - stringly typed, unvalidated, untestable, re-parsed every call
+public sealed class WeatherClient(IConfiguration config)
+{
+    public Task<Forecast> GetAsync() =>
+        CallAsync(config["Weather:ApiBaseUrl"]!,
+                  int.Parse(config["Weather:TimeoutSeconds"]!));
+}
+```
+
+```csharp
+// DO - the class declares exactly what it needs
+public sealed class WeatherClient(IOptions<WeatherOptions> options)
+{
+    private readonly WeatherOptions _options = options.Value;
+}
+```
+
+The `!` in the DON'T panel is circled in gold — it is anti-pattern #3 on its own.
 
 ## Notes
 
@@ -1127,9 +1161,26 @@ just inside the codebase instead of between teams.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Full-bleed code slide.** The options type, then the registration.
 
-> Binding and registration
+```csharp
+public sealed class WeatherOptions
+{
+    public const string SectionName = "Weather";
+
+    [Required, Url]            public required string ApiBaseUrl { get; init; }
+    [Range(1, 300)]            public int TimeoutSeconds { get; init; } = 30;
+    [Required, MinLength(8)]   public required string ApiKey { get; init; }
+}
+
+builder.Services
+    .AddOptionsWithValidateOnStart<WeatherOptions>()
+    .Bind(builder.Configuration.GetSection(WeatherOptions.SectionName))
+    .ValidateDataAnnotations();
+```
+
+Show the short form only. The longer `AddOptions().Bind().Validate().ValidateOnStart()`
+chain goes in the notes — modelling the good default matters more than completeness.
 
 ## Notes
 
@@ -1166,11 +1217,20 @@ referenced implicitly by the web SDK - so it just works and people wonder why.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** IOptions, IOptionsSnapshot, IOptionsMonitor
 
-> IOptions, IOptionsSnapshot, IOptionsMonitor
+Comparison table. **This is a deliberate exception to the one-visual rule** — interface
+x lifetime x re-read behaviour is a genuine matrix and a diagram would be worse.
+
+| | Lifetime | Re-reads config? | Use when |
+| --- | --- | --- | --- |
+| `IOptions<T>` | Singleton | No — bound once, forever | The value can't change at runtime |
+| `IOptionsSnapshot<T>` | **Scoped** | Once per request | Per-request consistency in a web app |
+| `IOptionsMonitor<T>` | Singleton | Yes, with `OnChange` | Singletons and background services |
 
 Failure-mode badge, top right: `LIFETIME`.
+
+Slides **28a** and **28b** are the before/after pair that follow it.
 
 ## Notes
 
@@ -1206,13 +1266,80 @@ Failure mode #3: LIFETIME. Name it here.
 
 ---
 
+# Slide 28a
+
+## Slide Content
+
+**Headline:** Same three interfaces. One file edit.
+
+**Setup.** All three interfaces reading `Weather:TimeoutSeconds`, before anything changes.
+
+```text
+IOptions<T>          30
+IOptionsSnapshot<T>  30
+IOptionsMonitor<T>   30
+```
+
+Caption: *now appsettings.json changes to 90 underneath the running app.*
+
+Ask the room which of the three move. Then advance.
+
+## Notes
+
+```text
+(to write — see the parent slide's notes)
+```
+
+---
+
+# Slide 28b
+
+## Slide Content
+
+**Reveal.** Identical layout so only the values appear to move.
+
+```text
+IOptions<T>          30   <- did not move
+IOptionsSnapshot<T>  90
+IOptionsMonitor<T>   90
+```
+
+`IOptions` row stays muted; the two that changed go gold.
+
+This is the longest beat in the talk and the one people remember. Do not rush it.
+
+## Notes
+
+```text
+(to write — see the parent slide's notes)
+```
+
+---
+
 # Slide 29
 
 ## Slide Content
 
-**Headline-only slide.**
+**Setup / reveal.** The registration, then what a bad value actually does.
 
-> Validate at startup
+```csharp
+builder.Services
+    .AddOptionsWithValidateOnStart<WeatherOptions>()
+    .Bind(builder.Configuration.GetSection("Weather"))
+    .ValidateDataAnnotations();
+```
+
+Then the captured startup failure, full-bleed:
+
+```text
+Unhandled exception. Microsoft.Extensions.Options.OptionsValidationException:
+  DataAnnotation validation failed for 'WeatherOptions' members:
+  'TimeoutSeconds' with the error: 'The field TimeoutSeconds must be between 1 and 300.'
+```
+
+The point is *where* this happened: at startup, before the process took traffic.
+Without `ValidateOnStart` it happens on first `.Value` access — which is to say,
+in production, on the first request that reaches that code path.
 
 ## Notes
 
@@ -1249,9 +1376,27 @@ knowable." A validated option is more knowable than a buried constant.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Named options and source generators
 
-> Named options and source generators
+Two halves, captioned.
+
+```csharp
+// Named - same shape, several times
+builder.Services.Configure<EndpointOptions>("primary",   config.GetSection("Endpoints:Primary"));
+builder.Services.Configure<EndpointOptions>("secondary", config.GetSection("Endpoints:Secondary"));
+
+EndpointOptions Primary => monitor.Get("primary");
+```
+
+```csharp
+// Generated - no reflection at runtime
+[OptionsValidator]
+public sealed partial class ValidateWeatherOptions : IValidateOptions<WeatherOptions>;
+```
+
+Plus one line, not a panel: `<EnableConfigurationBindingGenerator>true</...>`.
+
+At 60 minutes the generator half is one spoken sentence.
 
 ## Notes
 
@@ -1317,11 +1462,20 @@ input, not a build input.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Environment variables
 
-> Environment variables
+Two panels, same shape as the flat-dictionary slide so the rhyme is obvious.
 
-Failure-mode badge, top right: `SHAPE`.
+| what you export | the key it becomes |
+| --- | --- |
+| `Weather__ApiBaseUrl` | `Weather:ApiBaseUrl` |
+| `Weather__AllowedOrigins__0` | `Weather:AllowedOrigins:0` |
+| `ConnectionStrings__Default` | `ConnectionStrings:Default` |
+
+Caption beneath: **`:` is not portable in an environment variable name. `__` is.**
+
+Failure-mode badge, top right: `SHAPE` — single underscore instead of double is
+the most common version of it.
 
 ## Notes
 
@@ -1362,9 +1516,22 @@ container does NOTHING. Env vars are read once at startup. Restart the container
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Four became eleven
 
-> Connection-string prefixes
+A count, not a catalogue. Big gold **4 -> 11** with the seven new prefixes listed small
+beneath, and the three that carry a `_ProviderName` marked:
+
+```text
+.NET 9      CUSTOMCONNSTR_   MYSQLCONNSTR_*   SQLCONNSTR_*   SQLAZURECONNSTR_*
+
+.NET 10     + POSTGRESQLCONNSTR_*   DOCDBCONNSTR_        REDISCACHECONNSTR_
+            + SERVICEBUSCONNSTR_    EVENTHUBCONNSTR_     NOTIFICATIONHUBCONNSTR_
+            + APIHUBCONNSTR_
+
+            * also sets ConnectionStrings:{KEY}_ProviderName
+```
+
+The full mapping table stays in the notes. On screen, the number is the point.
 
 ## Notes
 
@@ -1406,9 +1573,25 @@ Short, concrete, and it's a genuinely new thing - good energy beat here.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Key-per-file
 
-> Key-per-file
+A directory becomes configuration. Two panels: the mount, then the keys.
+
+```text
+/run/secrets/
+  Weather__ApiKey            ->   Weather:ApiKey
+  ConnectionStrings__Default ->   ConnectionStrings:Default
+```
+
+Beneath, in gold, the thing that is easy to get wrong:
+
+```csharp
+AddKeyPerFile(dir, optional: true)                      // does NOT reload
+AddKeyPerFile(dir, optional: true, reloadOnChange: true) // does
+```
+
+The path must be absolute. On Kubernetes the mounts are symlink swaps, so even the
+reloading overload may not fire — treat restart as the contract.
 
 ## Notes
 
@@ -1445,9 +1628,23 @@ may not fire. Treat restart as the contract.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Azure Key Vault
 
-> Azure Key Vault
+The naming rule is the whole slide, because it is the thing that silently fails.
+
+| secret in the vault | key in configuration |
+| --- | --- |
+| `Weather--ApiKey` | `Weather:ApiKey` |
+
+`--` becomes `:` because Key Vault forbids a colon in a secret name.
+
+```csharp
+builder.Configuration.AddAzureKeyVault(
+    new Uri($"https://{vaultName}.vault.azure.net/"),
+    new DefaultAzureCredential());
+```
+
+One line beneath, muted: *no reload by default — `ReloadInterval` is null until you set it.*
 
 ## Notes
 
@@ -1632,9 +1829,27 @@ which is what forces the discipline: sentinel keys, validation, flag hygiene.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Azure App Configuration
 
-> Azure App Configuration
+The sentinel pattern, drawn as a sequence — this is the slide people take back to work.
+
+```text
+1.  edit  Weather:Timeout      ->  60
+2.  edit  Weather:Retries      ->  5
+3.  edit  Weather:Sentinel     ->  v4      <-- last, always
+                                             |
+        app refreshes on the next request --+  reloads all three together
+```
+
+```csharp
+.ConfigureRefresh(refresh =>
+{
+    refresh.Register("Weather:Sentinel", refreshAll: true)
+           .SetRefreshInterval(TimeSpan.FromSeconds(30));
+})
+```
+
+Labels are the environment axis; they go in the notes rather than on screen.
 
 ## Notes
 
@@ -1699,9 +1914,25 @@ Also exists: Map() rewrites keys on the way in, e.g. App__Settings__X -> App:Set
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** What actually reloads
 
-> What actually reloads
+Table. **Second deliberate exception to the one-visual rule** — it is a source x
+mechanism matrix and it is reference material people photograph.
+
+| Source | Reloads? | How |
+| --- | --- | --- |
+| `appsettings*.json` | Yes (host default) | `FileSystemWatcher` |
+| User secrets | Yes | file watcher |
+| Environment variables | **No** | read once at startup |
+| Command line | **No** | read once at startup |
+| Azure Key Vault | Only if `ReloadInterval` set | polling |
+| Azure App Configuration | Yes, with `ConfigureRefresh` | polling on activity |
+| Key-per-file | **Only the 4-arg overload** | file watcher |
+| In-memory | No | — |
+| Custom | Your call | `OnReload()` |
+
+The **No** rows are the ones that matter: changing an environment variable on a
+running container does nothing at all.
 
 ## Notes
 
@@ -1774,9 +2005,18 @@ Block breakdown at 90:
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** A feature flag is just configuration
 
-> A feature flag is just configuration
+Three rows — the same spine from the start of the talk, now carrying flags.
+
+| Stage | Where the flag lives | What you get |
+| --- | --- | --- |
+| **Local dev** | `appsettings.json` | Branch in code without branching in git. Zero cloud. |
+| **Deployment** | environment variable | Ship dark, enable per environment |
+| **Shared** | App Configuration | Flip at runtime, target a cohort, roll back in seconds |
+
+Row one is highlighted. It is the row that makes flags feel free, and it is the one
+to land before anyone sees Azure.
 
 ## Notes
 
@@ -1813,9 +2053,26 @@ require LaunchDarkly or a platform team. They require a JSON file.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Full-bleed code slide.** Flags with no cloud at all.
 
-> Flags with no cloud at all
+```json
+{
+  "feature_management": {
+    "feature_flags": [
+      { "id": "NewCheckout", "enabled": false },
+      { "id": "BetaBanner",  "enabled": true }
+    ]
+  }
+}
+```
+
+```csharp
+builder.Services.AddFeatureManagement();
+
+if (await features.IsEnabledAsync("NewCheckout", ct)) { ... }
+```
+
+That is the entire setup. No service, no SDK, no account.
 
 ## Notes
 
@@ -1863,9 +2120,27 @@ Microsoft.FeatureManagement.AspNetCore. The core package covers everything else.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** 50% of users, or 50% of calls?
 
-> Filters — and the percentage gotcha
+**Setup.** The flag definition, and a question.
+
+```json
+{
+  "id": "NewCheckout",
+  "enabled": true,
+  "conditions": {
+    "client_filters": [
+      { "name": "Microsoft.Percentage", "parameters": { "Value": 50 } }
+    ]
+  }
+}
+```
+
+Ask: **"Same user, same session, checks this flag twice. Same answer both times?"**
+
+Let them say yes. Then advance to **44a**.
+
+This is on the never-cut list at any talk length.
 
 ## Notes
 
@@ -1907,13 +2182,51 @@ with .AddFeatureFilter<TenantFilter>(). Good example: a flag enabled per tenant.
 
 ---
 
+# Slide 44a
+
+## Slide Content
+
+**Reveal.** The captured output.
+
+```text
+request 1   IsEnabledAsync("NewCheckout")  ->  true
+request 2   IsEnabledAsync("NewCheckout")  ->  false
+request 3   IsEnabledAsync("NewCheckout")  ->  true
+```
+
+Caption, gold: **`Microsoft.Percentage` is evaluated per call, not per user.**
+
+The nav bar says new checkout, the checkout page says old. This is the most common
+feature-flag bug in the wild.
+
+The fix, one line beneath: targeting, or variant allocation with a `seed` — that is
+what gives a stable per-user assignment.
+
+## Notes
+
+```text
+(to write — see the parent slide's notes)
+```
+
+---
+
 # Slide 45
 
 ## Slide Content
 
-**Headline-only slide.**
+**Full-bleed code slide.** Variants — where flags meet the options pattern.
 
-> Variants
+```csharp
+Variant variant = await features.GetVariantAsync("CheckoutLayout", ct);
+
+var settings = new CheckoutLayoutSettings();
+variant.Configuration.Bind(settings);   // it's an IConfigurationSection
+```
+
+The last line is the whole point: a variant hands you a configuration section, so you
+bind it like anything else in this talk.
+
+Cut entirely at 60 minutes — one spoken sentence that flags can return values.
 
 ## Notes
 
@@ -1948,9 +2261,21 @@ You cannot override a flag whose enabled is false.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Every flag is a permanent `if` with an owner and an expiry
 
-> Flag debt
+The taxonomy, because lifetime differs by an order of magnitude.
+
+| Kind | Lives for | Then |
+| --- | --- | --- |
+| **release** | days to weeks | delete after rollout |
+| **experiment** | weeks | delete after the decision |
+| **ops / kill switch** | permanent | and that's fine |
+| **permission** | permanent | arguably not a flag — that's authorization |
+
+Beneath, in gold: **`NewCheckout` never gets deleted. `Checkout_V2_Rollout_2026Q1`
+files its own expiry.**
+
+Slide **46a** carries the deletion and inventory half — they do not fit here.
 
 ## Notes
 
@@ -1994,13 +2319,50 @@ branch behind a switch someone can flip at 2am.
 
 ---
 
+# Slide 46a
+
+## Slide Content
+
+**Headline:** Deleting a flag is a code change, not a config change
+
+Turning it off in the portal and walking away leaves the dead branch compiling forever.
+
+The health endpoint, which is the thing people actually steal:
+
+```csharp
+app.MapGet("/flags", async (IVariantFeatureManager fm, CancellationToken ct) =>
+{
+    var flags = new Dictionary<string, bool>();
+    await foreach (var name in fm.GetFeatureNamesAsync(ct))
+        flags[name] = await fm.IsEnabledAsync(name, ct);
+    return flags;
+});
+```
+
+One line beneath: *ten live flags is up to 1,024 nominal combinations. You test three.*
+
+## Notes
+
+```text
+(to write — see the parent slide's notes)
+```
+
+---
+
 # Slide 47
 
 ## Slide Content
 
 **Headline-only slide.**
 
-> The honest counterargument
+> Flags convert a deployment problem into a runtime problem.
+
+Beneath, smaller:
+
+> You gain instant rollback. You lose *"the code that ran is the code in the commit."*
+
+This is the callback. Point back at the build-time/runtime slide from the opening and
+say: **same trade, one level up.**
 
 ## Notes
 
@@ -2035,9 +2397,18 @@ End the flags block on JUDGMENT, not tooling.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Sort every setting into three buckets
 
-> Sort every setting into three buckets
+Three cards across.
+
+| | Examples | Where it belongs |
+| --- | --- | --- |
+| **Non-secret, per-environment** | base URLs, timeouts, retries, log levels, toggles | `appsettings.{Env}.json`, or App Configuration |
+| **Secret** | API keys, connection strings with passwords | user secrets (dev) -> Key Vault (prod) |
+| **Per-instance** | environment name, instance id, port, region | environment variables, set by the platform |
+
+The line to say with it on screen: **if a value is in the wrong bucket, no amount of
+provider tuning fixes it.**
 
 ## Notes
 
@@ -2071,9 +2442,21 @@ order.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** By application shape
 
-> By application shape
+**The photograph slide.** Third and last deliberate table exception — it is reference
+material and that is exactly why people want it.
+
+| App shape | Baseline | Secrets | Change without redeploy? |
+| --- | --- | --- | --- |
+| ASP.NET Core on App Service | JSON + App Service settings | Key Vault refs | App Service settings restart; App Config doesn't |
+| Container / AKS | JSON + orchestrator env vars | key-per-file, or workload identity | restart the pod, or App Config |
+| Many microservices | App Config + labels | Key Vault references | yes — sentinel + refresh |
+| Worker / background | JSON + env vars | Key Vault via managed identity | `IOptionsMonitor` + explicit refresh |
+| Console / CLI | JSON + command line | user secrets in dev | no — short-lived process |
+| Desktop | JSON next to the EXE + AppData | **none in the client** | restart, or call your own API |
+
+Leave it up longer than feels comfortable. Count to five.
 
 ## Notes
 
@@ -2117,9 +2500,21 @@ Rule 2 is on the never-cut list at any talk length.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Don't do this
 
-> Don't do this
+**Reduced deliberately.** Eleven items shown for twenty seconds is theatre, not
+communication — so the slide shows the four failure modes again, each with its
+single worst offender, and the full list of eleven lives in the repo.
+
+| | The one that costs you most |
+| --- | --- |
+| **ORDER** | assuming an array in `appsettings.Production.json` replaces the base array |
+| **SHAPE** | `config["Some:Key"]!` with a null-forgiving operator and no validation |
+| **LIFETIME** | `IOptionsSnapshot<T>` injected into a singleton |
+| **TRUST** | secrets committed in `appsettings.json` — or worse, `appsettings.Production.json` |
+
+By now the room should be calling the mode before you say it. That is the win condition
+for the motif.
 
 ## Notes
 
@@ -2152,9 +2547,23 @@ failure modes before you do, this slide is working.
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** The spine assumes something that gets deployed
 
-> The desktop aside
+Desktop falls off the model, and saying so is more honest than pretending otherwise.
+
+| | Server | Desktop |
+| --- | --- | --- |
+| Local dev | yes | yes |
+| Deployment | a deploy | an **install** |
+| Shared | App Configuration | **there is no stage three** |
+
+Three lines beneath, muted:
+
+- `SetBasePath(AppContext.BaseDirectory)` — the working directory of a double-clicked
+  EXE is not the install directory
+- `IConfiguration` is read-optimised and has **no write API** — user preferences are a
+  different problem
+- **No cloud secrets in a client binary.** Authenticate the user, call a backend
 
 ## Notes
 
@@ -2204,9 +2613,27 @@ from a file or your own backend. It just can't hold the credential to a flag sto
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** Null is preserved now
 
-> What changed in .NET 10
+The .NET 10 breaking change that will actually bite someone, shown as before/after —
+and it **differs by type**, which is the part usually got wrong.
+
+```json
+{ "StringProperty": null, "IntProperty": null, "Array1": [null, null], "Array2": [] }
+```
+
+| Property | .NET 9 | .NET 10 |
+| --- | --- | --- |
+| `string?` (initialized) | `""` — already overwritten | `null` |
+| `int?` (initialized) | **kept its initializer** | `null` |
+| non-nullable value type | **threw** | `default(T)` |
+| `[null, null]` | two empty strings | two nulls |
+| `[]` | ignored | binds as empty array |
+
+The honest one-liner is d06's own: *"Retries was 3 on .NET 9 and is null on .NET 10."*
+
+The other three .NET 10 deltas (connection-string prefixes, AOT-safe `ValidationContext`,
+file-based user secrets) are already covered where they belong; they do not need repeating.
 
 ## Notes
 
