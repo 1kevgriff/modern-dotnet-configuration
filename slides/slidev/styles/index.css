@@ -1,0 +1,133 @@
+/* Brand tokens carried over from the PowerPoint build (scratchpad/deck/build.js), unchanged. */
+
+:root {
+  --navy:  #16303F;
+  --cream: #F7F6F3;
+  --gold:  #F4C233;
+  --code:  #011627;   /* night-owl ground, same as the carbon panels */
+  --muted: #6B7B84;
+  --rule:  #DDD9D2;
+}
+
+/* ---- ground ------------------------------------------------------------------- */
+
+.slidev-layout {
+  background: var(--cream);
+  color: var(--navy);
+  font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  font-weight: 400;
+  padding: 2.2rem 3rem;
+}
+
+.slidev-layout h1 {
+  font-weight: 800;
+  font-size: 2.35rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--navy);
+  margin: 0 0 1.1rem;
+  text-align: left;
+}
+
+.slidev-layout h2 {
+  font-weight: 700;
+  font-size: 1.35rem;
+  color: var(--navy);
+}
+
+.slidev-layout p,
+.slidev-layout li { font-size: 1rem; line-height: 1.5; }
+
+.slidev-layout strong { font-weight: 800; }
+.slidev-layout code   { font-family: 'JetBrains Mono', ui-monospace, monospace; }
+
+/* ---- code --------------------------------------------------------------------- */
+
+.slidev-layout pre.slidev-code,
+.slidev-layout .slidev-code {
+  background: var(--code) !important;
+  border-radius: 10px;
+  padding: 1.1rem 1.3rem;
+  font-family: 'JetBrains Mono', ui-monospace, monospace;
+  font-size: 0.86rem;
+  line-height: 1.55;
+  overflow: hidden;       /* never let code paint outside its own panel */
+  max-width: 100%;
+}
+
+/* Panel code is sized by the generator to fit its column; padding here must match
+   PADDING in fitPanels() or the measurement is wrong. */
+.slidev-layout .panel-row .slidev-code,
+.slidev-layout .panel-row .slidev-code code {
+  font-size: var(--code-size, 13px);
+  line-height: 1.5;
+}
+.slidev-layout .panel-row .slidev-code { padding: 0.8rem 0.85rem; }
+
+/* Shiki line marker -> the gold highlight the outline asks for.
+   Every line is a block, not just the highlighted ones: making only the marked lines block
+   leaves the trailing newline of each on its own line and opens a phantom gap between them.
+   NO negative margins or calc() widths - an inline-block wider than the content box forces
+   the <pre> itself wider than its container, which is how slide 15 overflowed. */
+.slidev-layout .slidev-code .line { display: block; }
+.slidev-layout .slidev-code .highlighted {
+  background: rgba(244, 194, 51, 0.16);
+  box-shadow: inset 3px 0 0 var(--gold);
+}
+.slidev-layout .slidev-code .dimmed { opacity: 0.45; }
+
+/* ---- tables ------------------------------------------------------------------- */
+
+.slidev-layout table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.88rem;
+  margin: 0.3rem 0;
+}
+.slidev-layout thead th {
+  text-align: left;
+  font-weight: 800;
+  font-size: 0.68rem;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: var(--muted);
+  border-bottom: 2px solid var(--navy);
+  padding: 0.45rem 0.7rem;
+}
+.slidev-layout tbody td {
+  padding: 0.42rem 0.7rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+.slidev-layout tbody tr:nth-child(even) { background: rgba(22, 48, 63, 0.035); }
+.slidev-layout tbody td code {
+  background: rgba(22, 48, 63, 0.07);
+  padding: 0.08em 0.36em;
+  border-radius: 4px;
+  font-size: 0.92em;
+}
+.slidev-layout tbody td strong { color: var(--navy); }
+
+/* ---- lists -------------------------------------------------------------------- */
+
+.slidev-layout ul, .slidev-layout ol { margin: 0; padding-left: 1.1rem; }
+.slidev-layout li { margin: 0.3rem 0; }
+
+/* ---- blockquote (statement slides carry their text as a quote) ----------------- */
+
+.slidev-layout blockquote {
+  border: 0;
+  margin: 0;
+  padding: 0;
+  font-size: inherit;
+  color: inherit;
+  background: none;
+}
+
+/* ---- cards -------------------------------------------------------------------- */
+
+.slidev-layout .cards { align-items: stretch; }
+.slidev-layout .card  { min-height: 8.2rem; }
+
+/* A 2-up quadrant reads better with more room per card than a 5-up row. */
+.slidev-layout .cards[style*="--cols:2"] .card { min-height: 6.6rem; }
