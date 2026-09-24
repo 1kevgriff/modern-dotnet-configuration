@@ -1331,9 +1331,17 @@ Optional forward-looking closer, clearly labeled as .NET 11 preview: a generic
 
 ---
 
-## 11. Demo plan
+## 11. Snippet plan
 
-Numbered to match `/demos`. Each demo is one idea and should run in under two minutes.
+**The talk has no live demos.** Every idea below is a code snippet or a captured terminal
+output on a slide, walked through out loud. The `/demos` projects still ship — they are where
+the snippets come from and they are the audience's takeaway, but nothing is executed on stage.
+
+Why: sixteen scheduled demo transitions in a 90-minute room is the single largest risk to the
+talk landing, and every live cloud demo adds a failure mode that costs minutes you cannot get
+back. Snippets cost nothing at runtime and the repo still proves the code runs.
+
+Numbered to match `/demos`. Each one is still one idea.
 
 | # | Demo | Shows | Payoff |
 | --- | --- | --- | --- |
@@ -1344,48 +1352,57 @@ Numbered to match `/demos`. Each demo is one idea and should run in under two mi
 | 05 | Options binding + `ValidateOnStart` | Fail-fast startup | Bad config = no start |
 | 06 | `IOptions` vs `IOptionsSnapshot` vs `IOptionsMonitor` | Live-edit `appsettings.json` while running | Three answers on one screen |
 | 07 | Key Vault with `DefaultAzureCredential` | `--` → `:`, managed identity | No connection strings anywhere |
-| 08 | App Configuration + sentinel key + feature flag | Change without redeploy | Flip a flag mid-demo |
+| 08 | App Configuration + sentinel key + feature flag | Change without redeploy | A flag flipped without a deploy |
 | 09 | Custom provider (SQL or `.env`) | `IConfigurationSource`, `OnReload` | The extensibility point |
 | 10 | Source generators + `PublishAot` | Warnings before and after | Trim-safe configuration |
 
-The authoritative demo list now lives in Solo (project `modern-dotnet-configuration`, 33 items
-tagged `demo`), split one-idea-per-demo. The flag demos are 28–33; see §6.
+The authoritative list lives in Solo (project `modern-dotnet-configuration`, 33 items tagged
+`demo`), split one idea per project. The flag projects are 28–33; see §6.
 
-Fallback plan: demos 07 and 08 need Azure. Record them both, and keep 03 and 06 ready to stretch.
+**No Azure dependency.** `d18` (Key Vault) and `d20` (App Configuration) were the two that
+needed a live subscription. As snippets they need nothing, which removes the talk's only
+external dependency on show day.
+
+**Capture rules.** Terminal output on a slide is real output from the matching project, not a
+mock-up — rendered as text so it stays legible from the back row rather than screenshotted with
+window chrome. Screenshots are for cases where the tooling itself is the point: the Azure portal,
+a flag flipping in App Configuration.
 
 ### 11.1 Running order — 90 minutes (Cloud & AI Summit)
 
 Feature flags get 20 of the 90 (~22%). Budget 84 minutes of content; questions ride along rather
-than queueing to the end.
+than queueing to the end. **Minutes are advisory** — spend them where the room is engaged.
 
-| Minutes | Block | Content | Demos |
+| Minutes | Block | Content | Snippets |
 | --- | --- | --- | --- |
-| 0–04 | **Cold open** | §1.0 wrong value on screen, unexplained provider dump. No slides yet | 01 `GetDebugView` |
+| 0–04 | **Cold open** | §1.0 two slides: the file says 120, the app says 10 — then the provider dump, unexplained | d01 |
 | 04–10 | **Why** | §1.1 five reasons — hard-coding, environments, on the fly, **trust**, **ownership** | — |
 | 10–13 | Cold open pt 2 | §1.2 constants → `web.config` → Generic Host. The build-time/runtime trade | — |
 | 13–16 | **Thesis + spine** | §1.3 config for everything, flags for everything · §1.4 local dev → deployment → shared | — |
 | 16–23 | The model | §2 flat dictionary, strings, `:` and `__`, arrays as keys. **Pays off the cold open** | — |
-| 23–31 | Order | §3 host vs app config, why `ASPNETCORE_ENVIRONMENT` picks your other inputs | 02, 03 |
-| 31–39 | **Stage 1 — local dev** | §4.1 environment files, §4.4 user secrets + .NET 10 file-based apps, the `launchSettings` trap. Close on its signature failure | 09, 07 |
-| 39–51 | Options | §5 binding, three interfaces, `ValidateOnStart` | 11, 12, 13 |
-| 51–59 | **Stage 2 — deployment** | §4.2–4.3 env vars, .NET 10 connstr prefixes, §4.7 key-per-file, §4.5 Key Vault. Close on its signature failure | 05, 23, 18 (recorded) |
-| 59–64 | **Stage 3 — shared** | §4.6 App Configuration: labels, sentinel key, KV references | 20 (recorded) |
-| 64–84 | **Feature flags** | §6 — see the breakdown below | 28, 29, 30, 32 |
+| 23–31 | Order | §3 host vs app config, why `ASPNETCORE_ENVIRONMENT` picks your other inputs | d02, d03 |
+| 31–39 | **Stage 1 — local dev** | §4.1 environment files, §4.4 user secrets + .NET 10 file-based apps, the `launchSettings` trap. Close on its signature failure | d09, d07 |
+| 39–51 | Options | §5 binding, three interfaces, `ValidateOnStart` | d11, d12, d13 |
+| 51–59 | **Stage 2 — deployment** | §4.2–4.3 env vars, .NET 10 connstr prefixes, §4.7 key-per-file, §4.5 Key Vault. Close on its signature failure | d04, d05, d23, d18 |
+| 59–64 | **Stage 3 — shared** | §4.6 App Configuration: labels, sentinel key, KV references | d20 |
+| 64–84 | **Feature flags** | §6 — see the breakdown below | d28, d29, d30, d32 |
 | 84–87 | Choosing | §7 three buckets + by-app-shape matrix. **The photograph slide** — where to stop | — |
 | 87–90 | Close | §10 anti-patterns rapid-fire, §4.11 desktop aside if time, repo QR, contact | — |
 
 The 20-minute feature-flag block, in detail:
 
-| Minutes | Content | Demo |
+| Minutes | Content | Snippets |
 | --- | --- | --- |
 | 64–67 | §6.1 a flag is just configuration — the provider chain already does this | — |
-| 67–72 | §6.2–6.3 flags with zero cloud: JSON schema, `IVariantFeatureManager`, `FeatureGate`, tag helper | 28 |
-| 72–77 | §6.4 filters: percentage, time window, targeting — **and the per-call vs per-user gotcha** | 29, 30 |
-| 77–80 | §6.5 variants: flags that return values, bound like any other config section | 31 (optional) |
-| 80–84 | §6.6 flag debt + §6.8 the honest counterargument. Ends the talk on judgment, not tooling | 32 |
+| 67–72 | §6.2–6.3 flags with zero cloud: JSON schema, `IVariantFeatureManager`, `FeatureGate`, tag helper | d28 |
+| 72–77 | §6.4 filters: percentage, time window, targeting — **and the per-call vs per-user gotcha** | d29, d30 |
+| 77–80 | §6.5 variants: flags that return values, bound like any other config section | d31 (optional) |
+| 80–84 | §6.6 flag debt + §6.8 the honest counterargument. Ends the talk on judgment, not tooling | d32 |
 
 Notes:
-- Demo 13 (three options interfaces, live edit) stays the single longest demo. Don't rush it.
+- The three options interfaces (`d13`) are a **before/after slide pair** — the same three values
+  before and after `appsettings.json` changes underneath the running app. `IOptions` doesn't move;
+  the other two do. It is the longest beat in the talk. Don't rush it.
 - Stage 3 shrank to 5 minutes because §6 now carries App Configuration's most interesting behavior.
   Show the sentinel key there and let flags do the rest.
 - §6.6 flag debt is the closing argument. It's the thing nobody else in the room will say.
@@ -1405,7 +1422,7 @@ questions ride along; a packed 56 overruns the moment a hand goes up during Opti
 | 19–23 | **Stage 1 — local dev** | Environment files, user secrets; mention file-based apps, don't demo | 09 |
 | 23–31 | Options | Binding, three interfaces, `ValidateOnStart` | 12, 13 |
 | 31–35 | **Stage 2 — deployment** | Env vars, .NET 10 connstr prefixes, Key Vault in one slide | 05 |
-| 35–38 | **Stage 3 — shared** | App Configuration: labels + sentinel key | 20 (recorded) |
+| 35–38 | **Stage 3 — shared** | App Configuration: labels + sentinel key | d20 |
 | 38–48 | **Feature flags** | §6.1–6.4 local flags + filters + the per-call gotcha; §6.6 flag debt | 28, 29 |
 | 48–51 | Choosing + close | §7 matrix, anti-patterns, repo QR | — |
 
@@ -1442,10 +1459,12 @@ desktop aside — not padding.
 
 ### 11.3 If you get 45 minutes
 
-Demos 01, 02, 13, and 28. Everything else becomes slides. Keep the §1.4 spine slide — at 45 minutes
-it does the organizing work the demos no longer have time to do. Flags drop to 8 minutes: §6.1
-(it's just configuration), §6.4's gotcha, §6.6 debt. Do not attempt a live cloud demo in a
-45-minute room; a failed Azure demo costs eight minutes you don't have.
+Keep the snippets from `d01`, `d02`, `d13` and `d28`; everything else becomes a claim slide.
+Keep the §1.4 spine slide — at 45 minutes it does more organizing work than anything else on
+offer. Flags drop to 8 minutes: §6.1 (it's just configuration), §6.4's gotcha, §6.6 debt.
+
+At this length the cold open earns its keep more than anywhere else: it is two slides and it buys
+you the attention to get through §2 and §3 quickly.
 
 ### 11.4 Demo layout and naming
 
@@ -1456,8 +1475,8 @@ and only one filesystem, so the folder number can't encode sequence. `d13` is *t
 demo* forever — in the 90 it runs eighth, in the 45 it runs third, and the folder never moves. Cut
 demos leave gaps. Nothing is ever renumbered.
 
-That number is also the join key across four places: the folder, the Solo todo, the recording file,
-and the running-order tables. Renumber once and all four drift.
+That number is also the join key across three places: the folder, the Solo todo, and the
+running-order tables. Renumber once and all three drift.
 
 #### Layout
 
@@ -1467,8 +1486,6 @@ demos/
   ASSIGNMENTS.md                folder -> todo -> spec map, and the documented exceptions
   WORKER-BRIEF.md               the contract demos are built against
   verify.ps1                    walks every demo: build + format check
-  recordings/
-    d18-key-vault.mp4           filename matches the demo id
   d01-provider-dump/
     README.md                   one idea · commands · expected output · stage
     D01.ProviderDump.csproj
@@ -1490,7 +1507,6 @@ demos/
 | Multi-project project name | `D{NN}.{PascalSlug}.{Role}` | `D26.NonWebHosts.Worker`, `D26.NonWebHosts.Desktop` |
 | Reset script | `d{NN}-{slug}/reset.ps1` | resets user secrets, env vars, edited JSON |
 | Shared helper | none — the dump helper is **copied** into each demo that needs it | self-contained beats DRY here |
-| Recording | `recordings/d{NN}-{slug}.mp4` | `recordings/d20-appconfig-sentinel.mp4` |
 
 - **Lowercase kebab for folders, PascalCase for projects.** The folder is what you type on stage; the
   project name is what appears in build errors and IDE tabs. Both carry the id so a stack trace on
@@ -1558,11 +1574,15 @@ repo root in an IDE still works; nothing about running a demo depends on it.
 *first* so the room sees that flags cost nothing before Azure enters the picture. `d21` is the
 portal flip.
 
-#### Slide ↔ demo cue
+#### Slide ↔ project cue
 
-Put the id in the corner of the slide that precedes each demo (`d29`). It makes the recording
-searchable afterward, and it means a "can you go back to the percentage one" question is a folder
-name rather than a scroll.
+The demo id belongs in the **speaker notes** of the slide whose snippet came from it, not on the
+slide face — the room does not care that a snippet came from `d29`. It matters for two things:
+answering "can you go back to the percentage one" with a folder name rather than a scroll, and
+keeping each snippet traceable to code that actually compiles.
+
+Every snippet on a slide is lifted verbatim from its project. If a snippet and its project ever
+disagree, the project is right and the slide is stale — `verify.ps1` builds them all.
 
 ### 11.5 Demo project conventions
 
