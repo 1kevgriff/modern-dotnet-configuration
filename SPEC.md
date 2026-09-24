@@ -141,7 +141,7 @@ capability and operational cost:
 single deployment unit — many apps, many instances, values that change without a deploy. Scale is one
 reason you get there, not the definition.)
 
-| Stage | The problem it solves | Primary sources | Spec | Demos |
+| Stage | The problem it solves | Primary sources | Spec | Projects |
 | --- | --- | --- | --- | --- |
 | **Local dev** | A developer clones the repo and it runs. Secrets never touch git. | `appsettings.json`, `appsettings.Development.json`, user secrets, `launchSettings.json` | §4.1, §4.4 | 01–04, 07, 09, 10 |
 | **Deployment** | One artifact, many environments. The platform supplies the values. | Environment variables, command line, key-per-file mounts, Key Vault | §4.2, §4.3, §4.5, §4.7 | 05, 08, 18, 23 |
@@ -1299,8 +1299,14 @@ Talk-relevant deltas from .NET 9:
    treated as missing and skipped by the binder, and the JSON provider converted `null` to `""`.
    In .NET 10 the JSON provider reports `null` unchanged and the binder binds it like any other
    value. Binding of `null` array elements and empty arrays now works.
-   → A property that used to keep its default when the JSON said `null` now gets overwritten with
-   `null`. Worth a live before/after.
+   → The payoff differs **by type**, so do not state it as one rule:
+   a `string` with an initializer was *already* overwritten — with `""`;
+   an `int?` **kept** its initializer, because `""` could not be parsed;
+   a non-nullable value type **threw** `InvalidOperationException`.
+   In .NET 10 those become `null`, `null`, and `default(T)` respectively, and
+   empty arrays now bind as empty arrays instead of being ignored.
+   The honest one-liner is `d06`'s own observation: *"Retries was 3 on .NET 9 and
+   is null on .NET 10."* Show at least `string?`, `int?` and a non-nullable type.
    [Docs](https://learn.microsoft.com/dotnet/core/compatibility/extensions/10.0/configuration-null-values-preserved)
 2. **Seven new connection-string environment prefixes** (11 total) — Postgres, Cosmos, Redis,
    Service Bus, Event Hubs, Notification Hubs, API Hubs. See §4.2.
@@ -1412,9 +1418,9 @@ Notes:
 Flags get 10 of the 51 content minutes (~20%) — the ratio holds. Budget 51, not 56, and let
 questions ride along; a packed 56 overruns the moment a hand goes up during Options.
 
-| Minutes | Block | Content | Demos |
+| Minutes | Block | Content | Snippets |
 | --- | --- | --- | --- |
-| 0–03 | **Cold open** | Wrong value, unexplained dump | 01 |
+| 0–03 | **Cold open** | Wrong value, then the unexplained dump | d01 |
 | 03–07 | **Why + thesis** | §1.1 five reasons (trust and ownership get one line each), §1.3 thesis | — |
 | 07–09 | **Spine** | §1.4 local dev → deployment → shared, with the three signature failures | — |
 | 09–14 | The model | Flat dictionary, `:` / `__`, precedence. Pays off the cold open | — |
@@ -1437,7 +1443,7 @@ Running long? Cut in this order. It buys six minutes without touching the never-
 3. Demo 29 — describe the per-call gotcha instead of showing it.
 
 Stretching past 60 is not a re-pace: switch to §11.1, which is a different talk. The extra 30
-minutes are real content — live Key Vault, key-per-file, variants, flag debt at full length, the
+minutes are real content — Key Vault, key-per-file, variants, flag debt at full length, the
 desktop aside — not padding.
 
 **Cut from the 90 for the 60:**
@@ -1508,7 +1514,8 @@ demos/
 | Reset script | `d{NN}-{slug}/reset.ps1` | resets user secrets, env vars, edited JSON |
 | Shared helper | none — the dump helper is **copied** into each demo that needs it | self-contained beats DRY here |
 
-- **Lowercase kebab for folders, PascalCase for projects.** The folder is what you type on stage; the
+- **Lowercase kebab for folders, PascalCase for projects.** The folder is how you find the source of a
+  snippet; the
   project name is what appears in build errors and IDE tabs. Both carry the id so a stack trace on
   the projector names the demo.
 - **Zero-pad to two digits** so `ls` sorts correctly, and keep the `d` prefix — a bare `01-` folder
