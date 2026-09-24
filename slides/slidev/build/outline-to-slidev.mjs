@@ -104,47 +104,81 @@ function outlineBlocks(s) {
     .join(NL + NL)
 }
 
+// ---------------------------------------------------------------------------------------
+// fitting
+//
+// Slidev's canvas is 980x552 logical px, scaled up to whatever it is projected onto. Code
+// that does not fit is not wrapped - it is CLIPPED, silently, because panels set
+// overflow:hidden. So both dimensions have to be computed, not hoped for.
+//
+// Width alone is not enough: an earlier version sized only on the widest line and ten slides
+// lost their bottom half, including the audience question that makes slide 44's reveal work.
+// build/check-overflow.mjs is the gate that proves these numbers are right.
+// ---------------------------------------------------------------------------------------
+
+const FRAME_H = 552
+const ADVANCE = 0.6      // JetBrains Mono advance width, in em
+const LEADING = 1.5      // .line line-height in styles/index.css
+const MIN = 10.5         // legibility floor: ~1.1% of slide width, ~21px on a 1080p projector
+const PRE_PAD_X = 28     // pre's left+right padding
+const PRE_PAD_Y = 16     // pre's top+bottom padding
+const PANEL_LABEL = 29   // the small uppercase caption above a panel, incl. margin
+const GAP = 14           // gap between panels / stacked code blocks
+const H1 = 52            // headline height incl. margin-bottom
+const CAPTION_LINE = 22
+const CAPTION_MARGIN = 11
+
+const lineCount = body => String(body).split(NL).length
+const longestLine = body => Math.max(1, ...String(body).split(NL).map(l => l.length))
+
+/** Rough height of a caption, which wraps at roughly 95 characters on a full-width slide. */
+const captionHeight = text =>
+  text ? Math.ceil(String(text).length / 95) * CAPTION_LINE + CAPTION_MARGIN : 0
+
+/** Largest font size at which `lines` of `maxLen` characters fit in the given box. */
+const fitBox = (maxLen, lines, w, h, max) =>
+  Math.max(MIN, Math.min(max, w / maxLen / ADVANCE, h / lines / LEADING))
+
 /**
- * Pick a column count and code size so panel code FITS its column.
+ * Pick a column count and code size so panel code fits its column BOTH ways.
  *
- * Slide 26's two snippets are 71 characters wide; side by side that needs a ~10px font, which
- * is unreadable from the back of a room, and the text simply spilled outside the panel. So the
- * widest line decides: try the requested columns, and if the font that would need is below the
- * legibility floor, stack instead.
+ * Stacking trades width for height, so the two options are scored against each other rather
+ * than falling back blindly: whichever yields the larger legible size wins, preferring the
+ * requested column count on a tie.
  */
-function fitPanels(list, wanted) {
-  const maxLen = Math.max(...list.map(p => Math.max(...String(p.body).split(NL).map(l => l.length))), 1)
+function fitPanels(list, wanted, { heading, caption, arrow } = {}) {
+  const maxLen = Math.max(...list.map(p => longestLine(p.body)))
+  const availW = 980 - 64
+  const availH = FRAME_H - 83 - (heading ? H1 : 0) - captionHeight(caption)
+  // the arrow sits in a widened gutter, which is width the panels no longer have
+  const colGap = arrow ? 54 : GAP
 
-  // Sizes are in Slidev's 980px logical canvas, which is scaled up to the projector — so the
-  // floor is about size RELATIVE to the slide, not absolute pixels. 10.5/980 ≈ 1.07% of slide
-  // width, which is ~21px on a 1080p projector.
-  const SLIDE = 980, GUTTER = 64, GAP = 14
-  const ADVANCE = 0.6        // JetBrains Mono advance width, in em
-  const PADDING = 28         // panel's own left+right padding, px
-  const MIN = 10.5, MAX = 15 // legibility floor and a sane ceiling, px
-
-  const sizeFor = cols => {
-    const col = (SLIDE - GUTTER - GAP * (cols - 1)) / cols - PADDING
-    return col / maxLen / ADVANCE
+  const score = cols => {
+    const rows = Math.ceil(list.length / cols)
+    const colW = (availW - colGap * (cols - 1)) / cols - PRE_PAD_X
+    const rowH = (availH - GAP * (rows - 1)) / rows - PANEL_LABEL - PRE_PAD_Y
+    // the tallest panel in any row has to fit that row
+    const tallest = Math.max(...list.map(p => lineCount(p.body)))
+    return fitBox(maxLen, tallest, colW, rowH, 15)
   }
 
-  let cols = wanted
-  if (cols > 1 && sizeFor(cols) < MIN) cols = 1
-  const size = Math.min(MAX, Math.max(MIN, sizeFor(cols)))
-  return { cols, size: size.toFixed(1) }
+  const a = score(wanted)
+  const b = list.length > 1 ? score(1) : -1
+  const cols = b > a + 0.25 ? 1 : wanted
+  return { cols, size: score(cols).toFixed(1) }
 }
 
-/** Longest line across a slide's code blocks. */
-const widestLine = s =>
-  Math.max(1, ...s.code.map(b => Math.max(...b.body.split(NL).map(l => l.length))))
-
 /**
- * Font size for a full-width code block, so a long line is never clipped.
- * Code panels set `overflow: hidden`, so "too wide" would mean silently losing characters.
+ * Font size for full-width code blocks on the code / reveal / default layouts.
+ * `pad` is the layout's own vertical padding plus whatever sits above the code.
  */
-function fitCode(s, availablePx, max) {
-  const size = availablePx / widestLine(s) / 0.6
-  return Math.min(max, Math.max(10.5, size)).toFixed(1)
+function fitCode(s, { availW, pad, heading, caption, max }) {
+  if (!s.code.length) return String(max)
+  const maxLen = Math.max(...s.code.map(b => longestLine(b.body)))
+  const lines = s.code.reduce((n, b) => n + lineCount(b.body), 0)
+  const availH = FRAME_H - pad - (heading ? H1 : 0) - captionHeight(caption)
+    - GAP * (s.code.length - 1) - PRE_PAD_Y * s.code.length
+  return fitBox(maxLen, lines, availW - PRE_PAD_X, availH, max).toFixed(1)
 }
 
 /**
@@ -167,6 +201,11 @@ function caption(text, gold) {
 }
 
 const goldCaption = s => caption(s.goldCaption, true)
+
+/** All caption text a slide will render, for the height budget. */
+const captionText = (s, cfg) =>
+  [s.goldCaption, cfg.footnote ?? (cfg.prose === 'keep' ? s.residualProse.join(' ') : '')]
+    .filter(Boolean).join(' ')
 const heading = s => (s.headline ? `# ${s.headline}` : '')
 
 /**
@@ -187,7 +226,9 @@ function footnote(s, cfg) {
 const LAYOUTS = {
   code(s, cfg) {
     return {
-      front: { layout: 'code', codeSize: fitCode(s, 820, 17) },
+      front: { layout: 'code',
+               codeSize: fitCode(s, { availW: 848, pad: 58, max: 17,
+                                      caption: captionText(s, cfg) }) },
       body: chunks(outlineBlocks(s), goldCaption(s), footnote(s, cfg)),
     }
   },
@@ -246,15 +287,18 @@ const LAYOUTS = {
     const caps = cfg.panelCaptions || []
     const list = cfg.panels
       ?? s.code.map((b, i) => ({ caption: caps[i] ?? '', lang: b.lang, body: b.body }))
-    const { cols, size } = fitPanels(list, cfg.cols ?? list.length)
+    const { cols, size } = fitPanels(list, cfg.cols ?? list.length, {
+      heading: Boolean(s.headline),
+      caption: captionText(s, cfg),
+      arrow: Boolean(cfg.arrow),
+    })
     return {
       front: { layout: 'panels' },
       body: chunks(
         heading(s),
-        `<PanelRow :cols="${cols}" size="${size}">`,
+        `<PanelRow :cols="${cols}" size="${size}"${cfg.arrow && cols > 1 ? ' arrow' : ''}>`,
         list.map(panelBlock).join(NL + NL),
         '</PanelRow>',
-        cfg.arrow ? '<Arrow />' : '',
         footnote(s, cfg),
         goldCaption(s),
       ),
@@ -266,14 +310,24 @@ const LAYOUTS = {
   reveal(s, cfg) {
     const head = cfg.headline || s.headline
     return {
-      front: { layout: 'reveal', codeSize: fitCode(s, 820, 17) },
+      front: { layout: 'reveal',
+               codeSize: fitCode(s, { availW: 916, pad: 83, max: 17,
+                                      heading: Boolean(head),
+                                      caption: captionText(s, cfg) }) },
       body: chunks(head ? `# ${head}` : '', outlineBlocks(s), goldCaption(s), footnote(s, cfg)),
     }
   },
 
   default(s, cfg) {
     return {
-      front: { layout: 'default', codeSize: fitCode(s, 844, 15) },
+      front: { layout: 'default',
+               // the outline calls out one row on some tables; the class drives the styling
+               ...(cfg.markRow
+                 ? { class: `mark-row-${cfg.markRow}${cfg.markValue ? ' mark-value' : ''}` }
+                 : {}),
+               codeSize: fitCode(s, { availW: 884, pad: 83, max: 15,
+                                      heading: Boolean(s.headline),
+                                      caption: captionText(s, cfg) }) },
       body: chunks(
         heading(s),
         cfg.bigNum ? `<BigNum from="${esc(cfg.bigNum.from)}" to="${esc(cfg.bigNum.to)}" />` : '',
@@ -306,11 +360,12 @@ const HEADMATTER = [
   '  persist: false',
   'transition: none',
   'mdc: true',
+  // provider:none - the fonts are self-hosted in public/fonts and declared in styles/fonts.css.
+  // A conference machine with no network would otherwise fall back and change every metric.
   'fonts:',
   '  sans: Manrope',
   '  mono: JetBrains Mono',
-  "  weights: '400,600,800'",
-  '  provider: google',
+  '  provider: none',
 ].join(NL)
 
 const BANNER = [

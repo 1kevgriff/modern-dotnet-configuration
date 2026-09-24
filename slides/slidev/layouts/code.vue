@@ -32,6 +32,5 @@ defineProps<{ codeSize?: string }>()
 .code-stack :deep(.slidev-code),
 .code-stack :deep(.slidev-code code) {
   font-size: var(--code-size);
-  line-height: 1.55;
 }
 </style>

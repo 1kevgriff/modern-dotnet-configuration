@@ -1,3 +1,5 @@
+@import './fonts.css';
+
 /* Brand tokens carried over from the PowerPoint build (scratchpad/deck/build.js), unchanged. */
 
 :root {
@@ -50,7 +52,6 @@
   padding: 1.1rem 1.3rem;
   font-family: 'JetBrains Mono', ui-monospace, monospace;
   font-size: 0.86rem;
-  line-height: 1.55;
   overflow: hidden;       /* never let code paint outside its own panel */
   max-width: 100%;
 }
@@ -60,21 +61,23 @@
 .slidev-layout .panel-row .slidev-code,
 .slidev-layout .panel-row .slidev-code code {
   font-size: var(--code-size, 13px);
-  line-height: 1.5;
 }
 .slidev-layout .panel-row .slidev-code { padding: 0.8rem 0.85rem; }
 
 /* Shiki line marker -> the gold highlight the outline asks for.
-   Every line is a block, not just the highlighted ones: making only the marked lines block
-   leaves the trailing newline of each on its own line and opens a phantom gap between them.
-   NO negative margins or calc() widths - an inline-block wider than the content box forces
-   the <pre> itself wider than its container, which is how slide 15 overflowed. */
-.slidev-layout .slidev-code .line { display: block; }
-.slidev-layout .slidev-code .highlighted {
+   Slidev's own classes are `slidev-code-highlighted` / `slidev-code-dishonored`.
+
+   Shiki emits `<span class="line">...</span>` separated by real newlines, and inside a <pre>
+   those newlines ARE the line breaks. So .line stays inline: making every line a block gives
+   you the block break AND the newline, which silently double-spaces every code block and runs
+   it off the bottom of the slide. Only the marked lines go block, so the gold band can span
+   the full width - that costs a little extra leading on the one slide that has a marker. */
+.slidev-layout .slidev-code code { line-height: 1.5; }
+.slidev-layout .slidev-code-highlighted {
+  display: block;
   background: rgba(244, 194, 51, 0.16);
   box-shadow: inset 3px 0 0 var(--gold);
 }
-.slidev-layout .slidev-code .dimmed { opacity: 0.45; }
 
 /* ---- tables ------------------------------------------------------------------- */
 
@@ -131,3 +134,87 @@
 
 /* A 2-up quadrant reads better with more room per card than a 5-up row. */
 .slidev-layout .cards[style*="--cols:2"] .card { min-height: 6.6rem; }
+
+/* ---- emphasised table row ------------------------------------------------------ */
+/* OUTLINE.md singles out one row on a couple of tables: slide 18's winning value
+   ("bold navy with a large gold value") and slide 42's first row ("Row one is
+   highlighted"). The generator emits `class: mark-row-N` in the slide's frontmatter;
+   nth-child does the rest, so no runtime hook is needed. */
+
+.slidev-layout.mark-row-1 tbody tr:nth-child(1),
+.slidev-layout.mark-row-2 tbody tr:nth-child(2),
+.slidev-layout.mark-row-3 tbody tr:nth-child(3),
+.slidev-layout.mark-row-4 tbody tr:nth-child(4),
+.slidev-layout.mark-row-5 tbody tr:nth-child(5),
+.slidev-layout.mark-row-6 tbody tr:nth-child(6),
+.slidev-layout.mark-row-7 tbody tr:nth-child(7),
+.slidev-layout.mark-row-8 tbody tr:nth-child(8) {
+  background: var(--navy);
+}
+.slidev-layout.mark-row-1 tbody tr:nth-child(1) td,
+.slidev-layout.mark-row-2 tbody tr:nth-child(2) td,
+.slidev-layout.mark-row-3 tbody tr:nth-child(3) td,
+.slidev-layout.mark-row-4 tbody tr:nth-child(4) td,
+.slidev-layout.mark-row-5 tbody tr:nth-child(5) td,
+.slidev-layout.mark-row-6 tbody tr:nth-child(6) td,
+.slidev-layout.mark-row-7 tbody tr:nth-child(7) td,
+.slidev-layout.mark-row-8 tbody tr:nth-child(8) td {
+  border-bottom-color: var(--navy);
+  color: var(--cream);
+}
+.slidev-layout.mark-row-1 tbody tr:nth-child(1) td strong,
+.slidev-layout.mark-row-2 tbody tr:nth-child(2) td strong,
+.slidev-layout.mark-row-3 tbody tr:nth-child(3) td strong,
+.slidev-layout.mark-row-4 tbody tr:nth-child(4) td strong,
+.slidev-layout.mark-row-5 tbody tr:nth-child(5) td strong,
+.slidev-layout.mark-row-6 tbody tr:nth-child(6) td strong,
+.slidev-layout.mark-row-7 tbody tr:nth-child(7) td strong,
+.slidev-layout.mark-row-8 tbody tr:nth-child(8) td strong {
+  color: var(--cream);
+}
+.slidev-layout.mark-row-1 tbody tr:nth-child(1) td:last-child,
+.slidev-layout.mark-row-2 tbody tr:nth-child(2) td:last-child,
+.slidev-layout.mark-row-3 tbody tr:nth-child(3) td:last-child,
+.slidev-layout.mark-row-4 tbody tr:nth-child(4) td:last-child,
+.slidev-layout.mark-row-5 tbody tr:nth-child(5) td:last-child,
+.slidev-layout.mark-row-6 tbody tr:nth-child(6) td:last-child,
+.slidev-layout.mark-row-7 tbody tr:nth-child(7) td:last-child,
+.slidev-layout.mark-row-8 tbody tr:nth-child(8) td:last-child {
+  color: var(--gold);
+  font-weight: 800;
+}
+
+/* Only slide 18 wants "a large gold value"; slide 42's last cell is a whole sentence and
+   blowing it up would swamp the row. So the size bump is opt-in via markValue. */
+.slidev-layout.mark-value.mark-row-1 tbody tr:nth-child(1) td:last-child,
+.slidev-layout.mark-value.mark-row-2 tbody tr:nth-child(2) td:last-child,
+.slidev-layout.mark-value.mark-row-3 tbody tr:nth-child(3) td:last-child,
+.slidev-layout.mark-value.mark-row-4 tbody tr:nth-child(4) td:last-child,
+.slidev-layout.mark-value.mark-row-5 tbody tr:nth-child(5) td:last-child,
+.slidev-layout.mark-value.mark-row-6 tbody tr:nth-child(6) td:last-child,
+.slidev-layout.mark-value.mark-row-7 tbody tr:nth-child(7) td:last-child,
+.slidev-layout.mark-value.mark-row-8 tbody tr:nth-child(8) td:last-child {
+  font-size: 1.25em;
+}
+.slidev-layout.mark-row-1 tbody tr:nth-child(1) td code,
+.slidev-layout.mark-row-2 tbody tr:nth-child(2) td code,
+.slidev-layout.mark-row-3 tbody tr:nth-child(3) td code,
+.slidev-layout.mark-row-4 tbody tr:nth-child(4) td code,
+.slidev-layout.mark-row-5 tbody tr:nth-child(5) td code,
+.slidev-layout.mark-row-6 tbody tr:nth-child(6) td code,
+.slidev-layout.mark-row-7 tbody tr:nth-child(7) td code,
+.slidev-layout.mark-row-8 tbody tr:nth-child(8) td code {
+  background: rgba(247, 246, 243, 0.14);
+  color: var(--cream);
+}
+
+.slidev-layout.mark-row-1 tbody tr:nth-child(1) td:last-child strong,
+.slidev-layout.mark-row-2 tbody tr:nth-child(2) td:last-child strong,
+.slidev-layout.mark-row-3 tbody tr:nth-child(3) td:last-child strong,
+.slidev-layout.mark-row-4 tbody tr:nth-child(4) td:last-child strong,
+.slidev-layout.mark-row-5 tbody tr:nth-child(5) td:last-child strong,
+.slidev-layout.mark-row-6 tbody tr:nth-child(6) td:last-child strong,
+.slidev-layout.mark-row-7 tbody tr:nth-child(7) td:last-child strong,
+.slidev-layout.mark-row-8 tbody tr:nth-child(8) td:last-child strong {
+  color: var(--gold);
+}

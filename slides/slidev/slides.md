@@ -18,8 +18,7 @@ mdc: true
 fonts:
   sans: Manrope
   mono: JetBrains Mono
-  weights: '400,600,800'
-  provider: google
+  provider: none
 layout: "code"
 codeSize: "17.0"
 ---
@@ -507,7 +506,7 @@ layout: "panels"
 
 # It's one flat dictionary
 
-<PanelRow :cols="2" size="11.6">
+<PanelRow :cols="2" size="11.2" arrow>
 
 <!-- from: demos/d01-provider-dump/appsettings.json -->
 
@@ -518,8 +517,7 @@ layout: "panels"
   "Weather": {
     "ApiBaseUrl": "https://api.example.com",
     "TimeoutSeconds": 30,
-    "ApiKey": "placeholder-set-a-real-one-with-user-secrets",
-    prose: 'drop'
+    "ApiKey": "placeholder-set-a-real-one-with-user-secrets"
   },
   "ConnectionStrings": {
     "Default": "Server=localhost;Database=Demo;..."
@@ -543,8 +541,6 @@ ConnectionStrings:Default  "Server=localhost;Database=..."
 </Panel>
 
 </PanelRow>
-
-<Arrow />
 
 <!--
 [16-23 min] THE MODEL - S2
@@ -696,7 +692,7 @@ loud, because someone is about to go add GetDebugView to a production app.
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 16 -->
@@ -805,7 +801,8 @@ once; someone in the room is writing a worker this week.
 
 ---
 layout: "default"
-codeSize: "15.0"
+class: "mark-row-4 mark-value"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 18 -->
@@ -987,9 +984,9 @@ layout: "panels"
 
 # Arrays overlay. They don't replace.
 
-<PanelRow :cols="2" size="10.7">
+<PanelRow :cols="1" size="15.0">
 
-<!-- from: demos/d03-array-merge/README.md — captured output -->
+<!-- from: demos/d03-array-merge/README.md captured output, abbreviated for the screen -->
 
 <Panel caption="THE TWO FILES, AND WHAT YOU GET">
 
@@ -1002,7 +999,7 @@ WHAT YOUR APP BINDS            x, b, c
 
 </Panel>
 
-<!-- from: demos/d03-array-merge/README.md — captured output -->
+<!-- from: demos/d03-array-merge/README.md — captured output, source column relabelled -->
 
 <Panel caption="BECAUSE ARRAY ELEMENTS ARE KEYS" dark>
 
@@ -1059,7 +1056,7 @@ layout: "panels"
 
 # Not encrypted. Not a vault.
 
-<PanelRow :cols="2" size="10.5">
+<PanelRow :cols="1" size="15.0">
 
 <!-- from: demos/d09-user-secrets/D09.UserSecrets.csproj -->
 
@@ -1073,7 +1070,7 @@ layout: "panels"
 
 </Panel>
 
-<!-- from: demos/d09-user-secrets/README.md — the path the provider reports -->
+<!-- from: demos/d09-user-secrets/README.md — the directory the provider reports, plus the file name -->
 
 <Panel caption="ON YOUR MACHINE" dark>
 
@@ -1185,7 +1182,7 @@ file changes the hash, and therefore changes which secrets it sees.
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 24 -->
@@ -1309,7 +1306,7 @@ layout: "panels"
 
 # Stop injecting IConfiguration
 
-<PanelRow :cols="1" size="15.0">
+<PanelRow :cols="1" size="13.3">
 
 <Panel caption="DON'T">
 
@@ -1424,7 +1421,7 @@ referenced implicitly by the web SDK - so it just works and people wonder why.
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 28 -->
@@ -1707,7 +1704,7 @@ input, not a build input.
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 32 -->
@@ -2141,7 +2138,7 @@ Also exists: Map() rewrites keys on the way in, e.g. App__Settings__X -> App:Set
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 40 -->
@@ -2230,7 +2227,8 @@ Block breakdown at 90:
 
 ---
 layout: "default"
-codeSize: "15.0"
+class: "mark-row-1"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 42 -->
@@ -2498,7 +2496,7 @@ You cannot override a flag whose enabled is false.
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 46 -->
@@ -2642,7 +2640,7 @@ End the flags block on JUDGMENT, not tooling.
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 48 -->
@@ -2687,7 +2685,7 @@ order.
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 49 -->
@@ -2739,7 +2737,7 @@ Rule 2 is on the never-cut list at any talk length.
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 50 -->
@@ -2778,7 +2776,7 @@ failure modes before you do, this slide is working.
 
 ---
 layout: "default"
-codeSize: "15.0"
+codeSize: "15"
 ---
 
 <!-- OUTLINE.md # Slide 51 -->
@@ -2964,7 +2962,8 @@ image: "/kevin-griffin.png"
 
 - consultwithgriff.com
 - github.com/1kevgriff/modern-dotnet-configuration
-- @1kevgriff — X · Bluesky · LinkedIn · GitHub
+- X · LinkedIn · GitHub — @1kevgriff
+- Bluesky — @consultwithgriff.com
 
 <!--
 [thanks]

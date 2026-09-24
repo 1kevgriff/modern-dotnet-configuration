@@ -107,8 +107,7 @@ export const map = {
   "Weather": {
     "ApiBaseUrl": "https://api.example.com",
     "TimeoutSeconds": 30,
-    "ApiKey": "placeholder-set-a-real-one-with-user-secrets",
-    prose: 'drop'
+    "ApiKey": "placeholder-set-a-real-one-with-user-secrets"
   },
   "ConnectionStrings": {
     "Default": "Server=localhost;Database=Demo;..."
@@ -141,6 +140,9 @@ Row 1 is the other surprise: read first, applied last.`,
   },
   17: { layout: 'code' },
   18: {
+    // "The last row is bold navy with a large gold value." - OUTLINE.md slide 18
+    markRow: 4,
+    markValue: true,
     layout: 'default',
     footnote: '*last one wins*',
   },
@@ -190,7 +192,7 @@ ApiKey           placeholder  <- survived`,
       {
         caption: 'THE TWO FILES, AND WHAT YOU GET',
         lang: 'text',
-        from: 'demos/d03-array-merge/README.md — captured output',
+        from: 'demos/d03-array-merge/README.md captured output, abbreviated for the screen',
         body: `appsettings.json               a, b, c
 appsettings.Development.json   x
 
@@ -200,7 +202,7 @@ WHAT YOUR APP BINDS            x, b, c`,
         caption: 'BECAUSE ARRAY ELEMENTS ARE KEYS',
         lang: 'text',
         dark: true,
-        from: 'demos/d03-array-merge/README.md — captured output',
+        from: 'demos/d03-array-merge/README.md — captured output, source column relabelled',
         body: `Weather:AllowedOrigins:0  = https://x.example.com   Development
 Weather:AllowedOrigins:1  = https://b.example.com   base, survived
 Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
@@ -223,7 +225,7 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
         caption: 'ON YOUR MACHINE',
         lang: 'text',
         dark: true,
-        from: 'demos/d09-user-secrets/README.md — the path the provider reports',
+        from: 'demos/d09-user-secrets/README.md — the directory the provider reports, plus the file name',
         body: `%APPDATA%\\Microsoft\\UserSecrets\\d09a1b2c-...\\secrets.json
 
 { "Weather:ApiKey": "dev-key-12345" }`,
@@ -320,6 +322,8 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   // ---- feature flags ---------------------------------------------------------------
   41: { layout: 'section' },
   42: {
+    // "Row one is highlighted." - OUTLINE.md slide 42
+    markRow: 1,
     layout: 'default',
     prose: 'drop',
   },
@@ -394,7 +398,8 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
     lines: [
       SITE,
       'github.com/1kevgriff/modern-dotnet-configuration',
-      '@1kevgriff — X · Bluesky · LinkedIn · GitHub',
+      'X · LinkedIn · GitHub — @1kevgriff',
+      'Bluesky — @consultwithgriff.com',
     ],
     from: 'README.md §Speaker',
   },

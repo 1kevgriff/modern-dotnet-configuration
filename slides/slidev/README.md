@@ -5,7 +5,10 @@ The presentable deck. 59 slides, built from `OUTLINE.md`.
 ```bash
 npm install
 npm run dev        # present at http://localhost:3030 (press `p` for presenter mode)
+npm run verify     # generate + build + prove no slide clips its content
 ```
+
+`dev`, `build` and every `export` run `generate` first, so `slides.md` can never be stale.
 
 ## OUTLINE.md is the source of truth
 
@@ -77,6 +80,26 @@ pin content to a fixed top, so advancing moves only the values.
 Panel code is auto-sized: `fitPanels()` computes a font size from the widest line and falls
 back from N columns to a single stacked column when the required size would be illegible.
 
+## The overflow gate
+
+`slidev build` succeeding proves very little — it will happily compile a slide whose code block
+runs off the bottom of the screen, because panels set `overflow: hidden` and clip in silence.
+
+```bash
+npm run check      # renders all 59 slides and fails if anything overflows or clips
+npm run verify     # build + check, the one command to run before you present
+```
+
+An earlier version of the fitting sized code on width alone and ten slides quietly lost their
+bottom half, including the audience question that makes slide 44's reveal work. `fitPanels()`
+and `fitCode()` now budget both dimensions, and `build/check-overflow.mjs` is what proves it.
+
+## Fonts are self-hosted
+
+`public/fonts/` holds Manrope and JetBrains Mono, declared in `styles/fonts.css`, with the
+Slidev font provider set to `none`. A missing webfont changes every text metric and would
+invalidate the fitting above, so the deck must not depend on conference wifi.
+
 ## Export
 
 ```bash
@@ -85,13 +108,18 @@ npm run export:png      # one PNG per slide
 npm run export:pptx     # PowerPoint, native shapes and selectable text
 ```
 
-Needs `playwright-chromium` (already a dev dependency). All three pass `--wait` — without it
-the first slide exports as a "Loading slide…" placeholder.
+Needs `playwright-chromium` (already a dev dependency). All pass `--wait` — without it the
+first slide exports as a "Loading slide…" placeholder.
 
 ## Known gaps
 
-- **Repo QR code.** The outline asks for one on slides 3 and 54. Not added — generate it and
-  drop it in `public/`, then reference it from `slide-map.mjs`.
+- **Repo QR code.** The outline asks for one on slides 3 and 54. Not added — generate it, drop
+  it in `public/`, then reference it from `slide-map.mjs`.
+- **Emphasis that is described but not rendered.** The outline asks for gold on the values that
+  changed in slide 28b and on the environment-supplied values in slide 20. Both are mid-line,
+  which Shiki cannot mark without a custom transformer; the surrounding text carries the point
+  instead. Whole-row and whole-line emphasis *is* implemented (`markRow`, and Shiki line
+  markers from "Gold marker on line(s) N").
 - **Stray slide numbers in `OUTLINE.md`.** A few speaker notes end with a PowerPoint slide
   number glued to the sentence (`production."3`, `last slide.4`, `it."54`, and `until S2.1.5`).
   They came from the original `.pptx` extraction. `npm run generate` reports them; they need
