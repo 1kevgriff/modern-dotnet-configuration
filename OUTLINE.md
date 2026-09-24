@@ -267,59 +267,106 @@ source you forgot about. The rest of the talk is about paying that cost on purpo
 
 ## Slide Content
 
-**Headline:** The same problem, three generations
+**Headline:** 2002 — you recompiled to change a value
 
-**Full-bleed code slide.** Score each era against the five reasons.
+**Full-bleed code slide.** The value is not data. It is code.
 
 ```csharp
-// 2002
 #if DEBUG
     const string Db = "localhost";
 #else
     const string Db = "sql-prod-01";
 #endif
-
-// 2005
-ConfigurationManager.AppSettings["Db"];
-
-// 2018
-config.GetConnectionString("Default");
 ```
+
+> Change the database, rebuild, retest, redeploy. The failure mode was shipping
+> with the wrong line uncommented.
 
 ## Notes
 
 ```text
-[10-13 min] COLD OPEN PART TWO - S1.2
-60-min: fold into the Why block - drop the storytelling, keep the through-line
+[the three eras, 1 of 3] CONSTANTS AND #if DEBUG
+60-min: these three are 20 seconds each - do not linger
 
-Three eras. Score each against the five reasons.
+Hardcoded values, commented-out blocks, and a pre-commit ritual nobody enjoyed.
 
-1. CONSTANTS AND #if DEBUG
-   Hardcoded values, commented-out blocks, a pre-commit ritual.
-   Simple and dangerous - failure mode was shipping the wrong uncommented line.
-   Fails #1 outright. Fails #4 catastrophically.
+Score it against the five reasons from the last slide:
+  fails #1 outright - value and logic share a lifecycle
+  fails #4 catastrophically - the credential is in the assembly, everywhere it ships
 
-2. web.config / app.config + ConfigurationManager.AppSettings
-   XML, static, one string-keyed bag. No reload, no layering, framework-only.
-   Transforms (Web.Release.config) ran at BUILD time.
-   Wins #1 and #2 - but you built one artifact per environment, and #3 was impossible.
-
-3. THE .NET GENERIC HOST (2018, .NET Core 2.1) + IConfiguration
-   Provider chain, layering, binding, DI, reload - and the same model for a web
-   app, a worker, a console tool, and a WinForms app.
-   One artifact, many environments. All five reasons, finally.
-
-THE THROUGH-LINE - say this out loud, it comes back twice:
-"We traded a build-time decision for a runtime one."
-Everything hard about modern configuration comes from that trade.
-S6.8 shows feature flags making the same trade one level up.
-
-ON SCREEN: three snippets, one per era, dated. No prose. Walk them in order
-and score each against the five reasons from the previous slide.
+If anyone in the room is old enough, they have shipped the wrong uncommented line.
+Say so; it gets a laugh and it is the point.
 ```
 
 ---
+# Slide 7a
 
+## Slide Content
+
+**Headline:** 2005 — the value left the binary, but not the build
+
+**Full-bleed code slide.** One string-keyed bag, resolved at build time.
+
+```xml
+<appSettings>
+  <add key="Db" value="sql-prod-01" />
+</appSettings>
+```
+
+```csharp
+ConfigurationManager.AppSettings["Db"];
+```
+
+> Wins on hard-coding and on per-environment values. But `Web.Release.config`
+> transforms ran at **build** time, so you shipped one artifact per environment.
+
+## Notes
+
+```text
+[the three eras, 2 of 3] web.config AND ConfigurationManager
+60-min: 20 seconds
+
+XML, static, one string-keyed bag. No reload, no layering, framework-only.
+
+Score it:
+  wins #1 and #2
+  #3 was impossible - you could not change a value without a new build
+
+The thing to land: the transform ran at BUILD time. That is why "which build is
+this?" was a real production question for a decade.
+```
+
+---
+# Slide 7b
+
+## Slide Content
+
+**Headline:** 2018 — one artifact, many environments
+
+**Full-bleed code slide.** The generic host, and the same model everywhere.
+
+```csharp
+builder.Configuration.GetConnectionString("Default");
+```
+
+> A provider chain, layering, binding, DI and reload — and the same model for a
+> web app, a worker, a console tool and a desktop app. All five reasons, finally.
+
+## Notes
+
+```text
+[the three eras, 3 of 3] THE GENERIC HOST
+60-min: 20 seconds, then the trade slide
+
+.NET Core 2.1 in 2018. Provider chain, layering, binding, DI, reload - and the
+same model for a web app, a worker, a console tool and a WinForms app.
+
+One artifact, many environments. All five reasons, finally.
+
+Then advance: the next slide is the price of all this, and it comes back twice.
+```
+
+---
 # Slide 8
 
 ## Slide Content
@@ -401,14 +448,9 @@ HANDLE TWO OBJECTIONS OUT LOUD - both are fair:
 
 ## Slide Content
 
-**Section divider.** Kicker `THE JOURNEY`, title **One application. Four places it has to run.**. Navy ground.
-
-Beneath the title, the map the rest of the talk follows:
+**Section divider.** Kicker ``, title **One application. Four places it has to run.**. Navy ground.
 
 > **the team's baseline** → **my machine** → **a shared dev server** → **production**
-
-Each boundary changes *who supplies the value* and *what it costs to get it wrong*. The
-application does not change. Only the answer to "where did this come from?" does.
 
 ## Notes
 
@@ -489,7 +531,7 @@ that is when this slide has done its job.
 
 ## Slide Content
 
-**Section divider.** Kicker `ACT 1 · THE SHARED BASELINE`, title **`appsettings.json` is a team decision, and it ships with the app.**. Navy ground.
+**Section divider.** Kicker ``, title **`appsettings.json` is a team decision, and it ships with the app.**. Navy ground.
 
 ## Notes
 
@@ -519,8 +561,8 @@ cross every boundary in the talk.
 
 **Headline:** It's one flat dictionary
 
-Two panels. Left, captioned what YOU WROTE: nested JSON. Right, captioned
-what actually EXISTS: the flat keys it becomes. Gold arrow between them.
+Three different syntaxes, one key. Left panel lists how each source spells it;
+right panel is the single entry they all collapse into. Gold arrow between them.
 
 ## Notes
 
@@ -634,7 +676,7 @@ This is the slide people quote back to you afterwards.
 
 ## Slide Content
 
-**Section divider.** Kicker `ACT 2 · MY MACHINE`, title **Your machine can differ from mine — without changing the repo.**. Navy ground.
+**Section divider.** Kicker ``, title **Your machine can differ from mine — without changing the repo.**. Navy ground.
 
 ## Notes
 
@@ -836,20 +878,16 @@ file changes the hash, and therefore changes which secrets it sees.
 
 Two panels, side by side:
 
-| you set this, in this shell | and this file exists |
+Two things are true at once. One shell, one project.
+
+| You set an environment variable | The project has this file |
 | --- | --- |
 | `$env:Weather__TimeoutSeconds = "10"` | `Properties/launchSettings.json` |
-| `dotnet run` | `"environmentVariables": { "Weather__TimeoutSeconds": "45" }` |
+| then `dotnet run` | `"environmentVariables": { "Weather__TimeoutSeconds": "45" }` |
 
-Ask: **"Which one wins?"**
-
-Then advance to **24a**.
+> **Which one wins?**
 
 Failure-mode badge, top right: `ORDER`.
-
-> Deliberately `dotnet run` in the same shell, not F5. A `$env:` assignment only
-> affects that PowerShell process and its children — an already-running Visual
-> Studio never sees it, so an F5 version of this would prove nothing.
 
 ## Notes
 
@@ -933,7 +971,7 @@ Table, alternating row tint. **Deliberate table exception.**
 A label sits directly above the table, in gold, because the reading direction is the
 whole point and "Default provider order" reads just as easily as registration order:
 
-> **HIGHEST PRECEDENCE first — row 1 beats row 8.**
+> **HIGHEST PRECEDENCE FIRST — row 1 beats row 8.**
 
 | | Source | |
 | --- | --- | --- |
@@ -946,8 +984,9 @@ whole point and "Default provider order" reads just as easily as registration or
 | 7 | `appsettings.{Environment}.json` | |
 | 8 | `appsettings.json` | |
 
-Rows 5 and 6 are the ones almost nobody knows exist, and they apply to web apps too.
-Row 1 is the other surprise: read first, applied last.
+`{ApplicationName}` is the assembly name, so an app built as `Weather.Api.dll` also probes
+`Weather.Api.settings.json`. For a .NET 10 file-based app `web.cs`, it probes `web.settings.json`.
+Verified on SDK 10.0.303.
 
 ## Notes
 
@@ -988,24 +1027,23 @@ thirteen.
 
 **Headline:** The host reads configuration in two passes
 
-**Full-bleed code slide.** One command, two effects — note the provider listed twice.
+**Full-bleed code slide.** The same provider, registered at both ends of the chain.
 
 ```text
 $ dotnet run --environment Staging
 
-MemoryConfigurationProvider
-EnvironmentVariablesConfigurationProvider Prefix: 'ASPNETCORE_'
-MemoryConfigurationProvider
-EnvironmentVariablesConfigurationProvider Prefix: 'DOTNET_'
-CommandLineConfigurationProvider                        <--  picks which file loads
-JsonConfigurationProvider for 'appsettings.json'
-JsonConfigurationProvider for 'appsettings.Staging.json'
-JsonConfigurationProvider for 'web.settings.json'
-JsonConfigurationProvider for 'web.settings.Staging.json'
-EnvironmentVariablesConfigurationProvider
-CommandLineConfigurationProvider                        <--  wins the final read
-ChainedConfigurationProvider
+  PASS 1   decide WHICH files to load
+    CommandLineConfigurationProvider        <-- reads --environment Staging
+
+  PASS 2   load them, then let the same argument win
+    JsonConfigurationProvider  appsettings.json
+    JsonConfigurationProvider  appsettings.Staging.json     <-- chosen by pass 1
+    EnvironmentVariablesConfigurationProvider
+    CommandLineConfigurationProvider        <-- wins the final read
 ```
+
+> `ASPNETCORE_ENVIRONMENT` is not just another setting. It is the input that picks
+> the rest of your inputs.
 
 ## Notes
 
@@ -1034,6 +1072,10 @@ That reframing is what makes the two-phase design look deliberate instead of
 accidental. It also explains why setting the environment variable after the host
 is built does nothing at all.
 
+This dump is trimmed. The real one has thirteen providers - two Memory ones and
+the prefixed env-var providers are host plumbing. If someone counts along, say so
+and move on; do not narrate all thirteen.
+
 For a non-web host it is DOTNET_ENVIRONMENT, not ASPNETCORE_ENVIRONMENT. Say it
 once; someone in the room is writing a worker this week.
 ```
@@ -1044,16 +1086,17 @@ once; someone in the room is writing a worker this week.
 
 ## Slide Content
 
-**Headline:** Same key. Four winners.
+**Headline:** Add a source, and the answer changes
 
-Four rows, source on the left, the value it yields on the right.
+Each row ADDS a provider to the ones above it. The right column is what
+`Weather:TimeoutSeconds` reads as at that point — the same key every time.
 
-| | |
+| Add this source | `Weather:TimeoutSeconds` now reads |
 | --- | --- |
 | `appsettings.json` | 30 |
-| `appsettings.Development.json` | 120 |
-| `Weather__TimeoutSeconds` | 10 |
-| **`--Weather:TimeoutSeconds`** | **5** |
+| + `appsettings.Development.json` | 120 |
+| + `Weather__TimeoutSeconds` | 10 |
+| + **`--Weather:TimeoutSeconds`** | **5** |
 
 The last row is bold navy with a large gold value. Caption beneath: *last one wins*.
 
@@ -1113,9 +1156,8 @@ app.Logger.LogInformation("Configuration:\n{Dump}", dump);
 
 Beneath, in gold, because the slide must not imply that dumping configuration is safe:
 
-> **Development only.** That filter is a denylist, so it misses tokens, connection
-> strings and certificates. Gate it on `IsDevelopment()`, and prefer inspecting the
-> handful of keys you actually care about.
+> That filter is a denylist, so it misses tokens, connection strings and certificates.
+> Gate it on `IsDevelopment()`, and prefer inspecting the handful of keys you care about.
 
 ## Notes
 
@@ -1207,7 +1249,7 @@ loud, because someone is about to go add GetDebugView to a production app.
 
 ## Slide Content
 
-**Section divider.** Kicker `ACT 3 · THE SHARED DEV ENVIRONMENT`, title **It left your laptop. `launchSettings` and user secrets are gone.**. Navy ground.
+**Section divider.** Kicker ``, title **It left your laptop. `launchSettings` and user secrets are gone.**. Navy ground.
 
 ## Notes
 
@@ -1291,7 +1333,8 @@ container does nothing. Env vars are read once at startup. Restart the container
 
 **Headline:** Key-per-file
 
-A directory becomes configuration. Two panels: the mount, then the keys.
+A directory becomes configuration. `AddKeyPerFile` ships in
+**`Microsoft.Extensions.Configuration.KeyPerFile`** — it is not in the default chain.
 
 ```text
 /run/secrets/
@@ -1302,7 +1345,7 @@ A directory becomes configuration. Two panels: the mount, then the keys.
 Beneath, in gold, the thing that is easy to get wrong:
 
 ```csharp
-AddKeyPerFile(dir, optional: true)                      // does not reload
+AddKeyPerFile(dir, optional: true)                      // does NOT reload
 AddKeyPerFile(dir, optional: true, reloadOnChange: true) // does
 ```
 
@@ -1340,6 +1383,45 @@ may not fire. Treat restart as the contract.
 
 ---
 
+# Slide 34a
+
+## Slide Content
+
+**Headline:** One key. Four ways to write it.
+
+`:` is the delimiter. Everything else is a workaround for a store that cannot use it.
+
+| Where | How you write it | The key it becomes |
+| --- | --- | --- |
+| `appsettings.json` | nesting: `"Weather": { "ApiKey": ... }` | `Weather:ApiKey` |
+| Command line | `--Weather:ApiKey=x` | `Weather:ApiKey` |
+| Environment variable | `Weather__ApiKey=x` | `Weather:ApiKey` |
+| Azure Key Vault | `Weather--ApiKey` | `Weather:ApiKey` |
+
+> `:` is not portable in an environment variable name, and Key Vault forbids it in a
+> secret name. Hence `__` and `--`. Both are translated for you.
+
+## Notes
+
+```text
+[key syntax] ONE KEY, FOUR SPELLINGS
+60-min: keep - it is 30 seconds and it prevents the most common SHAPE bug
+
+This exists because people keep hitting the same wall from three directions:
+bash will not take a colon in a variable name, and Key Vault rejects it in a
+secret name. So each store invented its own escape and .NET translates it back.
+
+Say it once, plainly:
+"There is one key. Colon is the real delimiter. The rest is spelling."
+
+Failure mode #2, SHAPE, is almost always this: a single underscore instead of a
+double, or a colon somewhere that will not take one.
+
+Worth adding out loud: the double underscore is documented as working on ALL
+platforms, which is why it is the safe default even on Windows.
+```
+
+---
 # Slide 35
 
 ## Slide Content
@@ -1407,7 +1489,7 @@ prefixes - that's anti-pattern #9.
 
 ## Slide Content
 
-**Section divider.** Kicker `BINDING`, title **Stop passing configuration around as strings. Give it a type.**. Navy ground.
+**Section divider.** Kicker ``, title **Stop passing configuration around as strings. Give it a type.**. Navy ground.
 
 ## Notes
 
@@ -1664,7 +1746,7 @@ without a file.
 
 ## Slide Content
 
-**Section divider.** Kicker `ACT 4 · PRODUCTION`, title **Production supplies the values. Nothing gets rebuilt to change one.**. Navy ground.
+**Section divider.** Kicker ``, title **Production supplies the values. Nothing gets rebuilt to change one.**. Navy ground.
 
 ## Notes
 
@@ -1931,7 +2013,7 @@ problem wearing a config hat.
 
 ## Slide Content
 
-**Section divider.** Kicker `COORDINATED CHANGE`, title **One edit now has to reach every instance.**. Navy ground.
+**Section divider.** Kicker ``, title **One edit now has to reach every instance.**. Navy ground.
 
 ## Notes
 
@@ -2044,7 +2126,7 @@ Also exists: Map() rewrites keys on the way in, e.g. App__Settings__X -> App:Set
 
 ## Slide Content
 
-**Section divider.** Kicker `CONTROLLED RELEASE`, title **A feature flag is configuration with an `if` statement attached.**. Navy ground.
+**Section divider.** Kicker ``, title **A feature flag is configuration with an `if` statement attached.**. Navy ground.
 
 ## Notes
 
@@ -2519,7 +2601,7 @@ End the flags block on JUDGMENT, not tooling.
 
 ## Slide Content
 
-**Section divider.** Kicker `ACT 5 · where SHOULD this VALUE LIVE?`, title **Who owns it? Is it secret? Who needs it? How fast must it change?**. Navy ground.
+**Section divider.** Kicker ``, title **Who owns it? Is it secret? Who needs it? How fast must it change?**. Navy ground.
 
 ## Notes
 
@@ -2849,7 +2931,7 @@ remember you made it.&quot;
 
 ## Slide Content
 
-**Section divider.** Kicker `APPENDIX`, title **Useful details we skipped.**. Navy ground.
+**Section divider.** Kicker ``, title **Useful details we skipped.**. Navy ground.
 
 ## Notes
 

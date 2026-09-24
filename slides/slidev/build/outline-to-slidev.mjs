@@ -132,9 +132,17 @@ const CAPTION_MARGIN = 12
 const lineCount = body => String(body).split(NL).length
 const longestLine = body => Math.max(1, ...String(body).split(NL).map(l => l.length))
 
-/** Rough height of a caption, which wraps at roughly 95 characters on a full-width slide. */
+/**
+ * Rough height of the caption block.
+ *
+ * 88 chars/line was measured against a plain caption. A GOLD caption renders larger
+ * (1.08rem) and loses width to its left rule, so it wraps sooner - the two-pass slide
+ * had a three-line gold caption where this predicted two, and ran 12px off the top.
+ * 72 is the conservative figure that covers both.
+ */
+const CHARS_PER_LINE = 72
 const captionHeight = text =>
-  text ? Math.ceil(String(text).length / 88) * CAPTION_LINE + CAPTION_MARGIN : 0
+  text ? Math.ceil(String(text).length / CHARS_PER_LINE) * CAPTION_LINE + CAPTION_MARGIN : 0
 
 /** Largest font size at which `lines` of `maxLen` characters fit in the given box. */
 const fitBox = (maxLen, lines, w, h, max) =>
@@ -235,7 +243,9 @@ const LAYOUTS = {
   code(s, cfg) {
     return {
       front: { layout: 'code',
-               codeSize: fitCode(s, { availW: 848, pad: 70, max: 17,
+               // pad covers the layout's own padding plus the headline's margin; 70 left
+               // a headline slide 4px over the top on the two-pass slide.
+               codeSize: fitCode(s, { availW: 848, pad: 88, max: 17,
                                       heading: Boolean(s.headline),
                                       caption: captionText(s, cfg) }) },
       body: chunks(heading(s), outlineBlocks(s), caption(s.quote, true), goldCaption(s), footnote(s, cfg)),

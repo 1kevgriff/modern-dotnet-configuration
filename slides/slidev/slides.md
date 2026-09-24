@@ -263,12 +263,6 @@ layout: "default"
 
 </Cards>
 
-<Caption>
-
-04 and 05 are why this talk exists in 2026.
-
-</Caption>
-
 <!--
 [04-10 min] WHY - S1.1
 60-min: compress to 4 min - trust and ownership get one line each
@@ -306,51 +300,110 @@ codeSize: "17.0"
 
 <!-- OUTLINE.md # Slide 7 -->
 
-# The same problem, three generations
+# 2002 — you recompiled to change a value
 
 ```csharp
-// 2002
 #if DEBUG
     const string Db = "localhost";
 #else
     const string Db = "sql-prod-01";
 #endif
-
-// 2005
-ConfigurationManager.AppSettings["Db"];
-
-// 2018
-config.GetConnectionString("Default");
 ```
 
+<Caption gold>
+
+Change the database, rebuild, retest, redeploy. The failure mode was shipping
+
+with the wrong line uncommented.
+
+</Caption>
+
 <!--
-[10-13 min] COLD OPEN PART TWO - S1.2
-60-min: fold into the Why block - drop the storytelling, keep the through-line
+[the three eras, 1 of 3] CONSTANTS AND #if DEBUG
+60-min: these three are 20 seconds each - do not linger
 
-Three eras. Score each against the five reasons.
+Hardcoded values, commented-out blocks, and a pre-commit ritual nobody enjoyed.
 
-1. CONSTANTS AND #if DEBUG
-   Hardcoded values, commented-out blocks, a pre-commit ritual.
-   Simple and dangerous - failure mode was shipping the wrong uncommented line.
-   Fails #1 outright. Fails #4 catastrophically.
+Score it against the five reasons from the last slide:
+  fails #1 outright - value and logic share a lifecycle
+  fails #4 catastrophically - the credential is in the assembly, everywhere it ships
 
-2. web.config / app.config + ConfigurationManager.AppSettings
-   XML, static, one string-keyed bag. No reload, no layering, framework-only.
-   Transforms (Web.Release.config) ran at BUILD time.
-   Wins #1 and #2 - but you built one artifact per environment, and #3 was impossible.
+If anyone in the room is old enough, they have shipped the wrong uncommented line.
+Say so; it gets a laugh and it is the point.
+-->
 
-3. THE .NET GENERIC HOST (2018, .NET Core 2.1) + IConfiguration
-   Provider chain, layering, binding, DI, reload - and the same model for a web
-   app, a worker, a console tool, and a WinForms app.
-   One artifact, many environments. All five reasons, finally.
+---
+layout: "code"
+codeSize: "17.0"
+---
 
-THE THROUGH-LINE - say this out loud, it comes back twice:
-"We traded a build-time decision for a runtime one."
-Everything hard about modern configuration comes from that trade.
-S6.8 shows feature flags making the same trade one level up.
+<!-- OUTLINE.md # Slide 7a -->
 
-ON SCREEN: three snippets, one per era, dated. No prose. Walk them in order
-and score each against the five reasons from the previous slide.
+# 2005 — the value left the binary, but not the build
+
+```xml
+<appSettings>
+  <add key="Db" value="sql-prod-01" />
+</appSettings>
+```
+
+```csharp
+ConfigurationManager.AppSettings["Db"];
+```
+
+<Caption gold>
+
+Wins on hard-coding and on per-environment values. But `Web.Release.config`
+
+transforms ran at **build** time, so you shipped one artifact per environment.
+
+</Caption>
+
+<!--
+[the three eras, 2 of 3] web.config AND ConfigurationManager
+60-min: 20 seconds
+
+XML, static, one string-keyed bag. No reload, no layering, framework-only.
+
+Score it:
+  wins #1 and #2
+  #3 was impossible - you could not change a value without a new build
+
+The thing to land: the transform ran at BUILD time. That is why "which build is
+this?" was a real production question for a decade.
+-->
+
+---
+layout: "code"
+codeSize: "17.0"
+---
+
+<!-- OUTLINE.md # Slide 7b -->
+
+# 2018 — one artifact, many environments
+
+```csharp
+builder.Configuration.GetConnectionString("Default");
+```
+
+<Caption gold>
+
+A provider chain, layering, binding, DI and reload — and the same model for a
+
+web app, a worker, a console tool and a desktop app. All five reasons, finally.
+
+</Caption>
+
+<!--
+[the three eras, 3 of 3] THE GENERIC HOST
+60-min: 20 seconds, then the trade slide
+
+.NET Core 2.1 in 2018. Provider chain, layering, binding, DI, reload - and the
+same model for a web app, a worker, a console tool and a WinForms app.
+
+One artifact, many environments. All five reasons, finally.
+
+Then advance: the next slide is the price of all this, and it comes back twice.
 -->
 
 ---
@@ -420,7 +473,7 @@ HANDLE TWO OBJECTIONS OUT LOUD - both are fair:
 
 ---
 layout: "section"
-kicker: "THE JOURNEY"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 10 -->
@@ -517,7 +570,7 @@ that is when this slide has done its job.
 
 ---
 layout: "section"
-kicker: "ACT 1 · THE SHARED BASELINE"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 11a -->
@@ -550,41 +603,43 @@ layout: "panels"
 
 # It's one flat dictionary
 
-<PanelRow :cols="2" size="11.2" arrow>
+<PanelRow :cols="1" size="15.0">
 
-<!-- from: demos/d01-provider-dump/appsettings.json -->
+<!-- from: the three syntaxes used across demos/d01, d02 and d08 -->
 
-<Panel caption="WHAT YOU WROTE">
+<Panel caption="THREE WAYS TO SPELL IT">
 
-```json
-{
-  "Weather": {
-    "ApiBaseUrl": "https://api.example.com",
-    "TimeoutSeconds": 30,
-    "ApiKey": "placeholder-set-a-real-one-with-user-secrets"
-  },
-  "ConnectionStrings": {
-    "Default": "Server=localhost;Database=Demo;..."
-  }
-}
+```text
+appsettings.json   "Weather": { "TimeoutSeconds": 30 }
+
+environment        Weather__TimeoutSeconds=10
+
+command line       --Weather:TimeoutSeconds=5
 ```
 
 </Panel>
 
-<!-- from: the flat projection of the same file — ":" delimiter, values are strings -->
+<!-- from: the flat key all three produce; values are strings -->
 
-<Panel caption="WHAT ACTUALLY EXISTS" dark>
+<Panel caption="ONE KEY, ONE DICTIONARY" dark>
 
 ```text
-Weather:ApiBaseUrl         "https://api.example.com"
-Weather:TimeoutSeconds     "30"
-Weather:ApiKey             "placeholder-set-a-real-..."
-ConnectionStrings:Default  "Server=localhost;Database=..."
+Weather:TimeoutSeconds   "30"
+Weather:TimeoutSeconds   "10"
+Weather:TimeoutSeconds   "5"
+
+same key, three providers - last one wins
 ```
 
 </Panel>
 
 </PanelRow>
+
+<Caption>
+
+JSON nesting, `__` and `--` are just spellings. They all become `:`, and every value is a string.
+
+</Caption>
 
 <!--
 [16-23 min] THE MODEL - S2
@@ -714,7 +769,7 @@ This is the slide people quote back to you afterwards.
 
 ---
 layout: "section"
-kicker: "ACT 2 · MY MACHINE"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 19 -->
@@ -982,18 +1037,14 @@ codeSize: "15"
 
 <Caption gold>
 
-Deliberately `dotnet run` in the same shell, not F5. A `$env:` assignment only
-
-affects that PowerShell process and its children — an already-running Visual
-
-Studio never sees it, so an F5 version of this would prove nothing.
+**Which one wins?**
 
 </Caption>
 
-| you set this, in this shell | and this file exists |
+| You set an environment variable | The project has this file |
 | --- | --- |
 | `$env:Weather__TimeoutSeconds = "10"` | `Properties/launchSettings.json` |
-| `dotnet run` | `"environmentVariables": { "Weather__TimeoutSeconds": "45" }` |
+| then `dotnet run` | `"environmentVariables": { "Weather__TimeoutSeconds": "45" }` |
 
 <Caption gold>
 
@@ -1084,7 +1135,7 @@ codeSize: "15"
 
 <Caption gold>
 
-**HIGHEST PRECEDENCE first — row 1 beats row 8.**
+**HIGHEST PRECEDENCE FIRST — row 1 beats row 8.**
 
 </Caption>
 
@@ -1136,7 +1187,7 @@ thirteen.
 
 ---
 layout: "code"
-codeSize: "16.5"
+codeSize: "17.0"
 ---
 
 <!-- OUTLINE.md # Slide 17 -->
@@ -1146,19 +1197,23 @@ codeSize: "16.5"
 ```text
 $ dotnet run --environment Staging
 
-MemoryConfigurationProvider
-EnvironmentVariablesConfigurationProvider Prefix: 'ASPNETCORE_'
-MemoryConfigurationProvider
-EnvironmentVariablesConfigurationProvider Prefix: 'DOTNET_'
-CommandLineConfigurationProvider                        <--  picks which file loads
-JsonConfigurationProvider for 'appsettings.json'
-JsonConfigurationProvider for 'appsettings.Staging.json'
-JsonConfigurationProvider for 'web.settings.json'
-JsonConfigurationProvider for 'web.settings.Staging.json'
-EnvironmentVariablesConfigurationProvider
-CommandLineConfigurationProvider                        <--  wins the final read
-ChainedConfigurationProvider
+  PASS 1   decide WHICH files to load
+    CommandLineConfigurationProvider        <-- reads --environment Staging
+
+  PASS 2   load them, then let the same argument win
+    JsonConfigurationProvider  appsettings.json
+    JsonConfigurationProvider  appsettings.Staging.json     <-- chosen by pass 1
+    EnvironmentVariablesConfigurationProvider
+    CommandLineConfigurationProvider        <-- wins the final read
 ```
+
+<Caption gold>
+
+`ASPNETCORE_ENVIRONMENT` is not just another setting. It is the input that picks
+
+the rest of your inputs.
+
+</Caption>
 
 <!--
 [S3.2] HOST CONFIGURATION - THE TWO-PASS READ
@@ -1185,6 +1240,10 @@ That reframing is what makes the two-phase design look deliberate instead of
 accidental. It also explains why setting the environment variable after the host
 is built does nothing at all.
 
+This dump is trimmed. The real one has thirteen providers - two Memory ones and
+the prefixed env-var providers are host plumbing. If someone counts along, say so
+and move on; do not narrate all thirteen.
+
 For a non-web host it is DOTNET_ENVIRONMENT, not ASPNETCORE_ENVIRONMENT. Say it
 once; someone in the room is writing a worker this week.
 -->
@@ -1199,14 +1258,14 @@ codeSize: "15"
 
 <Badge>ORDER</Badge>
 
-# Same key. Four winners.
+# Add a source, and the answer changes
 
-| | |
+| Add this source | `Weather:TimeoutSeconds` now reads |
 | --- | --- |
 | `appsettings.json` | 30 |
-| `appsettings.Development.json` | 120 |
-| `Weather__TimeoutSeconds` | 10 |
-| **`--Weather:TimeoutSeconds`** | **5** |
+| + `appsettings.Development.json` | 120 |
+| + `Weather__TimeoutSeconds` | 10 |
+| + **`--Weather:TimeoutSeconds`** | **5** |
 
 <Caption>
 
@@ -1265,11 +1324,9 @@ app.Logger.LogInformation("Configuration:\n{Dump}", dump);
 
 <Caption gold>
 
-**Development only.** That filter is a denylist, so it misses tokens, connection
+That filter is a denylist, so it misses tokens, connection strings and certificates.
 
-strings and certificates. Gate it on `IsDevelopment()`, and prefer inspecting the
-
-handful of keys you actually care about.
+Gate it on `IsDevelopment()`, and prefer inspecting the handful of keys you care about.
 
 </Caption>
 
@@ -1353,7 +1410,7 @@ loud, because someone is about to go add GetDebugView to a production app.
 
 ---
 layout: "section"
-kicker: "ACT 3 · THE SHARED DEV ENVIRONMENT"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 31 -->
@@ -1448,7 +1505,7 @@ codeSize: "15.0"
 ```
 
 ```csharp
-AddKeyPerFile(dir, optional: true)                      // does not reload
+AddKeyPerFile(dir, optional: true)                      // does NOT reload
 AddKeyPerFile(dir, optional: true, reloadOnChange: true) // does
 ```
 
@@ -1483,6 +1540,54 @@ AddKeyPerFile(dir, optional) resolves to reloadOnChange: false. You only get
 a watcher from the 4-argument overload. And even then, on Kubernetes those
 mounts are symlink swaps rather than in-place writes, so the watcher may or
 may not fire. Treat restart as the contract.
+-->
+
+---
+layout: "default"
+codeSize: "15"
+---
+
+<!-- OUTLINE.md # Slide 34a -->
+
+# One key. Four ways to write it.
+
+<Caption gold>
+
+`:` is not portable in an environment variable name, and Key Vault forbids it in a
+
+secret name. Hence `__` and `--`. Both are translated for you.
+
+</Caption>
+
+| Where | How you write it | The key it becomes |
+| --- | --- | --- |
+| `appsettings.json` | nesting: `"Weather": { "ApiKey": ... }` | `Weather:ApiKey` |
+| Command line | `--Weather:ApiKey=x` | `Weather:ApiKey` |
+| Environment variable | `Weather__ApiKey=x` | `Weather:ApiKey` |
+| Azure Key Vault | `Weather--ApiKey` | `Weather:ApiKey` |
+
+<Caption>
+
+`:` is the delimiter. Everything else is a workaround for a store that cannot use it.
+
+</Caption>
+
+<!--
+[key syntax] ONE KEY, FOUR SPELLINGS
+60-min: keep - it is 30 seconds and it prevents the most common SHAPE bug
+
+This exists because people keep hitting the same wall from three directions:
+bash will not take a colon in a variable name, and Key Vault rejects it in a
+secret name. So each store invented its own escape and .NET translates it back.
+
+Say it once, plainly:
+"There is one key. Colon is the real delimiter. The rest is spelling."
+
+Failure mode #2, SHAPE, is almost always this: a single underscore instead of a
+double, or a colon somewhere that will not take one.
+
+Worth adding out loud: the double underscore is documented as working on ALL
+platforms, which is why it is the safe default even on Windows.
 -->
 
 ---
@@ -1549,7 +1654,7 @@ prefixes - that's anti-pattern #9.
 
 ---
 layout: "section"
-kicker: "BINDING"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 25 -->
@@ -1805,7 +1910,7 @@ without a file.
 
 ---
 layout: "section"
-kicker: "ACT 4 · PRODUCTION"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 36a -->
@@ -2062,7 +2167,7 @@ problem wearing a config hat.
 
 ---
 layout: "section"
-kicker: "COORDINATED CHANGE"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 38 -->
@@ -2169,7 +2274,7 @@ Also exists: Map() rewrites keys on the way in, e.g. App__Settings__X -> App:Set
 
 ---
 layout: "section"
-kicker: "CONTROLLED RELEASE"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 41 -->
@@ -2616,7 +2721,7 @@ End the flags block on JUDGMENT, not tooling.
 
 ---
 layout: "section"
-kicker: "ACT 5 · where SHOULD this VALUE LIVE?"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 47a -->
@@ -2936,7 +3041,7 @@ remember you made it."
 
 ---
 layout: "section"
-kicker: "APPENDIX"
+kicker: ""
 ---
 
 <!-- OUTLINE.md # Slide 54a -->

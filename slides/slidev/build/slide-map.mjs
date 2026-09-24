@@ -62,11 +62,13 @@ export const map = {
       { n: '04', title: 'Trust', accent: true },
       { n: '05', title: 'Ownership', accent: true },
     ],
-    footnote: '04 and 05 are why this talk exists in 2026.',
     from: 'OUTLINE.md slide 6 — card titles inline, emphasis as described',
+    prose: 'drop',
   },
 
   7: { layout: 'code' },
+  '7a': { layout: 'code' },
+  '7b': { layout: 'code' },
   8: { layout: 'statement' },
   9: {
     layout: 'statement',
@@ -98,34 +100,31 @@ export const map = {
   12: {
     layout: 'panels',
     arrow: true,
-    prose: 'drop',   // the prose only describes the two panels, which the panels now are
+    prose: 'drop',
     panels: [
       {
-        caption: 'WHAT YOU WROTE',
-        lang: 'json',
-        from: 'demos/d01-provider-dump/appsettings.json',
-        body: `{
-  "Weather": {
-    "ApiBaseUrl": "https://api.example.com",
-    "TimeoutSeconds": 30,
-    "ApiKey": "placeholder-set-a-real-one-with-user-secrets"
-  },
-  "ConnectionStrings": {
-    "Default": "Server=localhost;Database=Demo;..."
-  }
-}`,
+        caption: 'THREE WAYS TO SPELL IT',
+        lang: 'text',
+        from: 'the three syntaxes used across demos/d01, d02 and d08',
+        body: `appsettings.json   "Weather": { "TimeoutSeconds": 30 }
+
+environment        Weather__TimeoutSeconds=10
+
+command line       --Weather:TimeoutSeconds=5`,
       },
       {
-        caption: 'WHAT ACTUALLY EXISTS',
+        caption: 'ONE KEY, ONE DICTIONARY',
         lang: 'text',
         dark: true,
-        from: 'the flat projection of the same file — ":" delimiter, values are strings',
-        body: `Weather:ApiBaseUrl         "https://api.example.com"
-Weather:TimeoutSeconds     "30"
-Weather:ApiKey             "placeholder-set-a-real-..."
-ConnectionStrings:Default  "Server=localhost;Database=..."`,
+        from: 'the flat key all three produce; values are strings',
+        body: `Weather:TimeoutSeconds   "30"
+Weather:TimeoutSeconds   "10"
+Weather:TimeoutSeconds   "5"
+
+same key, three providers - last one wins`,
       },
     ],
+    footnote: 'JSON nesting, `__` and `--` are just spellings. They all become `:`, and every value is a string.',
   },
 
   13: {
@@ -141,9 +140,10 @@ ConnectionStrings:Default  "Server=localhost;Database=..."`,
     // fact that label does not carry.
     footnote: 'Rows 5 and 6 are the ones almost nobody knows exist — and they apply to web apps too.',
   },
-  17: { layout: 'code' },
+  17: { layout: 'code', prose: 'drop' },
   18: {
-    // "The last row is bold navy with a large gold value." - OUTLINE.md slide 18
+    // "The last row is bold navy with a large gold value." - OUTLINE.md slide 18.
+    // Rows are cumulative, so the marked row is the full stack.
     markRow: 4,
     markValue: true,
     layout: 'default',
@@ -304,6 +304,9 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
     layout: 'default',
     footnote: 'The path must be absolute. On Kubernetes the mounts are symlink swaps, so even the reloading overload may not fire — treat restart as the contract.',
   },
+  // one key, four spellings - the SHAPE bug in one slide
+  '34a': { layout: 'default', prose: 'keep' },
+
   35: {
     layout: 'default',
     footnote: '`--` becomes `:` because Key Vault forbids a colon in a secret name. No reload by default — `ReloadInterval` is null until you set it.',

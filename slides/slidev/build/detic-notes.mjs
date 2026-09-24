@@ -9,6 +9,10 @@
 //
 //   node build/detic-notes.mjs          dry run - prints every change
 //   node build/detic-notes.mjs --write  applies it
+//
+// BUG FOUND IN USE: the first run operated on the WHOLE file, so it also re-cased slide
+// content - it lower-cased a word inside a fenced code comment and mangled a gold label.
+// It is scoped to "## Notes" blocks now. Re-run it only with that scoping intact.
 
 import { readFileSync, writeFileSync, copyFileSync } from 'node:fs'
 import { fileURLToPath } from 'node:url'
