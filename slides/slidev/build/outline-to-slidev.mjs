@@ -205,9 +205,16 @@ const goldCaption = s => caption(s.goldCaption, true)
 
 /** All caption text a slide will render, for the height budget. */
 const captionText = (s, cfg) =>
-  [s.goldCaption, cfg.footnote ?? (cfg.prose === 'keep' ? s.residualProse.join(' ') : '')]
+  [s.quote, s.goldCaption, cfg.footnote ?? (cfg.prose === 'keep' ? s.residualProse.join(' ') : '')]
     .filter(Boolean).join(' ')
 const heading = s => (s.headline ? `# ${s.headline}` : '')
+
+/** A divider's sub-line: the journey map under slide 10's title. */
+const quoteLine = s => (s.quote ? `<Caption>
+
+${s.quote}
+
+</Caption>` : '')
 
 /**
  * On-screen text beneath the main visual.
@@ -231,7 +238,7 @@ const LAYOUTS = {
                codeSize: fitCode(s, { availW: 848, pad: 70, max: 17,
                                       heading: Boolean(s.headline),
                                       caption: captionText(s, cfg) }) },
-      body: chunks(heading(s), outlineBlocks(s), goldCaption(s), footnote(s, cfg)),
+      body: chunks(heading(s), outlineBlocks(s), caption(s.quote, true), goldCaption(s), footnote(s, cfg)),
     }
   },
 
@@ -245,10 +252,10 @@ const LAYOUTS = {
     }
   },
 
-  section(s) {
+  section(s, cfg) {
     return {
       front: { layout: 'section', kicker: s.kicker || '' },
-      body: `# ${s.dividerTitle}`,
+      body: chunks(`# ${s.dividerTitle}`, quoteLine(s), footnote(s, cfg)),
     }
   },
 
@@ -321,11 +328,16 @@ const LAYOUTS = {
   },
 
   default(s, cfg) {
+    // A long table plus a label plus a footnote does not fit at the default row height.
+    // Counting the rows here beats shaving content off a reference slide people photograph.
+    const rows = s.tables.length ? s.tables[0].body.split(NL).length - 2 : 0
     return {
       front: { layout: 'default',
+               ...(rows >= 8 ? { class: 'table-dense' } : {}),
                // the outline calls out one row on some tables; the class drives the styling
                ...(cfg.markRow
-                 ? { class: `mark-row-${cfg.markRow}${cfg.markValue ? ' mark-value' : ''}` }
+                 ? { class: `${rows >= 8 ? 'table-dense ' : ''}mark-row-${cfg.markRow}` +
+                            `${cfg.markValue ? ' mark-value' : ''}` }
                  : {}),
                codeSize: fitCode(s, { availW: 884, pad: PAD_Y, max: 15,
                                       heading: Boolean(s.headline),
@@ -333,6 +345,7 @@ const LAYOUTS = {
       body: chunks(
         heading(s),
         cfg.bigNum ? `<BigNum from="${esc(cfg.bigNum.from)}" to="${esc(cfg.bigNum.to)}" />` : '',
+        caption(s.quote, true),
         outlineBlocks(s),
         footnote(s, cfg),
         goldCaption(s),

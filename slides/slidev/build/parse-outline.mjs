@@ -145,19 +145,19 @@ export function parseOutline(path) {
     const headline = prose.match(RE.headline)
     const goldCaption = prose.match(RE.goldCaption)
 
-    // A headline-only slide carries its statement as a blockquote. Markdown allows LAZY
-    // CONTINUATION - only the first line needs ">", and slide 8 relies on that:
+    // A blockquote is AUTHORED ON-SCREEN TEXT wherever it appears - not only on a
+    // headline-only slide. Slide 10 carries the journey map this way and slide 14 its
+    // security caveat; gating this on headlineOnly dropped both silently.
+    //
+    // Each ">" line is a DELIBERATE line (slide 9: "Two lines, stacked."). A line WITHOUT
+    // ">" is markdown lazy continuation and folds into the one above - slide 8 relies on
+    // that, and filtering on ">" alone ate the second half of its sentence:
     //
     //     > We traded a build-time decision
     //     for a runtime one.
     //
-    // Filtering on ">" alone silently drops the second half of the sentence.
-    const quote = RE.headlineOnly.test(prose)
-      // Each ">" line is a DELIBERATE line (slide 9: "Two lines, stacked."); a line without
-      // ">" is a wrap of the one above it and folds in.
-      // Each ">" line is a DELIBERATE line (slide 9: "Two lines, stacked."); a line without
-      // ">" is a wrap of the one above it and folds in. A BLANK LINE ends the quote - without
-      // that, the commentary paragraph after it gets swallowed onto the slide.
+    // A blank line ends the quote, or the commentary after it gets swallowed onto the slide.
+    const quote = /^>/m.test(prose)
       ? (() => {
           const lines = []
           let open = false

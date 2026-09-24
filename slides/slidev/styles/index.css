@@ -219,3 +219,12 @@
 .slidev-layout.mark-row-8 tbody tr:nth-child(8) td:last-child strong {
   color: var(--gold);
 }
+
+/* ---- dense tables -------------------------------------------------------------- */
+/* Eight rows plus a reading-direction label plus a footnote does not fit at the normal
+   row height. Tightening the rows keeps the whole reference table on screen, which
+   matters more here than uniform spacing - these are the slides people photograph. */
+
+.slidev-layout.table-dense tbody td { padding: 0.28rem 0.7rem; }
+.slidev-layout.table-dense thead th { padding: 0.3rem 0.7rem; }
+.slidev-layout.table-dense table { font-size: 0.84rem; }

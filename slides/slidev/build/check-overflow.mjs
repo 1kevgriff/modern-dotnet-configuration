@@ -7,6 +7,7 @@
 
 import http from 'node:http'
 import fs from 'node:fs'
+import { readFileSync } from 'node:fs'
 import path from 'node:path'
 import process from 'node:process'
 import { fileURLToPath } from 'node:url'
@@ -41,7 +42,11 @@ const base = `http://127.0.0.1:${server.address().port}`
 const browser = await chromium.launch()
 const page = await browser.newPage({ viewport: { width: 1280, height: 720 } })
 
-const total = Number(process.argv[2]) || 59
+// Derive the count from slides.md. A hardcoded default silently stopped checking once
+// the deck grew past it, which is exactly when new slides are most likely to overflow.
+const SLIDES = path.resolve(HERE, '../slides.md')
+const total = Number(process.argv[2])
+  || (readFileSync(SLIDES, 'utf8').match(/^<!-- OUTLINE\.md # Slide /gm) || []).length
 const problems = []
 
 for (let n = 1; n <= total; n++) {

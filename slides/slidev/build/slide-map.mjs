@@ -78,8 +78,11 @@ export const map = {
     prose: 'drop',
   },
 
-  // ---- the spine -------------------------------------------------------------------
-  10: { layout: 'section' },
+  // ---- the journey -----------------------------------------------------------------
+  10: {
+    layout: 'section',
+    footnote: 'Each boundary changes *who supplies the value* and *what it costs to get it wrong*. The application does not change — only the answer to “where did this come from?” does.',
+  },
 
   11: {
     layout: 'cards',
@@ -93,6 +96,9 @@ export const map = {
     from: 'OUTLINE.md slide 11 ## Notes — the four numbered definitions, verbatim',
     prose: 'drop'
   },
+
+  // ---- ACT 1 - the shared baseline --------------------------------------------------
+  '11a': { layout: 'section' },
 
   12: {
     layout: 'panels',
@@ -131,12 +137,14 @@ ConnectionStrings:Default  "Server=localhost;Database=..."`,
     layout: 'statement',
     prose: 'drop',
   },
-  14: { layout: 'code' },
+  14: { layout: 'code', prose: 'drop' },
   15: { layout: 'code' },
   16: {
     layout: 'default',
-    footnote: `Rows 5 and 6 are the ones almost nobody knows exist — and they apply to web apps too.
-Row 1 is the other surprise: read first, applied last.`,
+    prose: 'drop',   // the reading-direction label is the blockquote, rendered above the table
+    // "row 1 beats row 8" is now the gold label above the table, so this keeps only the
+    // fact that label does not carry.
+    footnote: 'Rows 5 and 6 are the ones almost nobody knows exist — and they apply to web apps too.',
   },
   17: { layout: 'code' },
   18: {
@@ -308,7 +316,10 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   36: { layout: 'code' },
   37: { layout: 'code' },
 
-  // ---- stage 3: shared -------------------------------------------------------------
+  // ---- ACT 4 - production -----------------------------------------------------------
+  '36a': { layout: 'section' },
+  '36b': { layout: 'statement', prose: 'keep' },
+
   38: { layout: 'section' },
   39: {
     layout: 'default',
@@ -359,7 +370,9 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
     prose: 'drop',
   },
 
-  // ---- choosing a strategy ---------------------------------------------------------
+  // ---- ACT 5 - where should this value live? ---------------------------------------
+  '47a': { layout: 'section' },
+
   48: {
     layout: 'default',
     gold: true,
@@ -391,6 +404,8 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
 
   // ---- close -----------------------------------------------------------------------
   53: { layout: 'section' },
+  // ---- appendix - off the main path -------------------------------------------------
+  '54a': { layout: 'section' },
   54: {
     layout: 'cover',
     variant: 'thanks',

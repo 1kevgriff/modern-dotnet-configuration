@@ -167,7 +167,7 @@ running, so don't stall here.
 
 Frame the next 90 minutes in one line:
 "Every app has configuration. Almost nobody revisits it. Today we find out what
-it actually does, where it cuts you, and what holds up in production."3
+it actually does, where it cuts you, and what holds up in production."
 -->
 
 ---
@@ -202,7 +202,7 @@ S6.6 (flag debt) and S4.6 (the idle-app refresh surprise) as scars rather than
 trivia.
 
 Do NOT list every technology you've touched. If they want the resume it's on
-the site, and the site is on the last slide.4
+the site, and the site is on the last slide.
 -->
 
 ---
@@ -237,7 +237,7 @@ Point at 04 and say "this is about a quarter of the talk, and it's the half
 people don't expect."
 
 Then get off this slide. The cold open is STILL unexplained and that tension is
-doing work for you until S2.1.5
+doing work for you until S2.1.
 -->
 
 ---
@@ -415,12 +415,24 @@ HANDLE TWO OBJECTIONS OUT LOUD - both are fair:
 
 ---
 layout: "section"
-kicker: "THE SPINE"
+kicker: "THE JOURNEY"
 ---
 
 <!-- OUTLINE.md # Slide 10 -->
 
-# local dev → deployment → shared
+# One application. Four places it has to run.
+
+<Caption>
+
+**my machine** → **the team's baseline** → **a shared dev server** → **production**
+
+</Caption>
+
+<Caption>
+
+Each boundary changes *who supplies the value* and *what it costs to get it wrong*. The application does not change — only the answer to “where did this come from?” does.
+
+</Caption>
 
 <!--
 [13-16 min] THE SPINE - S1.4
@@ -496,6 +508,33 @@ NAME THEM OUT LOUD AS THEY COME UP:
 
 By the anti-patterns slide the audience should be calling them before you do.
 That's the win condition for this slide.
+-->
+
+---
+layout: "section"
+kicker: "ACT 1 · THE SHARED BASELINE"
+---
+
+<!-- OUTLINE.md # Slide 11a -->
+
+# `appsettings.json` is a team decision, and it ships with the app.
+
+<!--
+[ACT 1] THE SHARED BASELINE
+60-min: keep, 30 seconds
+
+FIRST BOUNDARY. Everything from here to the end is one application moving:
+my laptop -> a shared dev server -> production. Say that out loud once.
+
+The baseline is the part everyone agrees on. It is checked in, it is reviewed,
+and it travels with the artifact. Nothing here is secret and nothing here is
+machine-specific - those come next, and they OVERRIDE this rather than replace it.
+
+THE QUESTION THIS ACT ANSWERS:
+  "Who owns this value, and what does everyone get by default?"
+
+Weather:TimeoutSeconds is the value to follow. It starts at 30 here and it will
+cross every boundary in the talk.
 -->
 
 ---
@@ -597,270 +636,85 @@ least, it wasn't until .NET 10 (S9).
 -->
 
 ---
-layout: "code"
-codeSize: "17.0"
+layout: "panels"
 ---
 
-<!-- OUTLINE.md # Slide 14 -->
+<!-- OUTLINE.md # Slide 21 -->
 
-```csharp
-var dump = ((IConfigurationRoot)app.Configuration).GetDebugView(ctx =>
-    ctx.Key.Contains("secret", StringComparison.OrdinalIgnoreCase) ||
-    ctx.Key.Contains("password", StringComparison.OrdinalIgnoreCase) ||
-    ctx.Key.Contains("key", StringComparison.OrdinalIgnoreCase)
-        ? "***"
-        : ctx.Value);
+# Arrays overlay. They don't replace.
 
-app.Logger.LogInformation("Configuration:\n{Dump}", dump);
-```
+<PanelRow :cols="1" size="15.0">
 
-<!--
-[16-23 min] THE DIAGNOSTIC - S2.1
-The cold-open dump, now marked
-60-min: NEVER CUT
+<!-- from: demos/d03-array-merge/README.md captured output, abbreviated for the screen -->
 
-This is the show-don't-tell moment of the talk, and it explains the cold open.
-GetDebugView() prints every key, its effective value, AND the provider that
-supplied it.
-
-The cold-open dump returns, now with the gold marker. Walk it and point at the
-line that explains the wrong value from minute zero.
-
-Output shape:
-  Db:
-    Timeout=30 (JsonConfigurationProvider for 'appsettings.json' (Optional))
-    ConnectionString=*** (EnvironmentVariablesConfigurationProvider Prefix: '')
-
-SAY:
-- The processValue overload takes Func<ConfigurationDebugViewContext, string>.
-  Context carries Path, Key, Value, ConfigurationProvider.
-- REDACT. Filter anything containing secret / password / key before printing.
-  Logging GetDebugView() unredacted is anti-pattern #11.
-- Gate it on IsDevelopment().
-- To enumerate the chain directly: ((IConfigurationRoot)app.Configuration).Providers
-
-This is the single most useful diagnostic in the entire system. If the audience
-takes one thing home, make it this.
--->
-
----
-layout: "code"
-codeSize: "17.0"
----
-
-<!-- OUTLINE.md # Slide 15 -->
-
-```text {6-7}
-Weather:
-  ApiBaseUrl=https://localhost:7104
-    (JsonConfigurationProvider for 'appsettings.Development.json')
-  Retries=3
-    (JsonConfigurationProvider for 'appsettings.json')
-  TimeoutSeconds=10
-    (EnvironmentVariablesConfigurationProvider Prefix: '')
-  ApiKey=***
-    (UserSecretsConfigurationProvider)
-```
-
-<!--
-[16-23 min] THE DUMP - S2.1 - THE PAYOFF
-The cold-open dump, marked this time
-60-min: NEVER CUT
-
-THIS IS THE SLIDE THE COLD OPEN WAS FOR.
-
-The gold marker is on TimeoutSeconds=10, supplied by
-EnvironmentVariablesConfigurationProvider - even though
-appsettings.Development.json clearly says 120 and that is the file everyone
-in the room was looking at for the last sixteen minutes.
-
-SAY IT LIKE THIS:
-"Sixteen minutes ago I showed you an app with the wrong timeout. Here's why.
-The JSON says 120. An environment variable says 10. The environment variable
-is later in the chain, so the environment variable wins. That's it. That's the
-whole mystery."
-
-Then name failure mode #1 - ORDER - and point at the badge when it turns up
-two slides from now.
-
-WHAT THE DUMP GIVES YOU THAT NOTHING ELSE DOES: the provider name in
-parentheses. Not the value - anyone can log the value. The SOURCE.
-
-Note ApiKey=*** is redacted by the lambda on the previous slide. Say that out
-loud, because someone is about to go add GetDebugView to a production app.
--->
-
----
-layout: "default"
-codeSize: "15"
----
-
-<!-- OUTLINE.md # Slide 16 -->
-
-# Default provider order
-
-| | Source | |
-| --- | --- | --- |
-| 1 | Host / chained configuration | added LAST, so it wins |
-| 2 | Command-line arguments | the provider runs twice |
-| 3 | Environment variables | unprefixed |
-| 4 | User secrets | Development only |
-| 5 | `{ApplicationName}.settings.{Environment}.json` | |
-| 6 | `{ApplicationName}.settings.json` | |
-| 7 | `appsettings.{Environment}.json` | |
-| 8 | `appsettings.json` | |
-
-<Caption>
-
-Rows 5 and 6 are the ones almost nobody knows exist — and they apply to web apps too.
-Row 1 is the other surprise: read first, applied last.
-
-</Caption>
-
-<!--
-[S3.1] DEFAULT PROVIDER ORDER
-60-min: keep - compressed into the order block
-
-HIGHEST PRIORITY FIRST. Reads top-down as "who wins".
-
-The two rows people have never seen are 5 and 6 -
-{ApplicationName}.settings.json and its environment variant. They are real,
-and they apply to WEB APPS TOO, not just workers. WebApplication.CreateBuilder
-constructs a HostApplicationBuilder internally, so it inherits them.
-The known exception is CreateSlimBuilder, whose slim defaults omit them.
-
-Verified on SDK 10.0.303: a file-based app web.cs really does probe
-web.settings.json and web.settings.Development.json.
-
-ROW 1 IS THE OTHER SURPRISE. The chained provider is added LAST, which makes
-host configuration the highest-priority source, not the lowest. People assume
-the opposite because it is read first. Read first, applied last.
-
-ROW 2 - the command-line provider is registered TWICE: once during host
-configuration so --environment can pick which files load, and once at the end
-so it still wins the final read. That is deliberate, not a bug.
-
-WHEN THE DUMP IS ON SCREEN the audience will count more providers than this
-table has rows - two MemoryConfigurationProviders and the prefixed env var
-providers. Say that those are host plumbing and move on; do not narrate all
-thirteen.
--->
-
----
-layout: "code"
-codeSize: "16.5"
----
-
-<!-- OUTLINE.md # Slide 17 -->
+<Panel caption="THE TWO FILES, AND WHAT YOU GET">
 
 ```text
-$ dotnet run --environment Staging
+appsettings.json               a, b, c
+appsettings.Development.json   x
 
-MemoryConfigurationProvider
-EnvironmentVariablesConfigurationProvider Prefix: 'ASPNETCORE_'
-MemoryConfigurationProvider
-EnvironmentVariablesConfigurationProvider Prefix: 'DOTNET_'
-CommandLineConfigurationProvider                        <--  picks which file loads
-JsonConfigurationProvider for 'appsettings.json'
-JsonConfigurationProvider for 'appsettings.Staging.json'
-JsonConfigurationProvider for 'web.settings.json'
-JsonConfigurationProvider for 'web.settings.Staging.json'
-EnvironmentVariablesConfigurationProvider
-CommandLineConfigurationProvider                        <--  wins the final read
-ChainedConfigurationProvider
+WHAT YOUR APP BINDS            x, b, c
 ```
 
-<!--
-[S3.2] HOST CONFIGURATION - THE TWO-PASS READ
-60-min: keep - one slide, best "aha" in the order block
+</Panel>
 
-A real dump. One command, two effects.
+<!-- from: demos/d03-array-merge/README.md — captured output, source column relabelled -->
 
-Host configuration is read FIRST and it decides EnvironmentName. EnvironmentName
-then decides WHICH appsettings.{Environment}.json even gets loaded. So the
-command-line provider is registered TWICE on purpose:
+<Panel caption="BECAUSE ARRAY ELEMENTS ARE KEYS" dark>
 
-  pass 1  so --environment Staging can influence which files load
-  pass 2  so the same argument still wins the final read
+```text
+Weather:AllowedOrigins:0  = https://x.example.com   Development
+Weather:AllowedOrigins:1  = https://b.example.com   base, survived
+Weather:AllowedOrigins:2  = https://c.example.com   base, survived
+```
 
-Point at the two CommandLineConfigurationProvider lines. They are the same
-provider, registered at both ends of the chain. That looks like a bug in the
-framework until you see what it buys.
+</Panel>
 
-THE LINE TO SAY:
-"ASPNETCORE_ENVIRONMENT is not just another setting. It is the input that picks
-the rest of your inputs."
-
-That reframing is what makes the two-phase design look deliberate instead of
-accidental. It also explains why setting the environment variable AFTER the host
-is built does nothing at all.
-
-For a non-web host it is DOTNET_ENVIRONMENT, not ASPNETCORE_ENVIRONMENT. Say it
-once; someone in the room is writing a worker this week.
--->
-
----
-layout: "default"
-class: "mark-row-4 mark-value"
-codeSize: "15"
----
-
-<!-- OUTLINE.md # Slide 18 -->
-
-<Badge>ORDER</Badge>
-
-# Same key. Four winners.
-
-| | |
-| --- | --- |
-| `appsettings.json` | 30 |
-| `appsettings.Development.json` | 120 |
-| `Weather__TimeoutSeconds` | 10 |
-| **`--Weather:TimeoutSeconds`** | **5** |
+</PanelRow>
 
 <Caption>
 
-*last one wins*
+Only index 0 was overlaid. Precedence then runs per key, exactly as it always does.
 
 </Caption>
 
 <!--
-[layering] PRECEDENCE, SHOWN
-Snippets: lifted from d02 and d03
-60-min: keep this; the array slide is the FIRST thing to cut if you run long
-Do not read the slide aloud. Walk down the four rows, name the source each
-time, and let the numbers do the work.
+[S4.1] THE ARRAY SURPRISE
+Snippet: lifted from d03
+60-min: FIRST THING TO CUT if you are running long - it is a gasp, not a
+load-bearing idea
 
-THE LAYERS - JSON, then the environment file, then an env var, then a CLI arg.
-Same key, four different winners, one at a time. Call out failure mode #1: ORDER.
-This is what makes "last provider wins" concrete instead of abstract.
+The reliable audible reaction of the talk. Set it up as a question:
+"The base file has three hosts. The Development file has one. How many hosts
+does the app see?"
 
-THE ARRAY SURPRISE is the next slide.
-appsettings.json has ["a","b","c"]. The environment file has ["x"].
-Result: ["x","b","c"] - NOT ["x"].
+Let them answer ONE. Then show three.
 
-Why: the environment file MERGES OVER the base file key by key. It is not a
-replacement. Arrays don't merge cleanly because index keys overlay individually:
-  Servers:0 = "x"   (overwritten)
-  Servers:1 = "b"   (survives)
-  Servers:2 = "c"   (survives)
+WHY: the environment file merges key by key, and array elements ARE keys.
+There is no array in the dictionary - there is Hosts:0, Hosts:1, Hosts:2. The
+override only writes Hosts:0. Nothing deletes Hosts:1 and Hosts:2, so they
+survive. Point at the right-hand panel and say exactly that.
 
-This gets an audible reaction every time. But it's a gasp, not a load-bearing
-idea - it's the first cut at 60 minutes.
+Call back to the flat dictionary slide. This is that slide's consequence, and
+it is the moment people realise the mental model actually predicts behaviour
+rather than just describing it.
 
-WHAT TO DO INSTEAD: prefer an object keyed by name, or replace the section
-deliberately. Also: EnvironmentName is arbitrary - appsettings.QA-East.json works
-fine if ASPNETCORE_ENVIRONMENT=QA-East.
+WHAT TO DO INSTEAD - say it, because someone is about to go fix this today:
+- Prefer an object keyed by name over a positional array.
+- Or replace the whole section deliberately rather than relying on the overlay.
+- Anti-pattern #10 is exactly this assumption in appsettings.Production.json.
+
+This is the slide people quote back to you afterwards.
 -->
 
 ---
 layout: "section"
-kicker: "STAGE 1 · LOCAL DEV"
+kicker: "ACT 2 · MY MACHINE"
 ---
 
 <!-- OUTLINE.md # Slide 19 -->
 
-# Clone the repo and it runs — and no secret ever touches git.
+# My setup can differ from yours without either of us editing the other's.
 
 <!--
 [31-39 min] STAGE 1 - LOCAL DEV
@@ -974,78 +828,6 @@ HOUSEKEEPING - say these, do not slide them:
 - Build Action = Content, Copy = PreserveNewest, or the file is not next to the
   DLL at runtime. This bites in published output, never during F5, which is why
   it is always found in production.
--->
-
----
-layout: "panels"
----
-
-<!-- OUTLINE.md # Slide 21 -->
-
-# Arrays overlay. They don't replace.
-
-<PanelRow :cols="1" size="15.0">
-
-<!-- from: demos/d03-array-merge/README.md captured output, abbreviated for the screen -->
-
-<Panel caption="THE TWO FILES, AND WHAT YOU GET">
-
-```text
-appsettings.json               a, b, c
-appsettings.Development.json   x
-
-WHAT YOUR APP BINDS            x, b, c
-```
-
-</Panel>
-
-<!-- from: demos/d03-array-merge/README.md — captured output, source column relabelled -->
-
-<Panel caption="BECAUSE ARRAY ELEMENTS ARE KEYS" dark>
-
-```text
-Weather:AllowedOrigins:0  = https://x.example.com   Development
-Weather:AllowedOrigins:1  = https://b.example.com   base, survived
-Weather:AllowedOrigins:2  = https://c.example.com   base, survived
-```
-
-</Panel>
-
-</PanelRow>
-
-<Caption>
-
-Only index 0 was overlaid. Precedence then runs per key, exactly as it always does.
-
-</Caption>
-
-<!--
-[S4.1] THE ARRAY SURPRISE
-Snippet: lifted from d03
-60-min: FIRST THING TO CUT if you are running long - it is a gasp, not a
-load-bearing idea
-
-The reliable audible reaction of the talk. Set it up as a question:
-"The base file has three hosts. The Development file has one. How many hosts
-does the app see?"
-
-Let them answer ONE. Then show three.
-
-WHY: the environment file merges key by key, and array elements ARE keys.
-There is no array in the dictionary - there is Hosts:0, Hosts:1, Hosts:2. The
-override only writes Hosts:0. Nothing deletes Hosts:1 and Hosts:2, so they
-survive. Point at the right-hand panel and say exactly that.
-
-Call back to the flat dictionary slide. This is that slide's consequence, and
-it is the moment people realise the mental model actually predicts behaviour
-rather than just describing it.
-
-WHAT TO DO INSTEAD - say it, because someone is about to go fix this today:
-- Prefer an object keyed by name over a positional array.
-- Or replace the whole section deliberately rather than relying on the overlay.
-- Anti-pattern #10 is exactly this assumption in appsettings.Production.json.
-
-This is the slide people quote back to you afterwards.
 -->
 
 ---
@@ -1191,6 +973,16 @@ codeSize: "15"
 
 # The launchSettings trap
 
+<Caption gold>
+
+Deliberately `dotnet run` in the same shell, not F5. A `$env:` assignment only
+
+affects that PowerShell process and its children — an already-running Visual
+
+Studio never sees it, so an F5 version of this would prove nothing.
+
+</Caption>
+
 | you set this, in this shell | and this file exists |
 | --- | --- |
 | `$env:Weather__TimeoutSeconds = "10"` | `Properties/launchSettings.json` |
@@ -1274,99 +1066,172 @@ letting the platform supply the values. That is stage two."
 -->
 
 ---
-layout: "section"
-kicker: "OPTIONS"
+layout: "default"
+class: "table-dense"
+codeSize: "15"
 ---
 
-<!-- OUTLINE.md # Slide 25 -->
+<!-- OUTLINE.md # Slide 16 -->
 
-# Binding turns loose strings into an application contract.
-
-<!--
-[39-51 min] OPTIONS - S5
-60-min: 8 min - this block survives the cut nearly intact
-
-The longest non-flag block in the talk, and correctly so. This is where
-"configuration" stops being strings and starts being types you can validate.
-
-Snippets here: d11 binding, d12 ValidateOnStart, d13 the three interfaces.
-The three-interfaces before/after pair is the longest beat in the talk.
-DO NOT RUSH IT.
-
-This is also the answer to the thesis objection from S1.3 - "then nothing is
-knowable." Binding plus validation is what makes a configurable value MORE
-knowable than a constant.
--->
-
----
-layout: "panels"
----
-
-<!-- OUTLINE.md # Slide 26 -->
-
-# Stop injecting IConfiguration
-
-<PanelRow :cols="1" size="12.3">
-
-<Panel caption="DON'T">
-
-```csharp
-// DON'T - over-broad dependency, stringly typed, unvalidated, re-parsed
-public sealed class WeatherClient(IConfiguration config)
-{
-    public Task<Forecast> GetAsync() =>
-        CallAsync(config["Weather:ApiBaseUrl"]!,
-                  int.Parse(config["Weather:TimeoutSeconds"]!));
-}
-```
-
-</Panel>
-
-<Panel caption="DO">
-
-```csharp
-// DO - the class declares exactly what it needs
-public sealed class WeatherClient(IOptions<WeatherOptions> options)
-{
-    private readonly WeatherOptions _options = options.Value;
-}
-```
-
-</Panel>
-
-</PanelRow>
+# Default provider order
 
 <Caption gold>
 
-That `!` is anti-pattern #3 on its own.
+**HIGHEST PRECEDENCE FIRST — row 1 beats row 8.**
+
+</Caption>
+
+| | Source | |
+| --- | --- | --- |
+| 1 | Host / chained configuration | added LAST, so it wins |
+| 2 | Command-line arguments | the provider runs twice |
+| 3 | Environment variables | unprefixed |
+| 4 | User secrets | Development only |
+| 5 | `{ApplicationName}.settings.{Environment}.json` | |
+| 6 | `{ApplicationName}.settings.json` | |
+| 7 | `appsettings.{Environment}.json` | |
+| 8 | `appsettings.json` | |
+
+<Caption>
+
+Rows 5 and 6 are the ones almost nobody knows exist — and they apply to web apps too.
 
 </Caption>
 
 <!--
-[39-51 min] STOP INJECTING ICONFIGURATION - S5.1
-60-min: keep
+[S3.1] DEFAULT PROVIDER ORDER
+60-min: keep - compressed into the order block
 
-THE DON'T:
-  public sealed class WeatherClient(IConfiguration config)
-      => CallAsync(config["Weather:ApiBaseUrl"]!,
-                   int.Parse(config["Weather:TimeoutSeconds"]!));
+HIGHEST PRIORITY FIRST. Reads top-down as "who wins".
 
-Four things wrong: stringly typed, unvalidated, untestable, re-parsed on every call.
-Plus that null-forgiving '!' is anti-pattern #3 all by itself.
+The two rows people have never seen are 5 and 6 -
+{ApplicationName}.settings.json and its environment variant. They are real,
+and they apply to WEB APPS TOO, not just workers. WebApplication.CreateBuilder
+constructs a HostApplicationBuilder internally, so it inherits them.
+The known exception is CreateSlimBuilder, whose slim defaults omit them.
 
-THE DO:
-  sealed class WeatherOptions with const SectionName, [Required][Url] ApiBaseUrl,
-  [Range(1,300)] TimeoutSeconds, [Range(0,10)] Retries, [Required][MinLength(8)] ApiKey
-  - required init properties, defaults where sensible.
+Verified on SDK 10.0.303: a file-based app web.cs really does probe
+web.settings.json and web.settings.Development.json.
 
-  public sealed class WeatherClient(IOptions<WeatherOptions> options)
+ROW 1 IS THE OTHER SURPRISE. The chained provider is added LAST, which makes
+host configuration the highest-priority source, not the lowest. People assume
+the opposite because it is read first. Read first, applied last.
 
-THE ARGUMENT: the class now DECLARES EXACTLY WHAT IT NEEDS. You can read the
-options type and know the whole configuration surface of that component. You
-cannot do that with IConfiguration - it's a bag of everything.
+ROW 2 - the command-line provider is registered TWICE: once during host
+configuration so --environment can pick which files load, and once at the end
+so it still wins the final read. That is deliberate, not a bug.
 
-Say the word "seam" again. This is the same ownership argument from S1.1 #5,
-just inside the codebase instead of between teams.
+WHEN THE DUMP IS ON SCREEN the audience will count more providers than this
+table has rows - two MemoryConfigurationProviders and the prefixed env var
+providers. Say that those are host plumbing and move on; do not narrate all
+thirteen.
+-->
+
+---
+layout: "code"
+codeSize: "16.5"
+---
+
+<!-- OUTLINE.md # Slide 17 -->
+
+```text
+$ dotnet run --environment Staging
+
+MemoryConfigurationProvider
+EnvironmentVariablesConfigurationProvider Prefix: 'ASPNETCORE_'
+MemoryConfigurationProvider
+EnvironmentVariablesConfigurationProvider Prefix: 'DOTNET_'
+CommandLineConfigurationProvider                        <--  picks which file loads
+JsonConfigurationProvider for 'appsettings.json'
+JsonConfigurationProvider for 'appsettings.Staging.json'
+JsonConfigurationProvider for 'web.settings.json'
+JsonConfigurationProvider for 'web.settings.Staging.json'
+EnvironmentVariablesConfigurationProvider
+CommandLineConfigurationProvider                        <--  wins the final read
+ChainedConfigurationProvider
+```
+
+<!--
+[S3.2] HOST CONFIGURATION - THE TWO-PASS READ
+60-min: keep - one slide, best "aha" in the order block
+
+A real dump. One command, two effects.
+
+Host configuration is read FIRST and it decides EnvironmentName. EnvironmentName
+then decides WHICH appsettings.{Environment}.json even gets loaded. So the
+command-line provider is registered TWICE on purpose:
+
+  pass 1  so --environment Staging can influence which files load
+  pass 2  so the same argument still wins the final read
+
+Point at the two CommandLineConfigurationProvider lines. They are the same
+provider, registered at both ends of the chain. That looks like a bug in the
+framework until you see what it buys.
+
+THE LINE TO SAY:
+"ASPNETCORE_ENVIRONMENT is not just another setting. It is the input that picks
+the rest of your inputs."
+
+That reframing is what makes the two-phase design look deliberate instead of
+accidental. It also explains why setting the environment variable AFTER the host
+is built does nothing at all.
+
+For a non-web host it is DOTNET_ENVIRONMENT, not ASPNETCORE_ENVIRONMENT. Say it
+once; someone in the room is writing a worker this week.
+-->
+
+---
+layout: "default"
+class: "mark-row-4 mark-value"
+codeSize: "15"
+---
+
+<!-- OUTLINE.md # Slide 18 -->
+
+<Badge>ORDER</Badge>
+
+# Same key. Four winners.
+
+| | |
+| --- | --- |
+| `appsettings.json` | 30 |
+| `appsettings.Development.json` | 120 |
+| `Weather__TimeoutSeconds` | 10 |
+| **`--Weather:TimeoutSeconds`** | **5** |
+
+<Caption>
+
+*last one wins*
+
+</Caption>
+
+<!--
+[layering] PRECEDENCE, SHOWN
+Snippets: lifted from d02 and d03
+60-min: keep this; the array slide is the FIRST thing to cut if you run long
+Do not read the slide aloud. Walk down the four rows, name the source each
+time, and let the numbers do the work.
+
+THE LAYERS - JSON, then the environment file, then an env var, then a CLI arg.
+Same key, four different winners, one at a time. Call out failure mode #1: ORDER.
+This is what makes "last provider wins" concrete instead of abstract.
+
+THE ARRAY SURPRISE is the next slide.
+appsettings.json has ["a","b","c"]. The environment file has ["x"].
+Result: ["x","b","c"] - NOT ["x"].
+
+Why: the environment file MERGES OVER the base file key by key. It is not a
+replacement. Arrays don't merge cleanly because index keys overlay individually:
+  Servers:0 = "x"   (overwritten)
+  Servers:1 = "b"   (survives)
+  Servers:2 = "c"   (survives)
+
+This gets an audible reaction every time. But it's a gasp, not a load-bearing
+idea - it's the first cut at 60 minutes.
+
+WHAT TO DO INSTEAD: prefer an object keyed by name, or replace the section
+deliberately. Also: EnvironmentName is arbitrary - appsettings.QA-East.json works
+fine if ASPNETCORE_ENVIRONMENT=QA-East.
 -->
 
 ---
@@ -1374,315 +1239,115 @@ layout: "code"
 codeSize: "17.0"
 ---
 
-<!-- OUTLINE.md # Slide 27 -->
+<!-- OUTLINE.md # Slide 14 -->
+
+# Prove which provider won
 
 ```csharp
-public sealed class WeatherOptions
-{
-    public const string SectionName = "Weather";
+var dump = ((IConfigurationRoot)app.Configuration).GetDebugView(ctx =>
+    ctx.Key.Contains("secret", StringComparison.OrdinalIgnoreCase) ||
+    ctx.Key.Contains("password", StringComparison.OrdinalIgnoreCase) ||
+    ctx.Key.Contains("key", StringComparison.OrdinalIgnoreCase)
+        ? "***"
+        : ctx.Value);
 
-    [Required, Url]            public required string ApiBaseUrl { get; init; }
-    [Range(1, 300)]            public int TimeoutSeconds { get; init; } = 30;
-    [Required, MinLength(8)]   public required string ApiKey { get; init; }
-}
-
-builder.Services
-    .AddOptionsWithValidateOnStart<WeatherOptions>()
-    .Bind(builder.Configuration.GetSection(WeatherOptions.SectionName))
-    .ValidateDataAnnotations();
+app.Logger.LogInformation("Configuration:\n{Dump}", dump);
 ```
 
-<!--
-[39-51 min] REGISTRATION - S5.2
-Snippet: lifted from d11
-60-min: merge into the previous slide if tight
+<Caption gold>
 
-  builder.Services
-      .AddOptions<WeatherOptions>()
-      .Bind(builder.Configuration.GetSection(WeatherOptions.SectionName))
-      .ValidateDataAnnotations()
-      .Validate(o => o.Retries == 0 || o.TimeoutSeconds >= 5,
-                "TimeoutSeconds must be >= 5 when retries are enabled.")
-      .ValidateOnStart();
+**Development only.** That filter is a denylist, so it misses tokens, connection
 
-Or the shorthand that makes fail-fast the DEFAULT POSTURE:
+strings and certificates. Gate it on `IsDevelopment()`, and prefer inspecting the
 
-  builder.Services
-      .AddOptionsWithValidateOnStart<WeatherOptions>()
-      .Bind(builder.Configuration.GetSection(WeatherOptions.SectionName))
-      .ValidateDataAnnotations();
+handful of keys you actually care about.
 
-Prefer the second form in every sample you show from here on. Modeling the good
-default matters more than showing the long form.
-
-ValidateDataAnnotations lives in Microsoft.Extensions.Options.DataAnnotations,
-referenced implicitly by the web SDK - so it just works and people wonder why.
--->
-
----
-layout: "default"
-codeSize: "15"
----
-
-<!-- OUTLINE.md # Slide 28 -->
-
-<Badge>LIFETIME</Badge>
-
-# IOptions, IOptionsSnapshot, IOptionsMonitor
-
-| | Lifetime | Re-reads config? | Use when |
-| --- | --- | --- | --- |
-| `IOptions<T>` | Singleton | No — bound once, forever | The value can't change at runtime |
-| `IOptionsSnapshot<T>` | **Scoped** | Once per request | Per-request consistency in a web app |
-| `IOptionsMonitor<T>` | Singleton | Yes, with `OnChange` | Singletons and background services |
+</Caption>
 
 <!--
-[39-51 min] THE THREE INTERFACES - S5.3
-Snippet: lifted from d13. THE LONGEST BEAT IN THE TALK. DO NOT RUSH IT.
+[16-23 min] THE DIAGNOSTIC - S2.1
+The cold-open dump, now marked
 60-min: NEVER CUT
 
-  IOptions<T>          Singleton  no re-read     value can't change at runtime
-  IOptionsSnapshot<T>  SCOPED     once per scope per-request consistency (web)
-  IOptionsMonitor<T>   Singleton  yes + OnChange singletons & background services
+This is the show-don't-tell moment of the talk, and it explains the cold open.
+GetDebugView() prints every key, its effective value, AND the provider that
+supplied it.
 
-BEFORE / AFTER PAIR: all three interfaces on one slide, then the same three
-after appsettings.json changed underneath the running app.
-Three different answers to the same question. That image is the slide.
+The cold-open dump returns, now with the gold marker. Walk it and point at the
+line that explains the wrong value from minute zero.
 
-THE CLASSIC BUG: injecting IOptionsSnapshot<T> into a singleton. It's scoped -
-the container either throws at validation, or you capture the first scope's value
-forever. Anti-pattern #4.
+Output shape:
+  Db:
+    Timeout=30 (JsonConfigurationProvider for 'appsettings.json' (Optional))
+    ConnectionString=*** (EnvironmentVariablesConfigurationProvider Prefix: '')
 
-THE OTHER CLASSIC BUG: caching _monitor.CurrentValue in a field at construction.
-That quietly turns a monitor back into an IOptions<T>. Anti-pattern #5.
-Read CurrentValue at the point of use, every time.
+SAY:
+- The processValue overload takes Func<ConfigurationDebugViewContext, string>.
+  Context carries Path, Key, Value, ConfigurationProvider.
+- REDACT. Filter anything containing secret / password / key before printing.
+  Logging GetDebugView() unredacted is anti-pattern #11.
+- Gate it on IsDevelopment().
+- To enumerate the chain directly: ((IConfigurationRoot)app.Configuration).Providers
 
-TWO CONVENTIONS IN THE BACKGROUND SERVICE SAMPLE - say them, people copy this code:
-- OnChange returns an IDisposable registration. HOLD IT AND DISPOSE IT or you leak
-  the subscription.
-- The log message is a TEMPLATE with named placeholders, never an interpolated
-  string. Structured logging is the house rule.
-
-Failure mode #3: LIFETIME. Name it here.
+This is the single most useful diagnostic in the entire system. If the audience
+takes one thing home, make it this.
 -->
 
 ---
-layout: "reveal"
+layout: "code"
 codeSize: "17.0"
 ---
 
-<!-- OUTLINE.md # Slide 28a -->
+<!-- OUTLINE.md # Slide 15 -->
 
-# Same three interfaces. One file edit.
-
-```text
-IOptions<T>          30
-IOptionsSnapshot<T>  30
-IOptionsMonitor<T>   30
+```text {6-7}
+Weather:
+  ApiBaseUrl=https://localhost:7104
+    (JsonConfigurationProvider for 'appsettings.Development.json')
+  Retries=3
+    (JsonConfigurationProvider for 'appsettings.json')
+  TimeoutSeconds=10
+    (EnvironmentVariablesConfigurationProvider Prefix: '')
+  ApiKey=***
+    (UserSecretsConfigurationProvider)
 ```
 
-<Caption>
-
-*now `appsettings.json` changes to 90 underneath the running app.*
-
-</Caption>
-
 <!--
-[OPTIONS] THE SETUP - BEFORE THE EDIT
-Snippet: lifted from d13
+[16-23 min] THE DUMP - S2.1 - THE PAYOFF
+The cold-open dump, marked this time
 60-min: NEVER CUT
 
-All three interfaces, same key, same value. Nothing interesting yet - and that
-is the point. Establish the baseline so the reveal has something to move
-against.
+THIS IS THE SLIDE THE COLD OPEN WAS FOR.
 
-ASK THE ROOM, and wait for an answer:
-"I am about to change appsettings.json to 90 while this is running.
- Which of these three change?"
+The gold marker is on TimeoutSeconds=10, supplied by
+EnvironmentVariablesConfigurationProvider - even though
+appsettings.Development.json clearly says 120 and that is the file everyone
+in the room was looking at for the last sixteen minutes.
 
-Most rooms say all three. Some say none. Both are wrong, and being wrong out
-loud is what makes the next slide land.
+SAY IT LIKE THIS:
+"Sixteen minutes ago I showed you an app with the wrong timeout. Here's why.
+The JSON says 120. An environment variable says 10. The environment variable
+is later in the chain, so the environment variable wins. That's it. That's the
+whole mystery."
 
-Do not explain lifetimes yet. The table two slides back already told them; this
-is the check on whether they believed it.
--->
+Then name failure mode #1 - ORDER - and point at the badge when it turns up
+two slides from now.
 
----
-layout: "reveal"
-codeSize: "17.0"
----
+WHAT THE DUMP GIVES YOU THAT NOTHING ELSE DOES: the provider name in
+parentheses. Not the value - anyone can log the value. The SOURCE.
 
-<!-- OUTLINE.md # Slide 28b -->
-
-# Same three interfaces. One file edit.
-
-```text
-                          same request      next request
-IOptions<T>          30        30                30      <- never moves
-IOptionsSnapshot<T>  30        30                90      <- new scope only
-IOptionsMonitor<T>   30        90                90      <- immediately
-```
-
-<Caption>
-
-The middle column matters: a snapshot already resolved in the current request stays at 30. It is scoped, so it only picks up the change in a **new scope** — normally the next request.
-
-</Caption>
-
-<!--
-[OPTIONS] THE REVEAL - AFTER THE EDIT
-Snippet: lifted from d13
-60-min: NEVER CUT. This is the longest beat in the talk.
-
-Three columns, because the honest answer has a middle state:
-
-  IOptions          never moves. Bound once at startup, forever.
-  IOptionsSnapshot  moves, but only in a NEW SCOPE - normally the next request.
-                    A snapshot already resolved in the current request stays at 30.
-  IOptionsMonitor   moves immediately. It is a singleton holding a change token.
-
-THE MIDDLE COLUMN IS THE ONE PEOPLE GET WRONG. "Scoped" does not mean "fresh
-whenever you ask" - it means fresh per scope. Within one request it is stable,
-which is exactly the property you want for per-request consistency.
-
-THEN NAME THE TWO CLASSIC BUGS while this is up:
-- IOptionsSnapshot<T> injected into a singleton. It is scoped: the container
-  either throws, or you capture the first scope's value forever.
-- _monitor.CurrentValue cached in a constructor field, which quietly turns a
-  monitor back into an IOptions<T>. Read CurrentValue at the point of use.
-
-Failure mode #3: LIFETIME. Badge is on the table slide; name it here.
--->
-
----
-layout: "default"
-codeSize: "15.0"
----
-
-<!-- OUTLINE.md # Slide 29 -->
-
-```csharp
-builder.Services
-    .AddOptionsWithValidateOnStart<WeatherOptions>()
-    .Bind(builder.Configuration.GetSection("Weather"))
-    .ValidateDataAnnotations();
-```
-
-```text
-Unhandled exception. Microsoft.Extensions.Options.OptionsValidationException:
-  DataAnnotation validation failed for 'WeatherOptions' members:
-  'TimeoutSeconds' with the error: 'The field TimeoutSeconds must be between 1 and 300.'
-```
-
-<Caption>
-
-The point is *where* this happened: at startup, before the process took traffic. Without `ValidateOnStart` it happens on first `.Value` access — in production, on the first request that reaches that code path.
-
-</Caption>
-
-<!--
-[39-51 min] VALIDATION - S5.5
-Snippet: lifted from d12
-60-min: NEVER CUT
-
-FAIL FAST IS THE WHOLE POINT.
-Without ValidateOnStart(), validation runs LAZILY on first .Value access - a bad
-deploy looks healthy until the first request reaches the affected code path. With
-it, the process refuses to start. That's exactly the behavior you want during a
-rolling deployment: the bad instance never takes traffic.
-
-Bad config = no start. Show the startup exception naming the offending property.
-
-NESTED OBJECTS AND COLLECTIONS ARE NOT VALIDATED BY DEFAULT. Opt in:
-  [Required, ValidateObjectMembers]  on the nested object
-  [ValidateEnumeratedItems]          on the collection
-This surprises people who think [Required] recurses. It doesn't.
-
-COMPLEX / CROSS-FIELD / SERVICE-DEPENDENT rules belong in a class:
-  IValidateOptions<T>, registered with
-  services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<T>, V>())
-  (TryAddEnumerable, not Add - otherwise duplicate registrations pile up.)
-
-Tie back to S1.3: this is the answer to "everything is configurable and nothing is
-knowable." A validated option is more knowable than a buried constant.
--->
-
----
-layout: "panels"
----
-
-<!-- OUTLINE.md # Slide 30 -->
-
-# Named options and source generators
-
-<PanelRow :cols="1" size="14.9">
-
-<Panel caption="NAMED">
-
-```csharp
-// Named - same shape, several times
-builder.Services.Configure<EndpointOptions>("primary",   config.GetSection("Endpoints:Primary"));
-builder.Services.Configure<EndpointOptions>("secondary", config.GetSection("Endpoints:Secondary"));
-
-EndpointOptions Primary => monitor.Get("primary");
-```
-
-</Panel>
-
-<Panel caption="GENERATED">
-
-```csharp
-// Generated - no reflection at runtime
-[OptionsValidator]
-public sealed partial class ValidateWeatherOptions : IValidateOptions<WeatherOptions>;
-```
-
-</Panel>
-
-</PanelRow>
-
-<Caption>
-
-Plus one line, not a panel: `<EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>`
-
-</Caption>
-
-<!--
-[39-51 min] NAMED OPTIONS + GENERATORS - S5.4, S5.6
-60-min: CUT the generator half to a single sentence
-
-NAMED OPTIONS - for "same shape, several times": multiple API clients, queues.
-  services.Configure<EndpointOptions>("primary", config.GetSection("Endpoints:Primary"));
-  services.Configure<EndpointOptions>("secondary", ...);
-  then monitor.Get("primary")
-Configure<T>(section) with no name is shorthand for Options.DefaultName ("").
-
-SOURCE GENERATORS - binding and validation both default to REFLECTION. Two opt-ins:
-
-  <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
-
-  [OptionsValidator]
-  public sealed partial class ValidateWeatherOptions : IValidateOptions<WeatherOptions>;
-  (empty partial - the generator writes the implementation)
-
-The options validation generator is ON BY DEFAULT when the project references
-Microsoft.Extensions.Options 8+ or builds an ASP.NET Core app. It rewrites
-[Range], [MinLength], [MaxLength], [Length] into generated equivalents.
-With [OptionsValidator] you do NOT also call ValidateDataAnnotations().
-
-OPTIONAL (d17, 90 min only): PublishAot=true surfaces IL2026 / IL3050 warnings
-from reflection binding; turn both generators on and they disappear.
-Niche. At 60 minutes this is one slide.
+Note ApiKey=*** is redacted by the lambda on the previous slide. Say that out
+loud, because someone is about to go add GetDebugView to a production app.
 -->
 
 ---
 layout: "section"
-kicker: "STAGE 2 · DEPLOYMENT"
+kicker: "ACT 3 · THE SHARED DEV ENVIRONMENT"
 ---
 
 <!-- OUTLINE.md # Slide 31 -->
 
-# Deployment changes how values arrive — not the model.
+# It left your laptop. `launchSettings` and user secrets are gone.
 
 <!--
 [51-59 min] STAGE 2 - DEPLOYMENT
@@ -1925,11 +1590,212 @@ prefixes - that's anti-pattern #9.
 -->
 
 ---
+layout: "section"
+kicker: "BINDING"
+---
+
+<!-- OUTLINE.md # Slide 25 -->
+
+# Binding turns loose strings into an application contract.
+
+<!--
+[39-51 min] OPTIONS - S5
+60-min: 8 min - this block survives the cut nearly intact
+
+The longest non-flag block in the talk, and correctly so. This is where
+"configuration" stops being strings and starts being types you can validate.
+
+Snippets here: d11 binding, d12 ValidateOnStart, d13 the three interfaces.
+The three-interfaces before/after pair is the longest beat in the talk.
+DO NOT RUSH IT.
+
+This is also the answer to the thesis objection from S1.3 - "then nothing is
+knowable." Binding plus validation is what makes a configurable value MORE
+knowable than a constant.
+-->
+
+---
+layout: "panels"
+---
+
+<!-- OUTLINE.md # Slide 26 -->
+
+# Stop injecting IConfiguration
+
+<PanelRow :cols="1" size="12.3">
+
+<Panel caption="DON'T">
+
+```csharp
+// DON'T - over-broad dependency, stringly typed, unvalidated, re-parsed
+public sealed class WeatherClient(IConfiguration config)
+{
+    public Task<Forecast> GetAsync() =>
+        CallAsync(config["Weather:ApiBaseUrl"]!,
+                  int.Parse(config["Weather:TimeoutSeconds"]!));
+}
+```
+
+</Panel>
+
+<Panel caption="DO">
+
+```csharp
+// DO - the class declares exactly what it needs
+public sealed class WeatherClient(IOptions<WeatherOptions> options)
+{
+    private readonly WeatherOptions _options = options.Value;
+}
+```
+
+</Panel>
+
+</PanelRow>
+
+<Caption gold>
+
+That `!` is anti-pattern #3 on its own.
+
+</Caption>
+
+<!--
+[39-51 min] STOP INJECTING ICONFIGURATION - S5.1
+60-min: keep
+
+THE DON'T:
+  public sealed class WeatherClient(IConfiguration config)
+      => CallAsync(config["Weather:ApiBaseUrl"]!,
+                   int.Parse(config["Weather:TimeoutSeconds"]!));
+
+Four things wrong: stringly typed, unvalidated, untestable, re-parsed on every call.
+Plus that null-forgiving '!' is anti-pattern #3 all by itself.
+
+THE DO:
+  sealed class WeatherOptions with const SectionName, [Required][Url] ApiBaseUrl,
+  [Range(1,300)] TimeoutSeconds, [Range(0,10)] Retries, [Required][MinLength(8)] ApiKey
+  - required init properties, defaults where sensible.
+
+  public sealed class WeatherClient(IOptions<WeatherOptions> options)
+
+THE ARGUMENT: the class now DECLARES EXACTLY WHAT IT NEEDS. You can read the
+options type and know the whole configuration surface of that component. You
+cannot do that with IConfiguration - it's a bag of everything.
+
+Say the word "seam" again. This is the same ownership argument from S1.1 #5,
+just inside the codebase instead of between teams.
+-->
+
+---
+layout: "code"
+codeSize: "17.0"
+---
+
+<!-- OUTLINE.md # Slide 27 -->
+
+```csharp
+public sealed class WeatherOptions
+{
+    public const string SectionName = "Weather";
+
+    [Required, Url]            public required string ApiBaseUrl { get; init; }
+    [Range(1, 300)]            public int TimeoutSeconds { get; init; } = 30;
+    [Required, MinLength(8)]   public required string ApiKey { get; init; }
+}
+
+builder.Services
+    .AddOptionsWithValidateOnStart<WeatherOptions>()
+    .Bind(builder.Configuration.GetSection(WeatherOptions.SectionName))
+    .ValidateDataAnnotations();
+```
+
+<!--
+[39-51 min] REGISTRATION - S5.2
+Snippet: lifted from d11
+60-min: merge into the previous slide if tight
+
+  builder.Services
+      .AddOptions<WeatherOptions>()
+      .Bind(builder.Configuration.GetSection(WeatherOptions.SectionName))
+      .ValidateDataAnnotations()
+      .Validate(o => o.Retries == 0 || o.TimeoutSeconds >= 5,
+                "TimeoutSeconds must be >= 5 when retries are enabled.")
+      .ValidateOnStart();
+
+Or the shorthand that makes fail-fast the DEFAULT POSTURE:
+
+  builder.Services
+      .AddOptionsWithValidateOnStart<WeatherOptions>()
+      .Bind(builder.Configuration.GetSection(WeatherOptions.SectionName))
+      .ValidateDataAnnotations();
+
+Prefer the second form in every sample you show from here on. Modeling the good
+default matters more than showing the long form.
+
+ValidateDataAnnotations lives in Microsoft.Extensions.Options.DataAnnotations,
+referenced implicitly by the web SDK - so it just works and people wonder why.
+-->
+
+---
+layout: "default"
+codeSize: "15.0"
+---
+
+<!-- OUTLINE.md # Slide 29 -->
+
+```csharp
+builder.Services
+    .AddOptionsWithValidateOnStart<WeatherOptions>()
+    .Bind(builder.Configuration.GetSection("Weather"))
+    .ValidateDataAnnotations();
+```
+
+```text
+Unhandled exception. Microsoft.Extensions.Options.OptionsValidationException:
+  DataAnnotation validation failed for 'WeatherOptions' members:
+  'TimeoutSeconds' with the error: 'The field TimeoutSeconds must be between 1 and 300.'
+```
+
+<Caption>
+
+The point is *where* this happened: at startup, before the process took traffic. Without `ValidateOnStart` it happens on first `.Value` access — in production, on the first request that reaches that code path.
+
+</Caption>
+
+<!--
+[39-51 min] VALIDATION - S5.5
+Snippet: lifted from d12
+60-min: NEVER CUT
+
+FAIL FAST IS THE WHOLE POINT.
+Without ValidateOnStart(), validation runs LAZILY on first .Value access - a bad
+deploy looks healthy until the first request reaches the affected code path. With
+it, the process refuses to start. That's exactly the behavior you want during a
+rolling deployment: the bad instance never takes traffic.
+
+Bad config = no start. Show the startup exception naming the offending property.
+
+NESTED OBJECTS AND COLLECTIONS ARE NOT VALIDATED BY DEFAULT. Opt in:
+  [Required, ValidateObjectMembers]  on the nested object
+  [ValidateEnumeratedItems]          on the collection
+This surprises people who think [Required] recurses. It doesn't.
+
+COMPLEX / CROSS-FIELD / SERVICE-DEPENDENT rules belong in a class:
+  IValidateOptions<T>, registered with
+  services.TryAddEnumerable(ServiceDescriptor.Singleton<IValidateOptions<T>, V>())
+  (TryAddEnumerable, not Add - otherwise duplicate registrations pile up.)
+
+Tie back to S1.3: this is the answer to "everything is configurable and nothing is
+knowable." A validated option is more knowable than a buried constant.
+-->
+
+---
 layout: "code"
 codeSize: "17.0"
 ---
 
 <!-- OUTLINE.md # Slide 36 -->
+
+# Tests must satisfy the same contract
 
 ```csharp
 public sealed class ApiFactory : WebApplicationFactory<Program>
@@ -1976,67 +1842,270 @@ without a file.
 -->
 
 ---
-layout: "code"
-codeSize: "16.3"
+layout: "section"
+kicker: "ACT 4 · PRODUCTION"
 ---
 
-<!-- OUTLINE.md # Slide 37 -->
+<!-- OUTLINE.md # Slide 36a -->
 
-```csharp
-public sealed class DotEnvConfigurationSource(string path) : IConfigurationSource
-{
-    public IConfigurationProvider Build(IConfigurationBuilder builder) =>
-        new DotEnvConfigurationProvider(path);
-}
-
-public sealed class DotEnvConfigurationProvider(string path) : ConfigurationProvider
-{
-    public override void Load() => Data = ParseDotEnv(path);
-}
-```
+# Production supplies the values. Nothing gets rebuilt to change one.
 
 <!--
-[S4.10] CUSTOM PROVIDER - THE EXTENSIBILITY POINT
-Snippet: lifted from d25
-60-min: cut - point at the repo
+[ACT 4] PRODUCTION
+60-min: keep, 45 seconds
 
-Two types. That is the whole contract.
+LAST BOUNDARY, and the one with consequences. Same artifact as the shared dev
+server - genuinely the same bytes. What changed is who supplies the values and
+what it costs to get one wrong.
 
-  IConfigurationSource   - a factory. Build() hands back a provider.
-  ConfigurationProvider  - has a protected IDictionary<string,string?> Data
-                           and a virtual Load(). Fill the dictionary.
+THREE THINGS ARE TRUE HERE THAT WERE NOT TRUE ON YOUR LAPTOP:
+  OWNERSHIP  the person who needs to change a value may not be a developer
+  TRUST      a leaked value here is an incident, not an inconvenience
+  UPTIME     a restart is a change window, not a keystroke
 
-Then an extension method so it reads like every other provider:
-  builder.Configuration.AddSqlConfiguration(connectionString);
+That third one is what the rest of this act is about. Say the line:
+"Nothing gets rebuilt to change a value. That is the whole point of the last
+ forty minutes."
+-->
 
-THREE THINGS TO LAND, THEN MOVE ON:
+---
+layout: "statement"
+---
 
-1. Load() RUNS ONCE, at build time. It is not lazy. If you want refresh you
-   schedule it yourself and call OnReload() - that is what fires the change
-   token that makes IOptionsMonitor wake up. Point back at the three
-   interfaces slide when you say it.
+<!-- OUTLINE.md # Slide 36b -->
 
-2. A provider that THROWS in Load() takes the app down at startup. That
-   sounds like a bug and is frequently the feature - it is the same
-   fail-fast posture as ValidateOnStart.
+Production adds a question the other environments never asked:
 
-3. Good real targets: a database-backed provider, a .env reader, a provider
-   that pulls from your own internal config service. Bad target: anything
-   you could have done with the eleven providers that already exist.
+**can this value change while the process is running?**
 
-Do not live-code this. Show the shape, say the three things, point at d25 in
-the repo. It is interesting to about six people in the room and they will
-read the code later.
+<Caption>
+
+Binding and validation answered *is it there, and is it valid*. Lifetime answers
+*and does it still hold five minutes from now*.
+
+</Caption>
+
+<!--
+[ACT 4] THE LIFETIME QUESTION
+60-min: keep - it is 20 seconds and it sets up the best beat in the talk
+
+On a laptop you restart the app without thinking. In production a restart is an
+event: dropped connections, a cold cache, a change window, maybe an approval.
+
+So production is the first place the question is worth asking at all:
+  "Can this value change WITHOUT stopping the process?"
+
+That question has exactly three answers in .NET, and they are the three interfaces
+on the next slide. Do not list them here - just land the question and advance.
+
+This is also the slide to point back to from What Actually Reloads. The interface
+decides whether your code SEES a change; the provider decides whether a change
+ever ARRIVES. Both have to line up.
+-->
+
+---
+layout: "default"
+codeSize: "15"
+---
+
+<!-- OUTLINE.md # Slide 28 -->
+
+<Badge>LIFETIME</Badge>
+
+# IOptions, IOptionsSnapshot, IOptionsMonitor
+
+| | Lifetime | Re-reads config? | Use when |
+| --- | --- | --- | --- |
+| `IOptions<T>` | Singleton | No — bound once, forever | The value can't change at runtime |
+| `IOptionsSnapshot<T>` | **Scoped** | Once per request | Per-request consistency in a web app |
+| `IOptionsMonitor<T>` | Singleton | Yes, with `OnChange` | Singletons and background services |
+
+<!--
+[39-51 min] THE THREE INTERFACES - S5.3
+Snippet: lifted from d13. THE LONGEST BEAT IN THE TALK. DO NOT RUSH IT.
+60-min: NEVER CUT
+
+  IOptions<T>          Singleton  no re-read     value can't change at runtime
+  IOptionsSnapshot<T>  SCOPED     once per scope per-request consistency (web)
+  IOptionsMonitor<T>   Singleton  yes + OnChange singletons & background services
+
+BEFORE / AFTER PAIR: all three interfaces on one slide, then the same three
+after appsettings.json changed underneath the running app.
+Three different answers to the same question. That image is the slide.
+
+THE CLASSIC BUG: injecting IOptionsSnapshot<T> into a singleton. It's scoped -
+the container either throws at validation, or you capture the first scope's value
+forever. Anti-pattern #4.
+
+THE OTHER CLASSIC BUG: caching _monitor.CurrentValue in a field at construction.
+That quietly turns a monitor back into an IOptions<T>. Anti-pattern #5.
+Read CurrentValue at the point of use, every time.
+
+TWO CONVENTIONS IN THE BACKGROUND SERVICE SAMPLE - say them, people copy this code:
+- OnChange returns an IDisposable registration. HOLD IT AND DISPOSE IT or you leak
+  the subscription.
+- The log message is a TEMPLATE with named placeholders, never an interpolated
+  string. Structured logging is the house rule.
+
+Failure mode #3: LIFETIME. Name it here.
+-->
+
+---
+layout: "reveal"
+codeSize: "17.0"
+---
+
+<!-- OUTLINE.md # Slide 28a -->
+
+# Same three interfaces. One file edit.
+
+```text
+IOptions<T>          30
+IOptionsSnapshot<T>  30
+IOptionsMonitor<T>   30
+```
+
+<Caption>
+
+*now `appsettings.json` changes to 90 underneath the running app.*
+
+</Caption>
+
+<!--
+[OPTIONS] THE SETUP - BEFORE THE EDIT
+Snippet: lifted from d13
+60-min: NEVER CUT
+
+All three interfaces, same key, same value. Nothing interesting yet - and that
+is the point. Establish the baseline so the reveal has something to move
+against.
+
+ASK THE ROOM, and wait for an answer:
+"I am about to change appsettings.json to 90 while this is running.
+ Which of these three change?"
+
+Most rooms say all three. Some say none. Both are wrong, and being wrong out
+loud is what makes the next slide land.
+
+Do not explain lifetimes yet. The table two slides back already told them; this
+is the check on whether they believed it.
+-->
+
+---
+layout: "reveal"
+codeSize: "17.0"
+---
+
+<!-- OUTLINE.md # Slide 28b -->
+
+# Same three interfaces. One file edit.
+
+```text
+                          same request      next request
+IOptions<T>          30        30                30      <- never moves
+IOptionsSnapshot<T>  30        30                90      <- new scope only
+IOptionsMonitor<T>   30        90                90      <- immediately
+```
+
+<Caption>
+
+The middle column matters: a snapshot already resolved in the current request stays at 30. It is scoped, so it only picks up the change in a **new scope** — normally the next request.
+
+</Caption>
+
+<!--
+[OPTIONS] THE REVEAL - AFTER THE EDIT
+Snippet: lifted from d13
+60-min: NEVER CUT. This is the longest beat in the talk.
+
+Three columns, because the honest answer has a middle state:
+
+  IOptions          never moves. Bound once at startup, forever.
+  IOptionsSnapshot  moves, but only in a NEW SCOPE - normally the next request.
+                    A snapshot already resolved in the current request stays at 30.
+  IOptionsMonitor   moves immediately. It is a singleton holding a change token.
+
+THE MIDDLE COLUMN IS THE ONE PEOPLE GET WRONG. "Scoped" does not mean "fresh
+whenever you ask" - it means fresh per scope. Within one request it is stable,
+which is exactly the property you want for per-request consistency.
+
+THEN NAME THE TWO CLASSIC BUGS while this is up:
+- IOptionsSnapshot<T> injected into a singleton. It is scoped: the container
+  either throws, or you capture the first scope's value forever.
+- _monitor.CurrentValue cached in a constructor field, which quietly turns a
+  monitor back into an IOptions<T>. Read CurrentValue at the point of use.
+
+Failure mode #3: LIFETIME. Badge is on the table slide; name it here.
+-->
+
+---
+layout: "default"
+class: "table-dense"
+codeSize: "15"
+---
+
+<!-- OUTLINE.md # Slide 40 -->
+
+# What actually reloads
+
+| Source | Reloads? | How |
+| --- | --- | --- |
+| `appsettings*.json` | Yes (host default) | `FileSystemWatcher` |
+| User secrets | Yes | file watcher |
+| Environment variables | **No** | read once at startup |
+| Command line | **No** | read once at startup |
+| Azure Key Vault | Only if `ReloadInterval` set | polling |
+| Azure App Configuration | Yes, with `ConfigureRefresh` | polling on activity |
+| Key-per-file | **Only when `reloadOnChange` is enabled** | file watcher |
+| In-memory | No | — |
+| Custom | Your call | `OnReload()` |
+
+<Caption>
+
+The **No** rows are the ones that matter: changing an environment variable on a running container does nothing at all.
+
+</Caption>
+
+<!--
+[S8] RELOAD SEMANTICS
+60-min: show the table, do NOT walk it
+
+  appsettings*.json   YES, when reloadOnChange: true (host default)  FileSystemWatcher
+  User secrets        YES                                            file watcher
+  Environment vars    NO - read once at startup
+  Command line        NO - read once at startup
+  Azure Key Vault     only if ReloadInterval is set (default: NEVER) polling
+  App Configuration   YES, with ConfigureRefresh + a trigger         polling on activity
+  Key-per-file        ONLY with the 4-arg overload                   file watcher
+  In-memory           NO
+  Custom              your call - OnReload()
+
+FOUR CONSEQUENCES - say these out loud, the table alone doesn't land them:
+
+- Changing an environment variable on a running container does NOTHING.
+  Restart the container.
+- reloadOnChange on a Kubernetes ConfigMap mount is UNRELIABLE - symlink swaps,
+  not in-place writes. The watcher may or may not see them. Treat restart as the
+  contract.
+- A single file save often fires the watcher TWICE (write + metadata). Debounce
+  anything expensive hanging off OnChange.
+- "CONFIG RELOADED" DOES NOT MEAN "APP RECONFIGURED." Reloading configuration
+  does not reconfigure things that read it once at startup: Kestrel endpoints,
+  the DI graph, HttpClient handler pipelines.
+
+RULE OF THUMB (S7.3 #4): prefer restart to hot reload unless hot reload is a
+requirement someone actually asked for. Hot reload is a distributed-systems
+problem wearing a config hat.
 -->
 
 ---
 layout: "section"
-kicker: "STAGE 3 · SHARED"
+kicker: "COORDINATED CHANGE"
 ---
 
 <!-- OUTLINE.md # Slide 38 -->
 
-# Shared configuration adds coordination — and new failure modes.
+# One edit has to reach every instance — or none of them.
 
 <!--
 [59-64 min] STAGE 3 - SHARED
@@ -2137,67 +2206,8 @@ Also exists: Map() rewrites keys on the way in, e.g. App__Settings__X -> App:Set
 -->
 
 ---
-layout: "default"
-codeSize: "15"
----
-
-<!-- OUTLINE.md # Slide 40 -->
-
-# What actually reloads
-
-| Source | Reloads? | How |
-| --- | --- | --- |
-| `appsettings*.json` | Yes (host default) | `FileSystemWatcher` |
-| User secrets | Yes | file watcher |
-| Environment variables | **No** | read once at startup |
-| Command line | **No** | read once at startup |
-| Azure Key Vault | Only if `ReloadInterval` set | polling |
-| Azure App Configuration | Yes, with `ConfigureRefresh` | polling on activity |
-| Key-per-file | **Only when `reloadOnChange` is enabled** | file watcher |
-| In-memory | No | — |
-| Custom | Your call | `OnReload()` |
-
-<Caption>
-
-The **No** rows are the ones that matter: changing an environment variable on a running container does nothing at all.
-
-</Caption>
-
-<!--
-[S8] RELOAD SEMANTICS
-60-min: show the table, do NOT walk it
-
-  appsettings*.json   YES, when reloadOnChange: true (host default)  FileSystemWatcher
-  User secrets        YES                                            file watcher
-  Environment vars    NO - read once at startup
-  Command line        NO - read once at startup
-  Azure Key Vault     only if ReloadInterval is set (default: NEVER) polling
-  App Configuration   YES, with ConfigureRefresh + a trigger         polling on activity
-  Key-per-file        ONLY with the 4-arg overload                   file watcher
-  In-memory           NO
-  Custom              your call - OnReload()
-
-FOUR CONSEQUENCES - say these out loud, the table alone doesn't land them:
-
-- Changing an environment variable on a running container does NOTHING.
-  Restart the container.
-- reloadOnChange on a Kubernetes ConfigMap mount is UNRELIABLE - symlink swaps,
-  not in-place writes. The watcher may or may not see them. Treat restart as the
-  contract.
-- A single file save often fires the watcher TWICE (write + metadata). Debounce
-  anything expensive hanging off OnChange.
-- "CONFIG RELOADED" DOES NOT MEAN "APP RECONFIGURED." Reloading configuration
-  does not reconfigure things that read it once at startup: Kestrel endpoints,
-  the DI graph, HttpClient handler pipelines.
-
-RULE OF THUMB (S7.3 #4): prefer restart to hot reload unless hot reload is a
-requirement someone actually asked for. Hot reload is a distributed-systems
-problem wearing a config hat.
--->
-
----
 layout: "section"
-kicker: "FEATURE FLAGS"
+kicker: "CONTROLLED RELEASE"
 ---
 
 <!-- OUTLINE.md # Slide 41 -->
@@ -2274,6 +2284,8 @@ codeSize: "17.0"
 ---
 
 <!-- OUTLINE.md # Slide 43 -->
+
+# Flags start with no cloud at all
 
 ```json
 {
@@ -2456,6 +2468,8 @@ codeSize: "17.0"
 
 <!-- OUTLINE.md # Slide 45 -->
 
+# Boolean flags are not enough
+
 ```csharp
 Variant variant = await features.GetVariantAsync("CheckoutLayout", ct);
 
@@ -2636,6 +2650,32 @@ Call back to the history slide explicitly. This is the moment the talk becomes
 one argument instead of a tour of providers.
 
 End the flags block on JUDGMENT, not tooling.
+-->
+
+---
+layout: "section"
+kicker: "ACT 5 · WHERE SHOULD THIS VALUE LIVE?"
+---
+
+<!-- OUTLINE.md # Slide 47a -->
+
+# Decide by ownership, sensitivity, scope, and change cadence.
+
+<!--
+[ACT 5] THE DECISION
+60-min: keep - this is what the room came for
+
+The journey is over. Now it pays out as a decision you can make on Monday.
+
+FOUR QUESTIONS, and they are the whole framework:
+  OWNERSHIP    who changes this - a developer, an SRE, a product manager?
+  SENSITIVITY  does it hurt if it leaks?
+  SCOPE        one app, or many?
+  CADENCE      per release, per environment, or while the app is serving traffic?
+
+Say plainly: you do not need stage three. Most apps never do. The next two slides
+are a sorting exercise, not a maturity model - nobody is behind for using JSON
+files and environment variables.
 -->
 
 ---
@@ -2840,64 +2880,6 @@ from a file or your own backend. It just can't hold the credential to a flag sto
 -->
 
 ---
-layout: "default"
-codeSize: "15.0"
----
-
-<!-- OUTLINE.md # Slide 52 -->
-
-# Null is preserved now
-
-```json
-{ "StringProperty": null, "IntProperty": null, "Array1": [null, null], "Array2": [] }
-```
-
-| Property | .NET 9 | .NET 10 |
-| --- | --- | --- |
-| `string?` (initialized) | `""` — already overwritten | `null` |
-| `int?` (initialized) | **kept its initializer** | `null` |
-| non-nullable value type | **threw** | `default(T)` |
-| `[null, null]` | two empty strings | two nulls |
-| `[]` | ignored | binds as empty array |
-
-<Caption>
-
-All rows are **the JSON provider specifically** — providers that already carried real nulls, such as in-memory, did not all behave this way. d06’s own one-liner: *“Retries was 3 on .NET 9 and is null on .NET 10.”*
-
-</Caption>
-
-<!--
-[S9] .NET 10 DELTAS
-60-min: fold into the slides where each one lives; skip as a standalone
-
-Four talk-relevant deltas from .NET 9:
-
-1. NULL VALUES ARE PRESERVED - *** BREAKING CHANGE ***
-   Previously a null in configuration was treated as MISSING and skipped by the
-   binder, and the JSON provider converted null to "".
-   In .NET 10 the JSON provider reports null unchanged and the binder binds it
-   like any other value. Binding of null array elements and empty arrays now works.
-   -> A property that used to KEEP ITS DEFAULT when the JSON said null now gets
-      OVERWRITTEN WITH NULL.
-   This is the one that will actually break someone's upgrade. d06 has the
-   before/after. Worth 60 seconds even at 60 minutes.
-
-2. SEVEN NEW CONNECTION-STRING PREFIXES (11 total) - Postgres, Cosmos, Redis,
-   Service Bus, Event Hubs, Notification Hubs, API Hubs. Covered on the connstr
-   slide; don't repeat it here.
-
-3. AOT-SAFE ValidationContext CONSTRUCTOR taking an explicit displayName,
-   removing AOT warnings from options validation.
-
-4. FILE-BASED APPS (dotnet run app.cs) participate in user secrets via a
-   path-hash-derived UserSecretsId and 'dotnet user-secrets --file'.
-
-OPTIONAL FORWARD-LOOKING CLOSER - label it clearly as .NET 11 PREVIEW:
-generic OptionsBuilder<T>.Validate<TValidator>(), Func<Task> overloads on
-ChangeToken.OnChange, and async DataAnnotations validation.
--->
-
----
 layout: "section"
 kicker: ""
 ---
@@ -2987,5 +2969,211 @@ Thank the room and thank the organizers by name.
 If you have slack left, the honest closer is the callback to S1.2 and S6.8:
 "Twenty years ago we traded a build-time decision for a runtime one. Feature
 flags are us making that same trade again. It's a good trade - as long as you
-remember you made it."54
+remember you made it."
+-->
+
+---
+layout: "section"
+kicker: "APPENDIX"
+---
+
+<!-- OUTLINE.md # Slide 54a -->
+
+# Things worth knowing that the journey did not need.
+
+<!--
+[APPENDIX] OFF THE MAIN PATH
+60-min: never shown; these exist for Q&A and for the repo
+
+Do not walk these. They are here so the answer exists when someone asks, and so
+the PDF is complete for whoever reads it later.
+
+  named options + source generators   "how do I bind the same shape twice?"
+  a custom provider                   "how would I read config from X?"
+  .NET 10 null preservation           "we upgraded and a default came back null"
+
+Each one is technically sound and each one interrupts the laptop -> shared dev ->
+production story, which is why they are back here.
+-->
+
+---
+layout: "panels"
+---
+
+<!-- OUTLINE.md # Slide 30 -->
+
+# Named options and source generators
+
+<PanelRow :cols="1" size="14.9">
+
+<Panel caption="NAMED">
+
+```csharp
+// Named - same shape, several times
+builder.Services.Configure<EndpointOptions>("primary",   config.GetSection("Endpoints:Primary"));
+builder.Services.Configure<EndpointOptions>("secondary", config.GetSection("Endpoints:Secondary"));
+
+EndpointOptions Primary => monitor.Get("primary");
+```
+
+</Panel>
+
+<Panel caption="GENERATED">
+
+```csharp
+// Generated - no reflection at runtime
+[OptionsValidator]
+public sealed partial class ValidateWeatherOptions : IValidateOptions<WeatherOptions>;
+```
+
+</Panel>
+
+</PanelRow>
+
+<Caption>
+
+Plus one line, not a panel: `<EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>`
+
+</Caption>
+
+<!--
+[39-51 min] NAMED OPTIONS + GENERATORS - S5.4, S5.6
+60-min: CUT the generator half to a single sentence
+
+NAMED OPTIONS - for "same shape, several times": multiple API clients, queues.
+  services.Configure<EndpointOptions>("primary", config.GetSection("Endpoints:Primary"));
+  services.Configure<EndpointOptions>("secondary", ...);
+  then monitor.Get("primary")
+Configure<T>(section) with no name is shorthand for Options.DefaultName ("").
+
+SOURCE GENERATORS - binding and validation both default to REFLECTION. Two opt-ins:
+
+  <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+
+  [OptionsValidator]
+  public sealed partial class ValidateWeatherOptions : IValidateOptions<WeatherOptions>;
+  (empty partial - the generator writes the implementation)
+
+The options validation generator is ON BY DEFAULT when the project references
+Microsoft.Extensions.Options 8+ or builds an ASP.NET Core app. It rewrites
+[Range], [MinLength], [MaxLength], [Length] into generated equivalents.
+With [OptionsValidator] you do NOT also call ValidateDataAnnotations().
+
+OPTIONAL (d17, 90 min only): PublishAot=true surfaces IL2026 / IL3050 warnings
+from reflection binding; turn both generators on and they disappear.
+Niche. At 60 minutes this is one slide.
+-->
+
+---
+layout: "code"
+codeSize: "16.3"
+---
+
+<!-- OUTLINE.md # Slide 37 -->
+
+# A provider is `Load()` and a dictionary
+
+```csharp
+public sealed class DotEnvConfigurationSource(string path) : IConfigurationSource
+{
+    public IConfigurationProvider Build(IConfigurationBuilder builder) =>
+        new DotEnvConfigurationProvider(path);
+}
+
+public sealed class DotEnvConfigurationProvider(string path) : ConfigurationProvider
+{
+    public override void Load() => Data = ParseDotEnv(path);
+}
+```
+
+<!--
+[S4.10] CUSTOM PROVIDER - THE EXTENSIBILITY POINT
+Snippet: lifted from d25
+60-min: cut - point at the repo
+
+Two types. That is the whole contract.
+
+  IConfigurationSource   - a factory. Build() hands back a provider.
+  ConfigurationProvider  - has a protected IDictionary<string,string?> Data
+                           and a virtual Load(). Fill the dictionary.
+
+Then an extension method so it reads like every other provider:
+  builder.Configuration.AddSqlConfiguration(connectionString);
+
+THREE THINGS TO LAND, THEN MOVE ON:
+
+1. Load() RUNS ONCE, at build time. It is not lazy. If you want refresh you
+   schedule it yourself and call OnReload() - that is what fires the change
+   token that makes IOptionsMonitor wake up. Point back at the three
+   interfaces slide when you say it.
+
+2. A provider that THROWS in Load() takes the app down at startup. That
+   sounds like a bug and is frequently the feature - it is the same
+   fail-fast posture as ValidateOnStart.
+
+3. Good real targets: a database-backed provider, a .env reader, a provider
+   that pulls from your own internal config service. Bad target: anything
+   you could have done with the eleven providers that already exist.
+
+Do not live-code this. Show the shape, say the three things, point at d25 in
+the repo. It is interesting to about six people in the room and they will
+read the code later.
+-->
+
+---
+layout: "default"
+codeSize: "15.0"
+---
+
+<!-- OUTLINE.md # Slide 52 -->
+
+# Null is preserved now
+
+```json
+{ "StringProperty": null, "IntProperty": null, "Array1": [null, null], "Array2": [] }
+```
+
+| Property | .NET 9 | .NET 10 |
+| --- | --- | --- |
+| `string?` (initialized) | `""` — already overwritten | `null` |
+| `int?` (initialized) | **kept its initializer** | `null` |
+| non-nullable value type | **threw** | `default(T)` |
+| `[null, null]` | two empty strings | two nulls |
+| `[]` | ignored | binds as empty array |
+
+<Caption>
+
+All rows are **the JSON provider specifically** — providers that already carried real nulls, such as in-memory, did not all behave this way. d06’s own one-liner: *“Retries was 3 on .NET 9 and is null on .NET 10.”*
+
+</Caption>
+
+<!--
+[S9] .NET 10 DELTAS
+60-min: fold into the slides where each one lives; skip as a standalone
+
+Four talk-relevant deltas from .NET 9:
+
+1. NULL VALUES ARE PRESERVED - *** BREAKING CHANGE ***
+   Previously a null in configuration was treated as MISSING and skipped by the
+   binder, and the JSON provider converted null to "".
+   In .NET 10 the JSON provider reports null unchanged and the binder binds it
+   like any other value. Binding of null array elements and empty arrays now works.
+   -> A property that used to KEEP ITS DEFAULT when the JSON said null now gets
+      OVERWRITTEN WITH NULL.
+   This is the one that will actually break someone's upgrade. d06 has the
+   before/after. Worth 60 seconds even at 60 minutes.
+
+2. SEVEN NEW CONNECTION-STRING PREFIXES (11 total) - Postgres, Cosmos, Redis,
+   Service Bus, Event Hubs, Notification Hubs, API Hubs. Covered on the connstr
+   slide; don't repeat it here.
+
+3. AOT-SAFE ValidationContext CONSTRUCTOR taking an explicit displayName,
+   removing AOT warnings from options validation.
+
+4. FILE-BASED APPS (dotnet run app.cs) participate in user secrets via a
+   path-hash-derived UserSecretsId and 'dotnet user-secrets --file'.
+
+OPTIONAL FORWARD-LOOKING CLOSER - label it clearly as .NET 11 PREVIEW:
+generic OptionsBuilder<T>.Validate<TValidator>(), Func<Task> overloads on
+ChangeToken.OnChange, and async DataAnnotations validation.
 -->
