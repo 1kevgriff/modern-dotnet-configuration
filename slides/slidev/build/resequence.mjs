@@ -135,7 +135,7 @@ const NEW = {
   '47a': {
     content: [
       '**Section divider.** Kicker `ACT 5 · WHERE SHOULD THIS VALUE LIVE?`, ' +
-      'title **Decide by ownership, sensitivity, scope, and change cadence.**. Navy ground.',
+      'title **Who owns it? Is it secret? Who needs it? How fast must it change?**. Navy ground.',
     ].join(NL),
     notes: [
       '[ACT 5] THE DECISION',
@@ -159,7 +159,7 @@ const NEW = {
   '54a': {
     content: [
       '**Section divider.** Kicker `APPENDIX`, ' +
-      'title **Things worth knowing that the journey did not need.**. Navy ground.',
+      'title **Useful details we skipped.**. Navy ground.',
     ].join(NL),
     notes: [
       '[APPENDIX] OFF THE MAIN PATH',
@@ -180,6 +180,19 @@ const NEW = {
 }
 
 // ---------------------------------------------------------------------------------------
+
+// The five NEW slides have been hand-edited since this migration ran, so a re-run would
+// silently revert them to their templates. This tool has done its job; it needs --force.
+if (!process.argv.includes('--force')) {
+  console.error([
+    '',
+    '  REFUSING: this was a one-shot migration and OUTLINE.md has been hand-edited since.',
+    '  Re-running would revert the act dividers and the lifetime bridge to their templates.',
+    '  Edit OUTLINE.md directly. Pass --force only if you genuinely mean to re-sequence.',
+    '',
+  ].join(NL))
+  process.exit(1)
+}
 
 const raw = readFileSync(OUTLINE, 'utf8')
 const lines = raw.split(NL)

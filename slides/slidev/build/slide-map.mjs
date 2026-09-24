@@ -24,7 +24,8 @@ export const map = {
     layout: 'cover',
     variant: 'title',
     headline: 'Modern .NET Configuration',
-    kicker: 'CONFIGURATION · OPTIONS · FEATURE FLAGS',
+    // No kicker. A three-noun strapline over the title is exactly the filler Kevin cut
+    // from the PowerPoint deck; it does not come back.
     lines: ['Kevin Griffin', 'Microsoft MVP', '.NET 10 / C# 14'],
     from: 'OUTLINE.md slide 3 byline',
     prose: 'drop'

@@ -51,21 +51,21 @@ $ dotnet run
 [COLD OPEN 1 of 2] THE CONTRADICTION
 60-min: keep, ~90 seconds for both cold open slides
 
-FIRST THING THE ROOM SEES. No title slide yet. No introduction. Say nothing
+first THING THE ROOM SEES. No title slide yet. No introduction. Say nothing
 for a beat, then read it out flatly:
 
 "The file says one hundred and twenty. The app says ten."
 
 Then STOP TALKING. Count to ten in your head. Let it be uncomfortable.
 
-Do NOT explain it. Do NOT say "who can tell me why". Do not take a guess from
+Don't explain it. Don't say "who can tell me why". Do not take a guess from
 the floor. The only line you say is:
 
 "We'll come back to this."
 
 Then advance.
 
-WHY OPEN HERE: "why externalize configuration" and "how do we load it" are
+WHY OPEN here: "why externalize configuration" and "how do we load it" are
 both expository. Two explanatory beats back to back is a flat first ten
 minutes. A small mystery buys attention for the parts that are genuinely just
 exposition - and it gets paid off properly at GetDebugView.
@@ -120,7 +120,6 @@ into a conversation; the whole device depends on the room sitting with it.
 layout: "cover"
 variant: "title"
 image: "/kevin-griffin.png"
-kicker: "CONFIGURATION · OPTIONS · FEATURE FLAGS"
 ---
 
 <!-- OUTLINE.md # Slide 3 -->
@@ -147,12 +146,12 @@ DO:
 - Let the room sit with it. Fifteen full seconds. Count them.
 - Say only: "We'll come back to this." Move on.
 
-WHY THIS OPENING:
+Why this opening:
 "Why externalize configuration" and "how do we load it" are both expository.
 Two explanatory beats back to back is a flat first ten minutes. A small mystery
 buys attention for the parts that are genuinely just exposition. S2 pays it off.
 
-DO NOT take questions here. It only works while it stays unexplained.
+Don't take questions here. It only works while it stays unexplained.
 
 === THEN BRING UP THIS SLIDE ===
 
@@ -201,7 +200,7 @@ That's the license to be opinionated for the next 85 minutes. It also sets up
 S6.6 (flag debt) and S4.6 (the idle-app refresh surprise) as scars rather than
 trivia.
 
-Do NOT list every technology you've touched. If they want the resume it's on
+Don't list every technology you've touched. If they want the resume it's on
 the site, and the site is on the last slide.
 -->
 
@@ -230,17 +229,17 @@ The same key, `Weather:TimeoutSeconds`, crosses all five.
 
 Five beats. Read them fast; it's a map, not a stop. Twenty seconds.
 
-  01  How the provider chain really resolves        (S2, S3)
-  02  Local dev -> deployment -> shared             (S1.4 spine, S4)
-  03  Binding, options, and failing fast            (S5)
-  04  Feature flags and flag debt                   (S6)
-  05  Choosing a strategy, and where to stop        (S7)
+  01  The shared baseline - what everyone gets
+  02  My machine - differing without breaking yours
+  03  The shared dev server - it left your laptop
+  04  Production - ownership, trust, change without a deploy
+  05  Where should this value live?
 
-Point at 02 and say "that's the spine - everything hangs off it."
-Point at 04 and say "this is about a quarter of the talk, and it's the half
-people don't expect."
+Say that one key - Weather:TimeoutSeconds - crosses all five, so they have
+something to follow. Point at 04 and say this is about a quarter of the talk,
+and it's the half people don't expect.
 
-Then get off this slide. The cold open is STILL unexplained and that tension is
+Then get off this slide. The cold open is still unexplained and that tension is
 doing work for you until S2.1.
 -->
 
@@ -280,7 +279,7 @@ Five answers. First three obvious, last two are why this talk exists in 2026.
    rebuilding, retesting, redeploying. Value and logic have completely different
    rates of change. They shouldn't share a lifecycle.
 
-2. VALUES THAT VARY BY ENVIRONMENT - same binary, local DB / staging API / prod
+2. VALUES that VARY BY ENVIRONMENT - same binary, local DB / staging API / prod
    endpoint. If the CODE differs per environment, you aren't testing what you ship.
 
 3. CHANGING A VALUE ON THE FLY - timeout, log level, toggle. No deploy window,
@@ -341,7 +340,7 @@ Three eras. Score each against the five reasons.
    Wins #1 and #2 - but you built one artifact per environment, and #3 was impossible.
 
 3. THE .NET GENERIC HOST (2018, .NET Core 2.1) + IConfiguration
-   Provider chain, layering, binding, DI, reload - and the SAME model for a web
+   Provider chain, layering, binding, DI, reload - and the same model for a web
    app, a worker, a console tool, and a WinForms app.
    One artifact, many environments. All five reasons, finally.
 
@@ -376,7 +375,7 @@ That's the whole reason the rest of the talk has failure modes at all. A
 constant can't be missing, malformed, stale, or arriving from a provider you
 forgot about. A runtime value can be all four.
 
-COMES BACK TWICE:
+Comes back twice:
 - S4.6, when App Configuration moves the decision later still.
 - S6.8, when feature flags make the same trade one level up: deploys to flags.
   Point at this slide from there. "Same trade, one level up."
@@ -388,9 +387,9 @@ layout: "statement"
 
 <!-- OUTLINE.md # Slide 9 -->
 
-**If an operational value can differ by environment, deployment, or time, configure it.**
+**If two environments need different answers, it's configuration.**
 
-**If a code path must be switchable without a deploy, flag it.**
+**If behaviour must change without shipping, it's a flag.**
 
 <!--
 [13-16 min] THESIS - S1.3
@@ -411,7 +410,7 @@ HANDLE TWO OBJECTIONS OUT LOUD - both are fair:
 
 - "Then everything is configurable and nothing is knowable."
   True if you stop at externalizing. That's why S5 binding + ValidateOnStart
-  exist. A configurable value that's validated at startup is MORE knowable than
+  exist. A configurable value that's validated at startup is more knowable than
   a constant buried in code - it's declared, typed, and checked in one place.
 
 - "That's a lot of flags."
@@ -459,7 +458,7 @@ SHARED - many apps and instances; values that change without a deploy.
   Azure App Configuration - labels, refresh, sentinel keys, feature flags
 
 EACH STAGE IS INTRODUCED BY THE FAILURE THAT FORCES YOU TO THE NEXT ONE.
-This is what gives the spine motion instead of making it a list:
+This is what gives the journey motion instead of making it a list:
 
   Local dev   -> "works on my machine"       (launchSettings overriding your env
                                              var; secrets on one laptop)
@@ -468,11 +467,11 @@ This is what gives the spine motion instead of making it a list:
   Shared      -> "it changed, but not everywhere at once" (stale caches,
                                              half-applied edits, idle instance)
 
-TWO THINGS TO SAY WITH THIS UP:
+Two things to say with this up:
 - The stages are CUMULATIVE, not alternatives. A stage-three app still has
   appsettings.json for defaults and still takes per-instance values from env vars.
   You add layers; you don't replace them.
-- KNOW WHERE TO STOP. Stage three earns its complexity when more than one app
+- KNOW where TO STOP. Stage three earns its complexity when more than one app
   shares values, or something genuinely must change without a deploy. S7 decides.
 -->
 
@@ -482,7 +481,7 @@ layout: "default"
 
 <!-- OUTLINE.md # Slide 11 -->
 
-# Almost every config bug is one of four things
+# When config breaks, I check four things first
 
 <!-- from: OUTLINE.md slide 11 ## Notes — the four numbered definitions, verbatim -->
 
@@ -508,12 +507,12 @@ in, almost every configuration bug is one of four things:
               one that wasn't.
 4. TRUST    - a secret is sitting in a file that ships with the app.
 
-NAME THEM OUT LOUD AS THEY COME UP:
+Name them out loud as they come up:
   order on Same key. Four winners.    shape on Environment variables
   lifetime on the three interfaces    trust on User secrets
 
 By the anti-patterns slide the audience should be calling them before you do.
-That's the win condition for this slide.
+that is when this slide has done its job.
 -->
 
 ---
@@ -529,14 +528,14 @@ kicker: "ACT 1 · THE SHARED BASELINE"
 [ACT 1] THE SHARED BASELINE
 60-min: keep, 30 seconds
 
-FIRST BOUNDARY. Everything from here to the end is one application moving:
+first BOUNDARY. Everything from here to the end is one application moving:
 the baseline everyone shares -> my machine -> a shared dev server -> production.
 
 The baseline is the part everyone agrees on. It is checked in, it is reviewed,
 and it travels with the artifact. Nothing here is secret and nothing here is
 machine-specific - those come next, and they OVERRIDE this rather than replace it.
 
-THE QUESTION THIS ACT ANSWERS:
+The question this act answers:
   "Who owns this value, and what does everyone get by default?"
 
 Weather:TimeoutSeconds is the value to follow. It starts at 30 here and it will
@@ -598,11 +597,11 @@ strings, plus a binder that projects slices of it onto typed objects.
 - Flat IDictionary<string, string?> with ':' as the hierarchy delimiter.
   {"Db": {"Timeout": 30}} is the single key Db:Timeout with the STRING "30".
 - KEYS ARE CASE-INSENSITIVE. DB:TIMEOUT == db:timeout.
-- VALUES ARE ALWAYS STRINGS. Every int, bool, TimeSpan, Uri is a binder conversion.
-- LAST PROVIDER WINS. Add() appends; reads walk the list in reverse, first hit wins.
+- VALUES ARE always STRINGS. Every int, bool, TimeSpan, Uri is a binder conversion.
+- last PROVIDER WINS. Add() appends; reads walk the list in reverse, first hit wins.
 - ARRAY ELEMENTS ARE KEYS TOO: Servers:0:Host, Servers:1:Host.
-- A duplicate key INSIDE one file provider throws FormatException.
-  A duplicate key ACROSS providers is the whole point of the system.
+- A duplicate key inside one file provider throws FormatException.
+  A duplicate key across providers is the whole point of the system.
 
 Show that these are all the same read:
   config["Db:Timeout"]
@@ -620,7 +619,7 @@ layout: "statement"
 Every scalar is text — or null.
 
 <!--
-[16-23 min] EVERYTHING IS A STRING - S2
+[16-23 min] everything IS A STRING - S2
 60-min: keep - it's 20 seconds and it justifies the whole options block
 
 Headline only.
@@ -629,7 +628,7 @@ Every int, every bool, every TimeSpan, every Uri you ever read out of
 configuration is a BINDER CONVERSION that happened on your behalf. The
 dictionary holds strings. Only strings. Always strings.
 
-WHY THIS MATTERS ENOUGH FOR ITS OWN SLIDE:
+Why this matters enough for its own slide:
 This is the fact that makes S5 necessary rather than merely tidy. If every
 value is a string, then every value can be the WRONG string - malformed,
 empty, or a word where you wanted a number - and nothing in the configuration
@@ -687,7 +686,7 @@ Only index 0 was overlaid. Precedence then runs per key, exactly as it always do
 <!--
 [S4.1] THE ARRAY SURPRISE
 Snippet: lifted from d03
-60-min: FIRST THING TO CUT if you are running long - it is a gasp, not a
+60-min: first THING TO CUT if you are running long - it is a gasp, not a
 load-bearing idea
 
 The reliable audible reaction of the talk. Set it up as a question:
@@ -705,7 +704,7 @@ Call back to the flat dictionary slide. This is that slide's consequence, and
 it is the moment people realise the mental model actually predicts behaviour
 rather than just describing it.
 
-WHAT TO DO INSTEAD - say it, because someone is about to go fix this today:
+what TO DO instead - say it, because someone is about to go fix this today:
 - Prefer an object keyed by name over a positional array.
 - Or replace the whole section deliberately rather than relying on the overlay.
 - Anti-pattern #10 is exactly this assumption in appsettings.Production.json.
@@ -720,13 +719,13 @@ kicker: "ACT 2 · MY MACHINE"
 
 <!-- OUTLINE.md # Slide 19 -->
 
-# My setup can differ from yours without either of us editing the other's.
+# Your machine can differ from mine — without changing the repo.
 
 <!--
 [31-39 min] STAGE 1 - LOCAL DEV
 60-min: compress to 4 min
 
-THE PROBLEM THIS STAGE SOLVES:
+The problem this stage solves:
 A developer clones the repo and it runs. Secrets never touch git.
 
 Sources: appsettings.json, appsettings.Development.json, user secrets,
@@ -811,7 +810,7 @@ POINTS:
 - Build Action = Content, Copy = PreserveNewest - or the file isn't next to the
   DLL at runtime. This one bites people in published output, not in F5.
 
-IF SOMEONE ASKS about taking full control:
+IF someone ASKS about taking full control:
   builder.Configuration.Sources.Clear();
   then AddJsonFile / AddEnvironmentVariables / AddCommandLine explicitly.
 Mention it exists; don't dwell. Most apps shouldn't.
@@ -823,7 +822,7 @@ is in the wrong bucket.
 ON SCREEN: three panels. Base, the environment overlay, and what the app
 actually sees. Gold marks the values the environment file supplied.
 
-THE ROW THAT TEACHES IT is TimeoutSeconds. The Development file says nothing
+THE ROW that TEACHES IT is TimeoutSeconds. The Development file says nothing
 about it, so 30 SURVIVES from the base file. That is what "merges key by key"
 means, and it is why this is not a file swap.
 
@@ -879,7 +878,7 @@ layout: "panels"
 Snippet: lifted from d09
 60-min: keep - mention .NET 10 file-based apps in one line
 
-WHAT IT IS NOT: not encrypted, not a vault.
+what IT IS not: not encrypted, not a vault.
 THE SINGLE PURPOSE: keeping secrets out of the repo on a dev box.
 
   dotnet user-secrets init          (adds <UserSecretsId> to the .csproj)
@@ -888,11 +887,11 @@ THE SINGLE PURPOSE: keeping secrets out of the repo on a dev box.
 
 Bulk load by piping JSON into 'dotnet user-secrets set'.
 
-Storage - mention, but tell them NOT to write code against it:
+Storage - mention, but tell them not to write code against it:
   Windows: %APPDATA%\Microsoft\UserSecrets\<id>\secrets.json
   Linux/macOS: ~/.microsoft/usersecrets/<id>/secrets.json
 
-Registered automatically by the default builders ONLY in Development.
+Registered automatically by the default builders only in Development.
 It sits ABOVE the JSON files and BELOW environment variables and command line.
 
 .NET 10 BONUS - file-based apps:
@@ -907,19 +906,19 @@ Failure mode #4: TRUST. Name it.
 ON SCREEN: the repo holds a GUID. Your laptop holds the actual secret, in
 plaintext, in a file anyone with your login can read.
 
-SAY IT PLAINLY: "This is not encryption. This is not a vault. The whole
+Say: "This is not encryption. This is not a vault. The whole
 feature is a convention for putting the file somewhere git will never see."
 
 That is not a criticism - it is exactly the right tool for the job it has. But
 half the room believes it is encrypted, and the ones who believe that are the
 ones who will reach for it in production.
 
-WHERE IT SITS IN THE CHAIN - say it, do not slide it:
-Development environment ONLY. Above the JSON files, below environment
+where IT SITS IN THE CHAIN - say it, do not slide it:
+Development environment only. Above the JSON files, below environment
 variables and the command line. The precedence table already showed the rank;
 point back at it rather than repeating it.
 
-Storage paths, for the record - and tell them NOT to write code against these:
+Storage paths, for the record - and tell them not to write code against these:
   Windows       %APPDATA%MicrosoftUserSecrets<id>secrets.json
   Linux/macOS   ~/.microsoft/usersecrets/<id>/secrets.json
 -->
@@ -952,7 +951,7 @@ Snippet: lifted from d09
 Five commands and one .NET 10 addition. Do not read them out. Let people
 photograph it and say what matters instead.
 
-WHAT MATTERS:
+What matters:
 - 'init' writes the UserSecretsId into the .csproj. That id is the only thing
   the repo ever learns about your secrets.
 - Values are set by KEY PATH using the colon form - "Weather:ApiKey", not
@@ -1011,7 +1010,7 @@ THE #1 "works on my machine" configuration story:
 
 launchSettings.json environment variables OVERRIDE machine and user environment
 variables during local F5 / dotnet run - and launchSettings.json is a
-DEVELOPMENT-ONLY file that never deploys.
+DEVELOPMENT-only file that never deploys.
 
 So: you set an env var, you run locally, nothing changes, you conclude env vars
 don't work. Or worse - it works locally because of launchSettings, and the value
@@ -1020,7 +1019,7 @@ simply isn't there in production.
 Show the two side by side: the env var you set, and the launchSettings entry
 that quietly beats it. Then the same app with that entry deleted.
 
-CLOSE THE STAGE HERE:
+Close the stage here:
 "That's stage one's signature failure. The fix isn't a better laptop - it's
 letting the platform supply the values. That's stage two."
 
@@ -1068,7 +1067,7 @@ That is why this is the number one "works on my machine" configuration story. It
 is not that the machine is different. It is that a development-only file is in
 the chain locally and absent everywhere else.
 
-CLOSE THE STAGE HERE:
+Close the stage here:
 "That is stage one's signature failure. The fix is not a better laptop - it is
 letting the platform supply the values. That is stage two."
 -->
@@ -1085,7 +1084,7 @@ codeSize: "15"
 
 <Caption gold>
 
-**HIGHEST PRECEDENCE FIRST — row 1 beats row 8.**
+**HIGHEST PRECEDENCE first — row 1 beats row 8.**
 
 </Caption>
 
@@ -1110,7 +1109,7 @@ Rows 5 and 6 are the ones almost nobody knows exist — and they apply to web ap
 [S3.1] DEFAULT PROVIDER ORDER
 60-min: keep - compressed into the order block
 
-HIGHEST PRIORITY FIRST. Reads top-down as "who wins".
+HIGHEST PRIORITY first. Reads top-down as "who wins".
 
 The two rows people have never seen are 5 and 6 -
 {ApplicationName}.settings.json and its environment variant. They are real,
@@ -1121,15 +1120,15 @@ The known exception is CreateSlimBuilder, whose slim defaults omit them.
 Verified on SDK 10.0.303: a file-based app web.cs really does probe
 web.settings.json and web.settings.Development.json.
 
-ROW 1 IS THE OTHER SURPRISE. The chained provider is added LAST, which makes
+ROW 1 IS THE OTHER SURPRISE. The chained provider is added last, which makes
 host configuration the highest-priority source, not the lowest. People assume
 the opposite because it is read first. Read first, applied last.
 
-ROW 2 - the command-line provider is registered TWICE: once during host
+ROW 2 - the command-line provider is registered twice: once during host
 configuration so --environment can pick which files load, and once at the end
 so it still wins the final read. That is deliberate, not a bug.
 
-WHEN THE DUMP IS ON SCREEN the audience will count more providers than this
+when THE DUMP IS ON SCREEN the audience will count more providers than this
 table has rows - two MemoryConfigurationProviders and the prefixed env var
 providers. Say that those are host plumbing and move on; do not narrate all
 thirteen.
@@ -1167,9 +1166,9 @@ ChainedConfigurationProvider
 
 A real dump. One command, two effects.
 
-Host configuration is read FIRST and it decides EnvironmentName. EnvironmentName
-then decides WHICH appsettings.{Environment}.json even gets loaded. So the
-command-line provider is registered TWICE on purpose:
+Host configuration is read first and it decides EnvironmentName. EnvironmentName
+then decides which appsettings.{Environment}.json even gets loaded. So the
+command-line provider is registered twice on purpose:
 
   pass 1  so --environment Staging can influence which files load
   pass 2  so the same argument still wins the final read
@@ -1178,12 +1177,12 @@ Point at the two CommandLineConfigurationProvider lines. They are the same
 provider, registered at both ends of the chain. That looks like a bug in the
 framework until you see what it buys.
 
-THE LINE TO SAY:
+Say:
 "ASPNETCORE_ENVIRONMENT is not just another setting. It is the input that picks
 the rest of your inputs."
 
 That reframing is what makes the two-phase design look deliberate instead of
-accidental. It also explains why setting the environment variable AFTER the host
+accidental. It also explains why setting the environment variable after the host
 is built does nothing at all.
 
 For a non-web host it is DOTNET_ENVIRONMENT, not ASPNETCORE_ENVIRONMENT. Say it
@@ -1218,7 +1217,7 @@ codeSize: "15"
 <!--
 [layering] PRECEDENCE, SHOWN
 Snippets: lifted from d02 and d03
-60-min: keep this; the array slide is the FIRST thing to cut if you run long
+60-min: keep this; the array slide is the first thing to cut if you run long
 Do not read the slide aloud. Walk down the four rows, name the source each
 time, and let the numbers do the work.
 
@@ -1228,7 +1227,7 @@ This is what makes "last provider wins" concrete instead of abstract.
 
 THE ARRAY SURPRISE is the next slide.
 appsettings.json has ["a","b","c"]. The environment file has ["x"].
-Result: ["x","b","c"] - NOT ["x"].
+Result: ["x","b","c"] - not ["x"].
 
 Why: the environment file MERGES OVER the base file key by key. It is not a
 replacement. Arrays don't merge cleanly because index keys overlay individually:
@@ -1239,7 +1238,7 @@ replacement. Arrays don't merge cleanly because index keys overlay individually:
 This gets an audible reaction every time. But it's a gasp, not a load-bearing
 idea - it's the first cut at 60 minutes.
 
-WHAT TO DO INSTEAD: prefer an object keyed by name, or replace the section
+what TO DO instead: prefer an object keyed by name, or replace the section
 deliberately. Also: EnvironmentName is arbitrary - appsettings.QA-East.json works
 fine if ASPNETCORE_ENVIRONMENT=QA-East.
 -->
@@ -1277,7 +1276,7 @@ handful of keys you actually care about.
 <!--
 [16-23 min] THE DIAGNOSTIC - S2.1
 The cold-open dump, now marked
-60-min: NEVER CUT
+60-min: never cut
 
 This is the show-don't-tell moment of the talk, and it explains the cold open.
 GetDebugView() prints every key, its effective value, AND the provider that
@@ -1327,7 +1326,7 @@ Weather:
 <!--
 [16-23 min] THE DUMP - S2.1 - THE PAYOFF
 The cold-open dump, marked this time
-60-min: NEVER CUT
+60-min: never cut
 
 THIS IS THE SLIDE THE COLD OPEN WAS FOR.
 
@@ -1336,7 +1335,7 @@ EnvironmentVariablesConfigurationProvider - even though
 appsettings.Development.json clearly says 120 and that is the file everyone
 in the room was looking at for the last sixteen minutes.
 
-SAY IT LIKE THIS:
+Say:
 "Sixteen minutes ago I showed you an app with the wrong timeout. Here's why.
 The JSON says 120. An environment variable says 10. The environment variable
 is later in the chain, so the environment variable wins. That's it. That's the
@@ -1345,7 +1344,7 @@ whole mystery."
 Then name failure mode #1 - ORDER - and point at the badge when it turns up
 two slides from now.
 
-WHAT THE DUMP GIVES YOU THAT NOTHING ELSE DOES: the provider name in
+what THE DUMP GIVES YOU that nothing ELSE DOES: the provider name in
 parentheses. Not the value - anyone can log the value. The SOURCE.
 
 Note ApiKey=*** is redacted by the lambda on the previous slide. Say that out
@@ -1365,7 +1364,7 @@ kicker: "ACT 3 · THE SHARED DEV ENVIRONMENT"
 [51-59 min] STAGE 2 - DEPLOYMENT
 60-min: compress to 4 min, one slide
 
-THE PROBLEM THIS STAGE SOLVES:
+The problem this stage solves:
 One artifact, many environments. The platform supplies the values.
 
 Sources: environment variables, command line, key-per-file mounts, Key Vault.
@@ -1409,14 +1408,14 @@ Snippet: lifted from d04
 
 The workhorse in containers and every PaaS.
 
-':' IS NOT PORTABLE in env var names. '__' is, and maps to ':'.
+':' IS not PORTABLE in env var names. '__' is, and maps to ':'.
   Weather__ApiBaseUrl        -> Weather:ApiBaseUrl
   ConnectionStrings__Default -> ConnectionStrings:Default
 
 Arrays use the index as a segment:
   Weather__AllowedOrigins__0, Weather__AllowedOrigins__1
 
-PREFIXES:
+Prefixes:
   AddEnvironmentVariables(prefix: "MYAPP_") loads only matching variables AND
   STRIPS the prefix from the key.
   MYAPP_Weather__TimeoutSeconds -> Weather:TimeoutSeconds
@@ -1430,7 +1429,7 @@ the key the binder is looking for. Single underscore instead of double is the
 most common version.
 
 ALSO SAY (it comes back in S8): changing an environment variable on a running
-container does NOTHING. Env vars are read once at startup. Restart the container.
+container does nothing. Env vars are read once at startup. Restart the container.
 -->
 
 ---
@@ -1449,7 +1448,7 @@ codeSize: "15.0"
 ```
 
 ```csharp
-AddKeyPerFile(dir, optional: true)                      // does NOT reload
+AddKeyPerFile(dir, optional: true)                      // does not reload
 AddKeyPerFile(dir, optional: true, reloadOnChange: true) // does
 ```
 
@@ -1472,14 +1471,14 @@ you consume them without an Azure round trip.
 File NAME is the key, file CONTENTS are the value, '__' is the delimiter.
 A file named Weather__ApiKey containing abc123 becomes Weather:ApiKey = abc123.
 
-THE PATH MUST BE ABSOLUTE. Relative paths fail in a way that looks like "the
+THE PATH must BE ABSOLUTE. Relative paths fail in a way that looks like "the
 provider isn't working."
 
 This is the right answer for AKS and Docker Swarm and it costs nothing. Worth
 naming even when you skip the snippet - half the room is on Kubernetes and has been
 shelling secrets in through env vars.
 
-RELOAD - GET THIS RIGHT: the 3-argument overload above does NOT reload.
+RELOAD - GET this RIGHT: the 3-argument overload above does not reload.
 AddKeyPerFile(dir, optional) resolves to reloadOnChange: false. You only get
 a watcher from the 4-argument overload. And even then, on Kubernetes those
 mounts are symlink swaps rather than in-place writes, so the watcher may or
@@ -1521,14 +1520,14 @@ Snippet: lifted from d18. No Azure dependency now - it is code on a slide.
       new DefaultAzureCredential());
   - guarded by if (!builder.Environment.IsDevelopment())
 
-FOUR THINGS THAT ACTUALLY MATTER:
+Four things that actually matter:
 
 1. SECRET NAMING. Key Vault forbids ':' in secret names. The default
    KeyVaultSecretManager maps '--' to the delimiter:
    secret Weather--ApiKey  ->  key Weather:ApiKey
    This is failure mode #2 (SHAPE) wearing a cloud hat.
 
-2. REGISTER IT LAST so it overrides the file providers it's meant to replace.
+2. REGISTER IT last so it overrides the file providers it's meant to replace.
 
 3. NO RELOAD BY DEFAULT. Secrets are cached for the life of the process.
    ReloadInterval defaults to NULL - meaning never. Opt into polling:
@@ -1536,7 +1535,7 @@ FOUR THINGS THAT ACTUALLY MATTER:
    Tie to S7.3 #6: "It's in Key Vault" plus a process that caches it forever is a
    secret you cannot rotate.
 
-4. EXPIRED SECRETS ARE STILL LOADED by default. Disabled secrets never are.
+4. EXPIRED SECRETS ARE still LOADED by default. Disabled secrets never are.
    Filter with a custom KeyVaultSecretManager overriding Load(SecretProperties).
 
 CREDENTIALS: DefaultAzureCredential is the DEV CONVENIENCE chain (CLI, VS, env
@@ -1555,7 +1554,7 @@ kicker: "BINDING"
 
 <!-- OUTLINE.md # Slide 25 -->
 
-# Binding turns loose strings into an application contract.
+# Stop passing configuration around as strings. Give it a type.
 
 <!--
 [39-51 min] OPTIONS - S5
@@ -1566,10 +1565,10 @@ The longest non-flag block in the talk, and correctly so. This is where
 
 Snippets here: d11 binding, d12 ValidateOnStart, d13 the three interfaces.
 The three-interfaces before/after pair is the longest beat in the talk.
-DO NOT RUSH IT.
+Don't RUSH IT.
 
 This is also the answer to the thesis objection from S1.3 - "then nothing is
-knowable." Binding plus validation is what makes a configurable value MORE
+knowable." Binding plus validation is what makes a configurable value more
 knowable than a constant.
 -->
 
@@ -1621,7 +1620,7 @@ That `!` is anti-pattern #3 on its own.
 [39-51 min] STOP INJECTING ICONFIGURATION - S5.1
 60-min: keep
 
-THE DON'T:
+The DON'T:
   public sealed class WeatherClient(IConfiguration config)
       => CallAsync(config["Weather:ApiBaseUrl"]!,
                    int.Parse(config["Weather:TimeoutSeconds"]!));
@@ -1636,7 +1635,7 @@ THE DO:
 
   public sealed class WeatherClient(IOptions<WeatherOptions> options)
 
-THE ARGUMENT: the class now DECLARES EXACTLY WHAT IT NEEDS. You can read the
+THE ARGUMENT: the class now DECLARES EXACTLY what IT NEEDS. You can read the
 options type and know the whole configuration surface of that component. You
 cannot do that with IConfiguration - it's a bag of everything.
 
@@ -1727,7 +1726,7 @@ The point is *where* this happened: at startup, before the process took traffic.
 <!--
 [39-51 min] VALIDATION - S5.5
 Snippet: lifted from d12
-60-min: NEVER CUT
+60-min: never cut
 
 FAIL FAST IS THE WHOLE POINT.
 Without ValidateOnStart(), validation runs LAZILY on first .Value access - a bad
@@ -1737,7 +1736,7 @@ rolling deployment: the bad instance never takes traffic.
 
 Bad config = no start. Show the startup exception naming the offending property.
 
-NESTED OBJECTS AND COLLECTIONS ARE NOT VALIDATED BY DEFAULT. Opt in:
+NESTED OBJECTS AND COLLECTIONS ARE not VALIDATED BY DEFAULT. Opt in:
   [Required, ValidateObjectMembers]  on the nested object
   [ValidateEnumeratedItems]          on the collection
 This surprises people who think [Required] recurses. It doesn't.
@@ -1778,13 +1777,13 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 Snippet: lifted from d24
 60-min: cut the slide, keep the sentence
 
-Added LAST, so it beats everything. That is the entire trick.
+Added last, so it beats everything. That is the entire trick.
 
 This is the right answer for WebApplicationFactory integration tests: you get
 the real application, the real provider chain, the real binding and validation
 - and then you overwrite exactly the handful of keys the test cares about.
 
-WHY IT BEATS THE ALTERNATIVES:
+Why it beats the alternatives:
 - Mocking IConfiguration tests your mock, not your configuration.
 - A test appsettings.json is a second file to keep in sync with the first.
 - Environment variables in a test runner leak between tests.
@@ -1794,12 +1793,12 @@ AddInMemoryCollection is appended, and reads walk the chain in reverse. It
 does not matter what appsettings.json says. It does not matter what the
 developer has in user secrets. The dictionary wins.
 
-SAME TRICK FOR FEATURE FLAGS - forward reference to S6.7. A flag is just
+same TRICK FOR FEATURE FLAGS - forward reference to S6.7. A flag is just
 configuration, so you set feature_management:feature_flags:0:enabled here and
 test both sides of the branch. That is the slide people photograph in the
 flags block.
 
-The other use, if anyone asks: in-memory as code DEFAULTS, added FIRST so
+The other use, if anyone asks: in-memory as code DEFAULTS, added first so
 everything overrides it. Rarer, but it is how you ship a sane fallback
 without a file.
 -->
@@ -1817,11 +1816,11 @@ kicker: "ACT 4 · PRODUCTION"
 [ACT 4] PRODUCTION
 60-min: keep, 45 seconds
 
-LAST BOUNDARY, and the one with consequences. Same artifact as the shared dev
+last BOUNDARY, and the one with consequences. Same artifact as the shared dev
 server - genuinely the same bytes. What changed is who supplies the values and
 what it costs to get one wrong.
 
-THREE THINGS ARE TRUE HERE THAT WERE NOT TRUE ON YOUR LAPTOP:
+Three things are true here that were not true on your laptop:
   OWNERSHIP  the person who needs to change a value may not be a developer
   TRUST      a leaked value here is an incident, not an inconvenience
   UPTIME     a restart is a change window, not a keystroke
@@ -1856,7 +1855,7 @@ On a laptop you restart the app without thinking. In production a restart is an
 event: dropped connections, a cold cache, a change window, maybe an approval.
 
 So production is the first place the question is worth asking at all:
-  "Can this value change WITHOUT stopping the process?"
+  "Can this value change without stopping the process?"
 
 That question has exactly three answers in .NET, and they are the three interfaces
 on the next slide. Do not list them here - just land the question and advance.
@@ -1885,14 +1884,14 @@ codeSize: "15"
 
 <!--
 [39-51 min] THE THREE INTERFACES - S5.3
-Snippet: lifted from d13. THE LONGEST BEAT IN THE TALK. DO NOT RUSH IT.
-60-min: NEVER CUT
+Snippet: lifted from d13. THE LONGEST BEAT IN THE TALK. Don't RUSH IT.
+60-min: never cut
 
   IOptions<T>          Singleton  no re-read     value can't change at runtime
   IOptionsSnapshot<T>  SCOPED     once per scope per-request consistency (web)
   IOptionsMonitor<T>   Singleton  yes + OnChange singletons & background services
 
-BEFORE / AFTER PAIR: all three interfaces on one slide, then the same three
+before / after PAIR: all three interfaces on one slide, then the same three
 after appsettings.json changed underneath the running app.
 Three different answers to the same question. That image is the slide.
 
@@ -1937,7 +1936,7 @@ IOptionsMonitor<T>   30
 <!--
 [OPTIONS] THE SETUP - BEFORE THE EDIT
 Snippet: lifted from d13
-60-min: NEVER CUT
+60-min: never cut
 
 All three interfaces, same key, same value. Nothing interesting yet - and that
 is the point. Establish the baseline so the reveal has something to move
@@ -1979,7 +1978,7 @@ The middle column matters: a snapshot already resolved in the current request st
 <!--
 [OPTIONS] THE REVEAL - AFTER THE EDIT
 Snippet: lifted from d13
-60-min: NEVER CUT. This is the longest beat in the talk.
+60-min: never cut. This is the longest beat in the talk.
 
 Three columns, because the honest answer has a middle state:
 
@@ -2031,28 +2030,28 @@ The **No** rows are the ones that matter: changing an environment variable on a 
 
 <!--
 [S8] RELOAD SEMANTICS
-60-min: show the table, do NOT walk it
+60-min: show the table, do not walk it
 
   appsettings*.json   YES, when reloadOnChange: true (host default)  FileSystemWatcher
   User secrets        YES                                            file watcher
   Environment vars    NO - read once at startup
   Command line        NO - read once at startup
-  Azure Key Vault     only if ReloadInterval is set (default: NEVER) polling
+  Azure Key Vault     only if ReloadInterval is set (default: never) polling
   App Configuration   YES, with ConfigureRefresh + a trigger         polling on activity
-  Key-per-file        ONLY with the 4-arg overload                   file watcher
+  Key-per-file        only with the 4-arg overload                   file watcher
   In-memory           NO
   Custom              your call - OnReload()
 
 FOUR CONSEQUENCES - say these out loud, the table alone doesn't land them:
 
-- Changing an environment variable on a running container does NOTHING.
+- Changing an environment variable on a running container does nothing.
   Restart the container.
 - reloadOnChange on a Kubernetes ConfigMap mount is UNRELIABLE - symlink swaps,
   not in-place writes. The watcher may or may not see them. Treat restart as the
   contract.
-- A single file save often fires the watcher TWICE (write + metadata). Debounce
+- A single file save often fires the watcher twice (write + metadata). Debounce
   anything expensive hanging off OnChange.
-- "CONFIG RELOADED" DOES NOT MEAN "APP RECONFIGURED." Reloading configuration
+- "CONFIG RELOADED" DOES not MEAN "APP RECONFIGURED." Reloading configuration
   does not reconfigure things that read it once at startup: Kestrel endpoints,
   the DI graph, HttpClient handler pipelines.
 
@@ -2068,13 +2067,13 @@ kicker: "COORDINATED CHANGE"
 
 <!-- OUTLINE.md # Slide 38 -->
 
-# One edit has to reach every instance — or none of them.
+# One edit now has to reach every instance.
 
 <!--
 [59-64 min] STAGE 3 - SHARED
 60-min: compress to 3 min - labels + sentinel key only
 
-THE PROBLEM THIS STAGE SOLVES:
+The problem this stage solves:
 Many apps and instances; values that change without a deploy.
 
 Note this block is only 5 minutes even at 90, because S6 now carries App
@@ -2120,19 +2119,19 @@ Snippet: lifted from d20. No Azure dependency now.
 Packages: Microsoft.Extensions.Configuration.AzureAppConfiguration
         + Microsoft.Azure.AppConfiguration.AspNetCore (refresh middleware)
 
-THE SIX THINGS WORTH SAYING:
+The six things worth saying:
 
 1. LABELS ARE THE ENVIRONMENT AXIS. One store, Development/Staging/Production
    labels, Selected in order so labeled values overlay unlabeled defaults.
    Select("Weather:*", LabelFilter.Null) then Select("Weather:*", envName).
    Load a SLICE, not the whole store.
 
-2. REFRESH IS NOT AUTOMATIC. You must call ConfigureRefresh and then RegisterAll()
+2. REFRESH IS not AUTOMATIC. You must call ConfigureRefresh and then RegisterAll()
    or Register(key). Feature flags are the exception - UseFeatureFlags self-registers.
    This trips up everyone exactly once.
 
 3. REFRESH IS ACTIVITY-DRIVEN in ASP.NET Core. The middleware checks on an
-   incoming request once the interval has elapsed. AN IDLE APP NEVER REFRESHES.
+   incoming request once the interval has elapsed. AN IDLE APP never REFRESHES.
    It is also ASYNCHRONOUS: the request that TRIGGERS the refresh does not
    block on it and may still serve the OLD values. Later requests see the new
    ones. Say this - people assume the triggering request gets the update.
@@ -2142,11 +2141,11 @@ THE SIX THINGS WORTH SAYING:
    middleware short-circuits before refresh ever runs.
 
 4. THE SENTINEL KEY PATTERN - the thing to actually take home.
-   Instead of RegisterAll(), watch ONE key you bump AFTER every other edit lands:
+   Instead of RegisterAll(), watch ONE key you bump after every other edit lands:
      refresh.Register("Weather:Sentinel", refreshAll: true)
-   Update the sentinel LAST. Each instance then reloads the selected values
+   Update the sentinel last. Each instance then reloads the selected values
    together in one refresh, so no single process sees a half-applied edit.
-   Do NOT say "atomic" - the store is not transactional across keys, and
+   Don't say "atomic" - the store is not transactional across keys, and
    instances refresh independently, so they do not all switch at the same
    moment. It answers "half-applied", not "everywhere at once".
 
@@ -2175,7 +2174,7 @@ kicker: "CONTROLLED RELEASE"
 
 <!-- OUTLINE.md # Slide 41 -->
 
-# Flags are configuration that changes behaviour, not just values.
+# A feature flag is configuration with an `if` statement attached.
 
 <!--
 [64-84 min] FEATURE FLAGS - S6
@@ -2219,10 +2218,10 @@ codeSize: "15"
 60-min: keep - this is the load-bearing idea of the whole flags block
 
 Microsoft.FeatureManagement IS BUILT ON IConfiguration.
-ANY configuration provider can back a feature flag. No new infrastructure, no new
+any configuration provider can back a feature flag. No new infrastructure, no new
 file format, no service dependency.
 
-That means flags inherit EVERYTHING from S2-S4: the provider chain, precedence,
+That means flags inherit everything from S2-S4: the provider chain, precedence,
 reload semantics, and the debug view. A flag in appsettings.Development.json is
 overridden by the same flag in an environment variable, by the same last-wins
 rule as any other key.
@@ -2278,19 +2277,19 @@ That is the entire setup. No cloud service, no cloud account, no network depende
 Snippet: lifted from d28
 60-min: keep
 
-THE SCHEMA:
+The schema:
   "feature_management": { "feature_flags": [
       { "id": "NewCheckout", "enabled": false },
       { "id": "BetaBanner",  "enabled": true }
   ]}
   services.AddFeatureManagement();
 
-SCHEMA NOTES WORTH SAYING OUT LOUD:
+Schema notes worth saying out loud:
 - feature_management / feature_flags is the MICROSOFT SCHEMA, shared across the
   .NET, Go, Python and JavaScript libraries. The older .NET-only FeatureManagement
   section still works; when both are present, feature_management wins.
 - No "conditions" means the flag is simply enabled. WITH conditions, enabled:true
-  means "eligible to be evaluated," NOT "on." That distinction catches people.
+  means "eligible to be evaluated," not "on." That distinction catches people.
 - requirement_type defaults to Any; set All when every filter must pass.
 - A COLON IS FORBIDDEN in a flag name - flag names are configuration keys.
 - Point the library at a custom section with AddFeatureManagement(config.GetSection("MyFlags")).
@@ -2302,7 +2301,7 @@ CONSUMING IT - four shapes, show at least two:
   <feature name="BetaBanner">  and  <feature negate="true" name="BetaBanner">
   app.UseForFeature("NewCheckout", branch => branch.UseMiddleware<...>())
 
-REGISTRATION DETAIL THAT BITES PEOPLE:
+Registration detail that bites people:
 AddFeatureManagement() registers feature management as a SINGLETON. If a filter
 needs scoped services (current user, a DbContext) you must use
 AddScopedFeatureManagement() instead.
@@ -2356,7 +2355,7 @@ user is:
 
 *** THE SLIDE THAT EARNS ITS OWN MINUTE ***
 
-PLAIN Microsoft.Percentage IS EVALUATED PER CALL, NOT PER USER.
+PLAIN Microsoft.Percentage IS EVALUATED PER CALL, not PER USER.
 
 A 50% flag checked twice in one request can answer DIFFERENTLY EACH TIME. A user
 can watch the feature flicker between page loads. Nav bar says new checkout,
@@ -2410,7 +2409,7 @@ Snippet: lifted from d29
 Ten checks. One user. One process. The percentage row flickers; the targeting
 row does not. That contrast is the slide.
 
-SAY IT PLAINLY:
+Say:
 "Microsoft.Percentage does not know who you are. It rolls the dice on every
  call. Fifty percent means half the CALLS, not half the USERS."
 
@@ -2453,7 +2452,7 @@ Snippet: lifted from d31 - optional even at 90
 
 A variant flag returns a VALUE - string, number, bool, or a whole configuration
 object - instead of a boolean. This is where feature flags and the options
-pattern meet, which is why it belongs in THIS talk and not a generic flags talk.
+pattern meet, which is why it belongs in this talk and not a generic flags talk.
 
   Variant variant = await features.GetVariantAsync("CheckoutLayout", ct);
   variant.Configuration.Bind(settings);   // it's an IConfigurationSection -
@@ -2463,7 +2462,7 @@ That last line is the whole point. Land it and you can move on.
 
 ALLOCATION is evaluated in order: user -> group -> percentile, falling back to
 default_when_enabled, or default_when_disabled when the flag is off.
-A SEED makes percentile assignment stable, and consistent ACROSS flags that share
+A SEED makes percentile assignment stable, and consistent across flags that share
 the same seed. (This is the fix for the S6.4 gotcha.)
 
 status_override (None / Enabled / Disabled) lets a variant flag also answer
@@ -2496,14 +2495,14 @@ codeSize: "15"
 <!--
 [80-84 min] FLAG DEBT - S6.6
 Snippet: lifted from d32, the flag inventory endpoint
-60-min: NEVER CUT. This is the closing argument.
+60-min: never cut. This is the closing argument.
 
 THIS SECTION IS WHAT SEPARATES THE TALK FROM THE DOCUMENTATION.
 It's the thing nobody else in the room will say.
 
 Every flag is a permanent if-statement with an owner and an expiry date.
 
-- A FLAG DOUBLES YOUR CODE PATHS. Ten live flags is up to 1,024 nominal
+- A FLAG DOUBLES your CODE PATHS. Ten live flags is up to 1,024 nominal
   combinations. You test maybe three of them.
 
 - NAME FLAGS FOR THEIR REMOVAL.
@@ -2517,17 +2516,17 @@ Every flag is a permanent if-statement with an owner and an expiry date.
     ops / kill  permanent        and that's fine
     permission  permanent        and arguably not a flag at all - that's authorization
 
-- DELETING A FLAG IS A CODE CHANGE, NOT A CONFIG CHANGE. Turning it off in the
+- DELETING A FLAG IS A CODE CHANGE, not A CONFIG CHANGE. Turning it off in the
   portal and walking away leaves the dead branch compiling forever. This is the
   sentence people need to hear.
 
 - INVENTORY THEM. GetFeatureNamesAsync() enumerates every flag the app knows
   about. A health endpoint listing flags and their current state is a five-minute
-  build and THE ONE PEOPLE WILL ACTUALLY STEAL. That's d32.
+  build and THE ONE PEOPLE will actually STEAL. That's d32.
 
 TESTING (S6.7): flags are configuration, so the in-memory provider is the whole
 story - or substitute IVariantFeatureManager outright.
-THE RULE: test BOTH SIDES of every live flag, or you're shipping an untested
+THE RULE: test both SIDES of every live flag, or you're shipping an untested
 branch behind a switch someone can flip at 2am.
 -->
 
@@ -2563,7 +2562,7 @@ Turning it off in the portal leaves the dead branch compiling forever. *Ten live
 Snippet: lifted from d32
 60-min: keep the first line; the endpoint is optional
 
-THE SENTENCE PEOPLE NEED TO HEAR:
+The sentence people need to hear:
 "Turning a flag off in the portal is not deleting it. The dead branch is still
  there, still compiling, still something the next person has to reason about."
 
@@ -2573,7 +2572,7 @@ someone's board, it does not happen.
 THE ENDPOINT IS THE THING PEOPLE STEAL. Two caveats, say both:
 - Name and a boolean is not enough. The previous slide argued owner and expiry
   are what matter, so the record carries them.
-- For a percentage or targeting flag that boolean is THIS evaluation, for THIS
+- For a percentage or targeting flag that boolean is this evaluation, for this
   context. Slide 44 just proved it can differ on the very next call. It is an
   inventory of what exists, not a global on/off state.
 - Authorize it. An open /flags endpoint hands an attacker your roadmap and your
@@ -2604,8 +2603,8 @@ A flag flipped in a portal is a PRODUCTION CHANGE WITH NO PR, NO REVIEW, AND NO
 DIFF - unless the store keeps history and you treat flag changes as deploys.
 Azure App Configuration keeps revisions. Use them.
 
-THE THROUGH-LINE CLOSES HERE:
-That is the SAME TRADE as S1.2's build-time-to-runtime move, one level up.
+The through-line closes here:
+That is the same TRADE as S1.2's build-time-to-runtime move, one level up.
 Constants -> web.config -> Generic Host was trading build-time for runtime.
 Deploys -> feature flags is the same trade again, one level up.
 
@@ -2617,12 +2616,12 @@ End the flags block on JUDGMENT, not tooling.
 
 ---
 layout: "section"
-kicker: "ACT 5 · WHERE SHOULD THIS VALUE LIVE?"
+kicker: "ACT 5 · where SHOULD this VALUE LIVE?"
 ---
 
 <!-- OUTLINE.md # Slide 47a -->
 
-# Decide by ownership, sensitivity, scope, and change cadence.
+# Who owns it? Is it secret? Who needs it? How fast must it change?
 
 <!--
 [ACT 5] THE DECISION
@@ -2678,7 +2677,7 @@ codeSize: "15"
     environment name, instance id, port, region
     -> environment variables, set by the platform
 
-THE LINE TO SAY:
+Say:
 "If a value is in the wrong bucket, no amount of provider tuning fixes it."
 
 That's the diagnostic. Most configuration pain people bring to you is a bucketing
@@ -2693,7 +2692,7 @@ codeSize: "15"
 
 <!-- OUTLINE.md # Slide 49 -->
 
-# By application shape
+# What I'd use for six common app types
 
 | App shape | Baseline | Secrets | Change without redeploy? |
 | --- | --- | --- | --- |
@@ -2708,7 +2707,7 @@ codeSize: "15"
 [84-87 min] CHOOSING A STRATEGY - S7.2, S7.3
 60-min: keep - this is the one people photograph. Pause on it.
 
-LEAVE THIS UP LONGER THAN FEELS COMFORTABLE. Count to five. Let them get the shot.
+LEAVE this UP LONGER than FEELS COMFORTABLE. Count to five. Let them get the shot.
 
   ASP.NET Core on App Service   JSON + App Service settings; KV refs
                                 App Service settings RESTART the app;
@@ -2784,7 +2783,7 @@ codeSize: "15"
 
 <!-- OUTLINE.md # Slide 51 -->
 
-# The spine assumes something that gets deployed
+# A desktop app gets installed, not deployed
 
 | | Server | Desktop |
 | --- | --- | --- |
@@ -2807,15 +2806,15 @@ codeSize: "15"
 60-min: compress to one line inside the choosing slide
 
 THE ABSTRACT PROMISES "cloud-native microservices OR DESKTOP APPS." This is the
-section that pays it off. If you're short on time, this is the honest thing to cut
+section that pays it off. If you're short on time, this is the first thing to cut
 - but say the one-liner.
 
-STRUCTURAL HONESTY - name this rather than letting the structure contradict you:
-The S1.4 spine assumes a SERVER. A desktop app has local dev, has "deployment" as
-an INSTALL, and has NO STAGE THREE at all - no orchestrator setting env vars, no
+Worth naming - name this rather than letting the structure contradict you:
+The journey assumes a server. A desktop app has local dev, has "deployment" as an
+install, and has no shared stage at all - no orchestrator setting env vars, no
 central store it should authenticate to, no instance fleet.
 
-THE LINE: "The spine assumes something that gets deployed. Here's what changes
+Say: "Everything so far assumed something that gets deployed. Here's what changes
 when it gets installed on someone's laptop instead."
 
 The configuration MODEL is identical. What differs is what's wired up for you.
@@ -2825,18 +2824,18 @@ The configuration MODEL is identical. What differs is what's wired up for you.
 - WinForms/WPF have no host by default. Either build IConfiguration by hand, or
   (preferred) host the desktop app and get DI, logging, and options for free.
 
-FOUR DESKTOP REALITIES:
+Four desktop realities:
 - SetBasePath(AppContext.BaseDirectory). The working directory of a double-clicked
-  EXE is NOT the install directory. Directory.GetCurrentDirectory() will bite you.
+  EXE is not the install directory. Directory.GetCurrentDirectory() will bite you.
 - Per-user WRITABLE settings are a different problem. IConfiguration is
   read-optimized and has NO WRITE API. User preferences belong in a JSON file
   under SpecialFolder.ApplicationData that you load as an extra provider and save
   yourself.
 - app.config isn't gone, but ConfigurationManager.AppSettings and IConfiguration
   are two UNRELATED systems. Migrating means moving keys, not bridging them.
-- CLIENT APPS MUST NOT HOLD CLOUD SECRETS. No Key Vault credential ships in a
+- CLIENT APPS must not HOLD CLOUD SECRETS. No Key Vault credential ships in a
   desktop binary. Authenticate the USER, call a backend that holds the secret.
-  SAY THIS OUT LOUD - someone always asks.
+  SAY this OUT LOUD - someone always asks.
 
 Flags are the interesting exception: a desktop app absolutely can consume flags
 from a file or your own backend. It just can't hold the credential to a flag store.
@@ -2855,7 +2854,7 @@ kicker: ""
 [Q&A]
 60-min: keep - but see the note below about where questions actually go
 
-THE ONE-LINE TAKEAWAY, say it BEFORE you open the floor - otherwise the last
+THE ONE-LINE TAKEAWAY, say it before you open the floor - otherwise the last
 thing the room hears is whatever the final question happened to be:
 
 "GetDebugView() tells you where the value came from. Validate at startup so the
@@ -2868,9 +2867,9 @@ AT 60 MINUTES: the running order takes questions at three breath points -
 after the model (14), after Options (31), after flags (48) - so this slide is
 a backstop, not the main event.
 
-QUESTIONS YOU WILL GET, AND THE SHORT ANSWERS:
+Questions you will get, and the short answers:
 
-- "When should I NOT use Azure App Configuration?"
+- "When should I not use Azure App Configuration?"
   S7.3 rule 3. One app that redeploys in five minutes doesn't need it.
   This is the best question, so if nobody asks it, ask it yourself.
 
@@ -2914,7 +2913,7 @@ image: "/kevin-griffin.png"
 [thanks]
 60-min: keep, 1 min
 
-LEAVE THIS UP for the rest of the room's time, and through the hallway track.
+LEAVE this UP for the rest of the room's time, and through the hallway track.
 People photograph the last slide. Put the repo QR here.
 
   Repo:      github.com/1kevgriff - modern-dotnet-configuration
@@ -2942,7 +2941,7 @@ kicker: "APPENDIX"
 
 <!-- OUTLINE.md # Slide 54a -->
 
-# Things worth knowing that the journey did not need.
+# Useful details we skipped.
 
 <!--
 [APPENDIX] OFF THE MAIN PATH
@@ -3074,7 +3073,7 @@ SOURCE GENERATORS - binding and validation both default to REFLECTION. Two opt-i
 The options validation generator is ON BY DEFAULT when the project references
 Microsoft.Extensions.Options 8+ or builds an ASP.NET Core app. It rewrites
 [Range], [MinLength], [MaxLength], [Length] into generated equivalents.
-With [OptionsValidator] you do NOT also call ValidateDataAnnotations().
+With [OptionsValidator] you do not also call ValidateDataAnnotations().
 
 OPTIONAL (d17, 90 min only): PublishAot=true surfaces IL2026 / IL3050 warnings
 from reflection binding; turn both generators on and they disappear.
@@ -3117,7 +3116,7 @@ Two types. That is the whole contract.
 Then an extension method so it reads like every other provider:
   builder.Configuration.AddSqlConfiguration(connectionString);
 
-THREE THINGS TO LAND, THEN MOVE ON:
+Three things to land, then move on:
 
 1. Load() RUNS ONCE, at build time. It is not lazy. If you want refresh you
    schedule it yourself and call OnReload() - that is what fires the change
