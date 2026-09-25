@@ -113,13 +113,16 @@ configuration comes from that trade, and §6.8 shows feature flags making the sa
 
 State the position plainly, because the rest of the talk is its defense:
 
-> **If a value could ever differ between two environments, two deployments, or two moments in time,
-> it belongs in configuration. If a behavior could ever need to change without a deploy, it belongs
-> behind a feature flag.**
+> **If an operational value can differ by environment, deployment, or time, configure it.
+> If a code path must be switchable without a deploy, flag it.**
 
-The bar is *could ever*, not *does today*. Moving a value into configuration later is a code change
-under time pressure; putting it there now costs one line. The same argument applies to flags: adding
-one before you ship is cheap, and adding one during an incident is not.
+Note the word *operational*. This is deliberately not "anything that might ever change" — user
+preferences, tenant data and business rules all vary without belonging in application configuration,
+and §4.11 says so explicitly about desktop. The claim is about the values that operate the app.
+
+Within that scope the bar is still anticipatory, not reactive. Moving a value into configuration
+later is a code change under time pressure; putting it there now costs one line. Same for flags:
+adding one before you ship is cheap, adding one during an incident is not.
 
 Two objections to handle out loud, both fair:
 
@@ -141,7 +144,7 @@ capability and operational cost:
 single deployment unit — many apps, many instances, values that change without a deploy. Scale is one
 reason you get there, not the definition.)
 
-| Stage | The problem it solves | Primary sources | Spec | Demos |
+| Stage | The problem it solves | Primary sources | Spec | Projects |
 | --- | --- | --- | --- | --- |
 | **Local dev** | A developer clones the repo and it runs. Secrets never touch git. | `appsettings.json`, `appsettings.Development.json`, user secrets, `launchSettings.json` | §4.1, §4.4 | 01–04, 07, 09, 10 |
 | **Deployment** | One artifact, many environments. The platform supplies the values. | Environment variables, command line, key-per-file mounts, Key Vault | §4.2, §4.3, §4.5, §4.7 | 05, 08, 18, 23 |
@@ -190,7 +193,9 @@ of that dictionary onto typed objects. §2 unpacks it — and explains the cold 
 - Configuration is a flat `IDictionary<string, string?>` with `:` as the hierarchy delimiter.
   `{"Db": {"Timeout": 30}}` is the single key `Db:Timeout` with the **string** value `"30"`.
 - **Keys are case-insensitive.** `DB:TIMEOUT` == `db:timeout`.
-- **Values are always strings.** Every `int`, `bool`, `TimeSpan`, and `Uri` is a binder conversion.
+- **Every scalar is text — or null.** The contract is `string?`. Every `int`, `bool`, `TimeSpan`
+  and `Uri` is a binder conversion. Since .NET 10 a real `null` survives as `null` rather than
+  being flattened to `""` (§9), so "always a string" is no longer quite true.
 - **Last provider wins.** `IConfigurationBuilder.Add` appends; reads walk the provider list in
   reverse and take the first hit.
 - Array elements are keys too: `Servers:0:Host`, `Servers:1:Host`.
@@ -668,11 +673,18 @@ public sealed class ApiFactory : WebApplicationFactory<Program>
 }
 ```
 
-### 4.9 INI and XML
+### 4.9 INI and XML — explicitly cut
 
-Included for completeness and legacy migration (`web.config` / `app.config` refugees):
-`AddIniFile`, `AddXmlFile`. Since .NET 6 the XML provider auto-indexes repeating elements instead of
-requiring a `name` attribute. One slide, no demo.
+**No slide, and no spoken line.** `AddIniFile` and `AddXmlFile` exist, are built in, and reload like
+any other file provider. Since .NET 6 the XML provider auto-indexes repeating elements rather than
+requiring a `name` attribute.
+
+They are cut on purpose rather than forgotten. Neither teaches anything the JSON provider has not
+already taught — the provider model and the precedence rules are identical — and a drive-by mention
+buys completeness at the cost of a detour. Almost nobody is reaching for INI in 2026.
+
+They stay in the repo's provider catalogue as legacy-interop options. If it comes up in Q&A:
+*"Yes, `AddIniFile` and `AddXmlFile` exist. Same provider model, same precedence rules."*
 
 ### 4.10 Custom provider
 
@@ -1299,8 +1311,14 @@ Talk-relevant deltas from .NET 9:
    treated as missing and skipped by the binder, and the JSON provider converted `null` to `""`.
    In .NET 10 the JSON provider reports `null` unchanged and the binder binds it like any other
    value. Binding of `null` array elements and empty arrays now works.
-   → A property that used to keep its default when the JSON said `null` now gets overwritten with
-   `null`. Worth a live before/after.
+   → The payoff differs **by type**, so do not state it as one rule:
+   a `string` with an initializer was *already* overwritten — with `""`;
+   an `int?` **kept** its initializer, because `""` could not be parsed;
+   a non-nullable value type **threw** `InvalidOperationException`.
+   In .NET 10 those become `null`, `null`, and `default(T)` respectively, and
+   empty arrays now bind as empty arrays instead of being ignored.
+   The honest one-liner is `d06`'s own observation: *"Retries was 3 on .NET 9 and
+   is null on .NET 10."* Show at least `string?`, `int?` and a non-nullable type.
    [Docs](https://learn.microsoft.com/dotnet/core/compatibility/extensions/10.0/configuration-null-values-preserved)
 2. **Seven new connection-string environment prefixes** (11 total) — Postgres, Cosmos, Redis,
    Service Bus, Event Hubs, Notification Hubs, API Hubs. See §4.2.
@@ -1412,9 +1430,9 @@ Notes:
 Flags get 10 of the 51 content minutes (~20%) — the ratio holds. Budget 51, not 56, and let
 questions ride along; a packed 56 overruns the moment a hand goes up during Options.
 
-| Minutes | Block | Content | Demos |
+| Minutes | Block | Content | Snippets |
 | --- | --- | --- | --- |
-| 0–03 | **Cold open** | Wrong value, unexplained dump | 01 |
+| 0–03 | **Cold open** | Wrong value, then the unexplained dump | d01 |
 | 03–07 | **Why + thesis** | §1.1 five reasons (trust and ownership get one line each), §1.3 thesis | — |
 | 07–09 | **Spine** | §1.4 local dev → deployment → shared, with the three signature failures | — |
 | 09–14 | The model | Flat dictionary, `:` / `__`, precedence. Pays off the cold open | — |
@@ -1437,7 +1455,7 @@ Running long? Cut in this order. It buys six minutes without touching the never-
 3. Demo 29 — describe the per-call gotcha instead of showing it.
 
 Stretching past 60 is not a re-pace: switch to §11.1, which is a different talk. The extra 30
-minutes are real content — live Key Vault, key-per-file, variants, flag debt at full length, the
+minutes are real content — Key Vault, key-per-file, variants, flag debt at full length, the
 desktop aside — not padding.
 
 **Cut from the 90 for the 60:**
@@ -1508,7 +1526,8 @@ demos/
 | Reset script | `d{NN}-{slug}/reset.ps1` | resets user secrets, env vars, edited JSON |
 | Shared helper | none — the dump helper is **copied** into each demo that needs it | self-contained beats DRY here |
 
-- **Lowercase kebab for folders, PascalCase for projects.** The folder is what you type on stage; the
+- **Lowercase kebab for folders, PascalCase for projects.** The folder is how you find the source of a
+  snippet; the
   project name is what appears in build errors and IDE tabs. Both carry the id so a stack trace on
   the projector names the demo.
 - **Zero-pad to two digits** so `ls` sorts correctly, and keep the `d` prefix — a bare `01-` folder

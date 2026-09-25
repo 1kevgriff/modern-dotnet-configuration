@@ -1,0 +1,23 @@
+{
+  "name": "modern-dotnet-configuration-slides",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "npm run generate && slidev build",
+    "dev": "npm run generate && slidev --open",
+    "export": "npm run build && slidev export --wait 6000 --wait-until networkidle --timeout 600000",
+    "generate": "node build/outline-to-slidev.mjs",
+    "export:png": "npm run build && slidev export --format png --wait 6000 --wait-until networkidle --timeout 600000",
+    "export:pptx": "npm run build && slidev export --format pptx-editable --wait 6000 --wait-until networkidle --timeout 600000",
+    "check": "node build/check-overflow.mjs",
+    "verify": "npm run build && npm run check"
+  },
+  "dependencies": {
+    "@slidev/cli": "^53.0.0",
+    "@slidev/theme-default": "latest",
+    "vue": "^3.5.33"
+  },
+  "devDependencies": {
+    "playwright-chromium": "^1.63.0"
+  }
+}
