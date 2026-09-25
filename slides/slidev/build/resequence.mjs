@@ -54,7 +54,7 @@ const NEW = {
   '11a': {
     content: [
       '**Section divider.** Kicker `ACT 1 · THE SHARED BASELINE`, ' +
-      'title **`appsettings.json` is a team decision, and it ships with the app.**. Navy ground.',
+      'title **Start with defaults the team shares.**. Navy ground.',
     ].join(NL),
     notes: [
       '[ACT 1] THE SHARED BASELINE',
@@ -63,9 +63,10 @@ const NEW = {
       'FIRST BOUNDARY. Everything from here to the end is one application moving:',
       'the baseline everyone shares -> my machine -> a shared dev server -> production.',
       '',
-      'The baseline is the part everyone agrees on. It is checked in, it is reviewed,',
-      'and it travels with the artifact. Nothing here is secret and nothing here is',
-      'machine-specific - those come next, and they OVERRIDE this rather than replace it.',
+      'In this example, we check in appsettings.json and publish it with the app.',
+      'That is a choice, not a requirement. The default builder makes the file optional.',
+      'A deployment can supply it separately or use other configuration providers.',
+      'These shared defaults contain no secrets or machine-specific values.',
       '',
       'THE QUESTION THIS ACT ANSWERS:',
       '  "Who owns this value, and what does everyone get by default?"',

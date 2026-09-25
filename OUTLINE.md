@@ -299,6 +299,7 @@ Say so; it gets a laugh and it is the point.
 ```
 
 ---
+
 # Slide 7a
 
 ## Slide Content
@@ -337,6 +338,7 @@ this?" was a real production question for a decade.
 ```
 
 ---
+
 # Slide 7b
 
 ## Slide Content
@@ -367,6 +369,7 @@ Then advance: the next slide is the price of all this, and it comes back twice.
 ```
 
 ---
+
 # Slide 8
 
 ## Slide Content
@@ -492,65 +495,310 @@ Two things to say with this up:
 
 ---
 
-# Slide 11
-
-## Slide Content
-
-**Headline:** When config breaks, I check four things first
-
-2×2 quadrant of white cards: **ORDER**, **SHAPE**, **LIFETIME**, **TRUST**,
-each with a one-line definition. This set is recalled later as a small navy badge
-in the top-right corner of the slide where that mode bites.
-
-## Notes
-
-```text
-[motif slide] FOUR FAILURE MODES - S1.5
-60-min: keep - it's 30 seconds and it pays off all talk
-
-Not a section. A label to hang on things as they come up. Whatever stage you're
-in, almost every configuration bug is one of four things:
-
-1. ORDER    - a provider you forgot about is winning.
-2. SHAPE    - the key you set doesn't produce the key the binder looks for.
-3. LIFETIME - you cached a value that was supposed to change, or didn't cache
-              one that wasn't.
-4. TRUST    - a secret is sitting in a file that ships with the app.
-
-Name them out loud as they come up:
-  order on Same key. Four winners.    shape on Environment variables
-  lifetime on the three interfaces    trust on User secrets
-
-By the end of the flags section the audience should be calling the mode before you do.
-that is when this slide has done its job.
-```
-
----
-
 # Slide 11a
 
 ## Slide Content
 
-**Section divider.** Kicker ``, title **`appsettings.json` is a team decision, and it ships with the app.**. Navy ground.
+**Headline:** Start with CreateBuilder
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+```
+
+It loads these configuration sources for you:
+
+- `appsettings.json` and `appsettings.{Environment}.json`
+- Application-named settings files in .NET 10
+- User secrets in Development, when configured
+- Environment variables
+- Command-line arguments from `args`
 
 ## Notes
 
 ```text
-[ACT 1] THE SHARED BASELINE
-60-min: keep, 30 seconds
+This starts our shared-baseline example. We are using WebApplication.CreateBuilder.
+These defaults belong to this builder; a bare ConfigurationBuilder does not add them.
+The JSON files are optional. They can ship with the app, be supplied separately,
+or be absent. For this example, we choose to publish our shared JSON defaults.
 
-first BOUNDARY. Everything from here to the end is one application moving:
-the baseline everyone shares -> my machine -> a shared dev server -> production.
+The .NET 10 application-named files are {ApplicationName}.settings.json and
+{ApplicationName}.settings.{Environment}.json. The full precedence reference comes
+after we have seen a value change. Host configuration also supplies fallback values.
 
-The baseline is the part everyone agrees on. It is checked in, it is reviewed,
-and it travels with the artifact. Nothing here is secret and nothing here is
-machine-specific - those come next, and they OVERRIDE this rather than replace it.
+Next: what goes inside appsettings.json, and how do we read it?
+```
 
-The question this act answers:
-  "Who owns this value, and what does everyone get by default?"
+---
 
-Weather:TimeoutSeconds is the value to follow. It starts at 30 here and it will
-cross every boundary in the talk.
+# Slide 11b
+
+## Slide Content
+
+**Headline:** Put a default in appsettings.json
+
+```json
+{
+  "Weather": {
+    "TimeoutSeconds": 30
+  }
+}
+```
+
+```csharp
+int timeout = builder.Configuration
+    .GetValue<int>("Weather:TimeoutSeconds");
+Console.WriteLine($"Weather timeout is {timeout} seconds.");
+```
+
+```text
+$ dotnet run --no-launch-profile
+Weather timeout is 30 seconds.
+```
+
+Nested JSON gives us the key `Weather:TimeoutSeconds`.
+
+## Notes
+
+```text
+The builder is the one from the preceding slide. This is the format of our first
+source: a JSON object, with a Weather section and a TimeoutSeconds value.
+The colon in the read follows that nesting. This is an application setting we
+chose, not a timeout built into .NET.
+
+The observed output assumes no environment or command-line override. We disable
+the launch profile so the template does not select Development for this run.
+The next slide explains why this API returns an int even though providers expose
+text or null. Then we will change the value without changing this read.
+```
+
+---
+
+# Slide 13
+
+## Slide Content
+
+**Headline:** `GetValue<int>` converts the text for you
+
+```csharp
+string? raw = builder.Configuration["Weather:TimeoutSeconds"];
+// raw is "30"
+
+int timeout = builder.Configuration
+    .GetValue<int>("Weather:TimeoutSeconds");
+// timeout is 30
+```
+
+The provider exposes text or null. `GetValue<int>` converts the value when you read it.
+
+## Notes
+
+```text
+This is the same GetValue<int> call from the first example. The generic type
+argument asks the configuration binder for an integer; it is not a C# cast.
+The indexer exposes the underlying string? value. GetValue<int> converts "30"
+to 30 without changing the value stored by the provider.
+
+If the supplied text is "thirty", conversion fails. If it is "-1", conversion
+succeeds even though that may be an invalid timeout. Typed options and validation
+later let us express that rule. Provider values can also be null; the appendix
+covers .NET 10's null handling.
+```
+
+---
+
+# Slide 13a
+
+## Slide Content
+
+**Headline:** The environment picks the second file
+
+```text
+# bash
+$ dotnet run --no-launch-profile
+  Weather timeout is 30 seconds.          appsettings.json only
+
+$ ASPNETCORE_ENVIRONMENT=Development dotnet run --no-launch-profile
+  Weather timeout is 120 seconds.         + appsettings.Development.json
+```
+
+Both files load. The environment one is added second, so its keys win.
+
+> `Production` is the fallback when nothing sets the name. Locally the name usually
+> comes from `launchSettings.json` — which is why plain `dotnet run` and
+> `dotnet run --no-launch-profile` can disagree.
+
+## Notes
+
+```text
+[act 1] THE ENVIRONMENT NAME
+Verified: loadproof cases 1 and 2 - Production -> 30, Development -> 120
+60-min: keep, 45 seconds
+
+EnvironmentName decides which second file is probed. It is the input that selects the
+rest of your inputs.
+
+Where the name comes from:
+  launchSettings.json      locally, under F5 or plain dotnet run
+  DOTNET_ENVIRONMENT       honoured by WebApplication too, not just workers
+  ASPNETCORE_ENVIRONMENT   what most deployment platforms set
+  Production               the fallback when nothing set it
+
+Measured on SDK 10.0.303, and it surprises people: when BOTH variables are set,
+DOTNET_ENVIRONMENT wins. ASPNETCORE_ENVIRONMENT=Staging with
+DOTNET_ENVIRONMENT=Development gives Development. The DOTNET_ provider is registered
+after the ASPNETCORE_ one, so it is later in the chain.
+
+Two other things worth a sentence:
+- appsettings.Development.json does not replace appsettings.json. Both load, in that
+  order. The next slide shows what that means key by key.
+- The name is arbitrary: appsettings.QA-East.json works if the variable says QA-East.
+```
+
+---
+# Slide 20
+
+## Slide Content
+
+**Headline:** The environment file overrides individual keys
+
+Three panels: `appsettings.json`, `appsettings.Development.json`, and
+**what the app sees**. Development overrides the URL and sets TimeoutSeconds to 120.
+ApiKey is absent from Development, so the placeholder survives from the base file.
+
+## Notes
+
+```text
+We are still reading Weather:TimeoutSeconds with the same code.
+The base file sets 30. Development sets 120. Both files load, and Development wins
+for that key. ApiKey is absent from the Development file, so the base placeholder
+survives. It is illustrative text, not a real secret.
+
+This example chooses to publish these files. Shipping them is not required:
+deployment can supply them separately or use other providers.
+
+Next we override the same key with an environment variable and a command-line
+argument. Neither change requires editing Program.cs.
+```
+
+---
+
+# Slide 18
+
+## Slide Content
+
+**Headline:** Same key. Four sources. Four answers.
+
+These sources are already registered by `CreateBuilder`. Each run just sets the same
+key in one more of them.
+
+```text
+  appsettings.json                          Weather timeout is 30 seconds.
++ appsettings.Development.json              Weather timeout is 120 seconds.
++ Weather__TimeoutSeconds=10                Weather timeout is 10 seconds.
++ --Weather:TimeoutSeconds=5                Weather timeout is 5 seconds.
+```
+
+Every layer is still loaded. The newer one just wins the read.
+
+## Notes
+
+```text
+The read stays the same. These runs use the default sources CreateBuilder already
+registered. We set Weather:TimeoutSeconds in an additional source each time:
+base JSON 30, Development JSON 120, environment variable 10, command line 5.
+The later provider that contains the key wins.
+
+Next: what if we want a file that the default setup does not load?
+```
+
+---
+
+# Slide 18a
+
+## Slide Content
+
+**Headline:** Add your own file and it wins
+
+**Full-bleed code slide.** Appended last, so it beats everything already registered.
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile("weather.json",
+                                  optional: false, reloadOnChange: true);
+```
+
+```text
+# bash - weather.json says 77, the env var says 10, the command line says 5
+$ Weather__TimeoutSeconds=10 dotnet run --no-launch-profile -- --Weather:TimeoutSeconds=5
+  Weather timeout is 77 seconds.
+```
+
+> `optional: false` fails fast if the file is missing. `reloadOnChange: true` watches
+> it. And nothing discovered this file — you named it.
+
+## Notes
+
+```text
+[act 1] YOUR OWN FILE, AND WHERE IT LANDS
+Verified: loadproof case 5 - weather.json 77 beat env 10 and cli 5
+60-min: keep - it makes "last one wins" actionable
+
+They have just learned the command line wins. Then a JSON file beats it. Nothing is
+special about the command line; it was simply registered last, and now this file is.
+There is no ranking table in the framework - there is a list, and Add appends to it.
+
+The two flags are worth naming:
+- optional: false turns a missing file into a startup failure instead of a silent
+  default.
+- reloadOnChange: true attaches a file watcher, one per file. The reload table later
+  says which providers honour it.
+
+.NET does not scan the folder for JSON. appsettings and appsettings.{Environment} are
+probed because CreateBuilder asks for them by name; weather.json is read because you
+asked for it by name.
+```
+
+---
+# Slide 18b
+
+## Slide Content
+
+**Headline:** I only want these three sources
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+var environment = builder.Environment.EnvironmentName;
+
+builder.Configuration.Sources.Clear();
+
+builder.Configuration
+    .AddJsonFile("appsettings.json", optional: true)
+    .AddJsonFile($"appsettings.{environment}.json", optional: true)
+    .AddEnvironmentVariables();
+```
+
+Environment variables come last, so they win.
+
+## Notes
+
+```text
+The previous slide added a source to the defaults. Here we replace that list.
+Clear the registered sources, then add exactly the three we want, in that order.
+This configuration no longer has the default command-line, user-secrets or
+application-named JSON providers. Environment variables override matching JSON keys.
+
+CreateBuilder has already selected the host environment before Sources.Clear runs.
+We keep that name and use it to choose the environment-specific file. Clearing
+the sources does not undo host decisions already made, such as the environment
+and content root. This is control over the configuration sources used from here on.
+
+Both files are optional in this example. Use optional: false if a missing file
+should stop startup. These overloads do not enable file watching; add
+reloadOnChange: true if that is also part of the setup you want.
+
+The read stays the same: GetValue<int>("Weather:TimeoutSeconds").
+Use the default setup, extend it, or replace its sources when you have a reason.
 ```
 
 ---
@@ -577,7 +825,7 @@ strings, plus a binder that projects slices of it onto typed objects.
 - Flat IDictionary<string, string?> with ':' as the hierarchy delimiter.
   {"Db": {"Timeout": 30}} is the single key Db:Timeout with the STRING "30".
 - KEYS ARE CASE-INSENSITIVE. DB:TIMEOUT == db:timeout.
-- VALUES ARE always STRINGS. Every int, bool, TimeSpan, Uri is a binder conversion.
+- Provider values are text or null. GetValue<int> converts text to an integer.
 - last PROVIDER WINS. Add() appends; reads walk the list in reverse, first hit wins.
 - ARRAY ELEMENTS ARE KEYS TOO: Servers:0:Host, Servers:1:Host.
 - A duplicate key inside one file provider throws FormatException.
@@ -588,43 +836,6 @@ Show that these are all the same read:
   config.GetSection("Db")["Timeout"]
   config.GetSection("Db").GetValue<int>("Timeout")
   config.GetValue<int>("Db:Timeout", defaultValue: 30)
-```
-
----
-
-# Slide 13
-
-## Slide Content
-
-**Headline-only slide.**
-
-> Every scalar is text — or null.
-
-The contract is `string?`. Saying "always a string" here contradicts slide 52,
-where .NET 10 preserves a real `null` instead of flattening it to `""`.
-
-## Notes
-
-```text
-[16-23 min] everything IS A STRING - S2
-60-min: keep - it's 20 seconds and it justifies the whole options block
-
-Headline only.
-
-Every int, every bool, every TimeSpan, every Uri you ever read out of
-configuration is a BINDER CONVERSION that happened on your behalf. The
-dictionary holds strings. Only strings. Always strings.
-
-Why this matters enough for its own slide:
-This is the fact that makes S5 necessary rather than merely tidy. If every
-value is a string, then every value can be the WRONG string - malformed,
-empty, or a word where you wanted a number - and nothing in the configuration
-system will tell you. Binding plus validation is where the type system
-re-enters the story.
-
-It is also why "30" and 30 are the same thing here, why a trailing space in an
-environment variable ruins your day, and why an empty string is not null - at
-least, it wasn't until .NET 10 (S9).
 ```
 
 ---
@@ -676,7 +887,7 @@ This is the slide people quote back to you afterwards.
 
 ## Slide Content
 
-**Section divider.** Kicker ``, title **Your machine can differ from mine — without changing the repo.**. Navy ground.
+**Section divider.** Kicker ``, title **Now let's configure your development machine.**. Navy ground.
 
 ## Notes
 
@@ -684,73 +895,15 @@ This is the slide people quote back to you afterwards.
 [31-39 min] STAGE 1 - LOCAL DEV
 60-min: compress to 4 min
 
-The problem this stage solves:
-A developer clones the repo and it runs. Secrets never touch git.
+We have loaded shared defaults and changed individual values. Now we need the
+settings for a developer running the app locally, including their API credentials.
 
-Sources: appsettings.json, appsettings.Development.json, user secrets,
-launchSettings.json
+Use user secrets for local credentials. Then show how launchSettings.json affects
+the process environment when you run the app. These are different mechanisms;
+neither means the repository can never change.
 
-Close the block on its signature failure - "works on my machine" - which is what
-pushes you to stage two.
-
-ON SCREEN: the four sources and what each one yields, so the room can follow
-the terminal without squinting. The last row is gold because it is the winner.
-```
-
----
-
-# Slide 20
-
-## Slide Content
-
-**Headline:** The environment file merges. Key by key.
-
-Three panels: `appsettings.json`, `appsettings.Development.json`, and
-**what the app sees** (navy). In the result panel, values that came from the
-environment file are gold; `TimeoutSeconds 30` stays white because it survived
-from the base file. That surviving row is the whole point.
-
-## Notes
-
-```text
-[31-39 min] JSON FILES - S4.1
-60-min: keep, brief
-
-appsettings.json - safe defaults, COMMITTED.
-appsettings.Development.json - overrides only, COMMITTED.
-ApiKey in the base file is a PLACEHOLDER (empty string), never a real value.
-
-POINTS:
-- The environment file merges over the base file KEY BY KEY. Not a replacement.
-  (The array consequence is the next slide.)
-- EnvironmentName is arbitrary. Development / Staging / Production are just the
-  framework's well-known values.
-- Build Action = Content, Copy = PreserveNewest - or the file isn't next to the
-  DLL at runtime. This one bites people in published output, not in F5.
-
-IF someone ASKS about taking full control:
-  builder.Configuration.Sources.Clear();
-  then AddJsonFile / AddEnvironmentVariables / AddCommandLine explicitly.
-Mention it exists; don't dwell. Most apps shouldn't.
-
-RULE OF THUMB TO STATE HERE (S7.3 #2):
-appsettings.json should be safe to publish. If leaking it would matter, something
-is in the wrong bucket.
-
-ON SCREEN: three panels. Base, the environment overlay, and what the app
-actually sees. Gold marks the values the environment file supplied.
-
-THE ROW that TEACHES IT is TimeoutSeconds. The Development file says nothing
-about it, so 30 SURVIVES from the base file. That is what "merges key by key"
-means, and it is why this is not a file swap.
-
-HOUSEKEEPING - say these, do not slide them:
-- EnvironmentName is ARBITRARY. Development / Staging / Production are just the
-  framework's well-known values. appsettings.QA-East.json works fine if
-  ASPNETCORE_ENVIRONMENT=QA-East. People think the three names are magic.
-- Build Action = Content, Copy = PreserveNewest, or the file is not next to the
-  DLL at runtime. This bites in published output, never during F5, which is why
-  it is always found in production.
+This section ends by diagnosing which provider supplied a value. After that,
+we move the same application into shared dev.
 ```
 
 ---
@@ -876,8 +1029,6 @@ file changes the hash, and therefore changes which secrets it sees.
 
 **Setup / reveal pair.** This slide is the setup only — do not show the answer yet.
 
-Two panels, side by side:
-
 Two things are true at once. One shell, one project.
 
 | You set an environment variable | The project has this file |
@@ -886,8 +1037,6 @@ Two things are true at once. One shell, one project.
 | then `dotnet run` | `"environmentVariables": { "Weather__TimeoutSeconds": "45" }` |
 
 > **Which one wins?**
-
-Failure-mode badge, top right: `ORDER`.
 
 ## Notes
 
@@ -975,18 +1124,18 @@ whole point and "Default provider order" reads just as easily as registration or
 
 | | Source | |
 | --- | --- | --- |
-| 1 | Host / chained configuration | added LAST, so it wins |
-| 2 | Command-line arguments | the provider runs twice |
-| 3 | Environment variables | unprefixed |
-| 4 | User secrets | Development only |
-| 5 | `{ApplicationName}.settings.{Environment}.json` | |
-| 6 | `{ApplicationName}.settings.json` | |
-| 7 | `appsettings.{Environment}.json` | |
-| 8 | `appsettings.json` | |
+| 1 | Command-line arguments | the provider is registered twice |
+| 2 | Environment variables | unprefixed |
+| 3 | User secrets | Development only |
+| 4 | `{ApplicationName}.settings.{Environment}.json` | |
+| 5 | `{ApplicationName}.settings.json` | |
+| 6 | `appsettings.{Environment}.json` | |
+| 7 | `appsettings.json` | |
+| 8 | Host configuration (`DOTNET_` / `ASPNETCORE_`) | read FIRST, and it loses |
 
 `{ApplicationName}` is the assembly name, so an app built as `Weather.Api.dll` also probes
-`Weather.Api.settings.json`. For a .NET 10 file-based app `web.cs`, it probes `web.settings.json`.
-Verified on SDK 10.0.303.
+`Weather.Api.settings.json`. Row 8 is the surprise: host configuration is read first, to decide the environment name,
+and its own values sit at the bottom. Verified on SDK 10.0.303.
 
 ## Notes
 
@@ -1030,7 +1179,7 @@ thirteen.
 **Full-bleed code slide.** The same provider, registered at both ends of the chain.
 
 ```text
-$ dotnet run --environment Staging
+$ dotnet run --no-launch-profile -- --environment Staging
 
   PASS 1   decide WHICH files to load
     CommandLineConfigurationProvider        <-- reads --environment Staging
@@ -1078,59 +1227,6 @@ and move on; do not narrate all thirteen.
 
 For a non-web host it is DOTNET_ENVIRONMENT, not ASPNETCORE_ENVIRONMENT. Say it
 once; someone in the room is writing a worker this week.
-```
-
----
-
-# Slide 18
-
-## Slide Content
-
-**Headline:** Add a source, and the answer changes
-
-Each row ADDS a provider to the ones above it. The right column is what
-`Weather:TimeoutSeconds` reads as at that point — the same key every time.
-
-| Add this source | `Weather:TimeoutSeconds` now reads |
-| --- | --- |
-| `appsettings.json` | 30 |
-| + `appsettings.Development.json` | 120 |
-| + `Weather__TimeoutSeconds` | 10 |
-| + **`--Weather:TimeoutSeconds`** | **5** |
-
-The last row is bold navy with a large gold value. Caption beneath: *last one wins*.
-
-Failure-mode badge, top right: `ORDER`.
-
-## Notes
-
-```text
-[layering] PRECEDENCE, SHOWN
-Snippets: lifted from d02 and d03
-60-min: keep this; the array slide is the first thing to cut if you run long
-Do not read the slide aloud. Walk down the four rows, name the source each
-time, and let the numbers do the work.
-
-THE LAYERS - JSON, then the environment file, then an env var, then a CLI arg.
-Same key, four different winners, one at a time. Call out failure mode #1: ORDER.
-This is what makes "last provider wins" concrete instead of abstract.
-
-THE ARRAY SURPRISE is the next slide.
-appsettings.json has ["a","b","c"]. The environment file has ["x"].
-Result: ["x","b","c"] - not ["x"].
-
-Why: the environment file MERGES OVER the base file key by key. It is not a
-replacement. Arrays don't merge cleanly because index keys overlay individually:
-  Servers:0 = "x"   (overwritten)
-  Servers:1 = "b"   (survives)
-  Servers:2 = "c"   (survives)
-
-This gets an audible reaction every time. But it's a gasp, not a load-bearing
-idea - it's the first cut at 60 minutes.
-
-what TO DO instead: prefer an object keyed by name, or replace the section
-deliberately. Also: EnvironmentName is arbitrary - appsettings.QA-East.json works
-fine if ASPNETCORE_ENVIRONMENT=QA-East.
 ```
 
 ---
@@ -1233,9 +1329,6 @@ The JSON says 120. An environment variable says 10. The environment variable
 is later in the chain, so the environment variable wins. That's it. That's the
 whole mystery."
 
-Then name failure mode #1 - ORDER - and point at the badge when it turns up
-two slides from now.
-
 what THE DUMP GIVES YOU that nothing ELSE DOES: the provider name in
 parentheses. Not the value - anyone can log the value. The SOURCE.
 
@@ -1288,9 +1381,6 @@ Two panels, same shape as the flat-dictionary slide so the rhyme is obvious.
 | `ConnectionStrings__Default` | `ConnectionStrings:Default` |
 
 Caption beneath: **`:` is not portable in an environment variable name. `__` is.**
-
-Failure-mode badge, top right: `SHAPE` — single underscore instead of double is
-the most common version of it.
 
 ## Notes
 
@@ -1422,6 +1512,7 @@ platforms, which is why it is the safe default even on Windows.
 ```
 
 ---
+
 # Slide 35
 
 ## Slide Content
@@ -1729,8 +1820,6 @@ x lifetime x re-read behaviour is a genuine matrix and a diagram would be worse.
 | `IOptionsSnapshot<T>` | **Scoped** | Once per request | Per-request consistency in a web app |
 | `IOptionsMonitor<T>` | Singleton | Yes, with `OnChange` | Singletons and background services |
 
-Failure-mode badge, top right: `LIFETIME`.
-
 Slides **28a** and **28b** are the before/after pair that follow it.
 
 ## Notes
@@ -1854,7 +1943,6 @@ THEN NAME THE TWO CLASSIC BUGS while this is up:
 - _monitor.CurrentValue cached in a constructor field, which quietly turns a
   monitor back into an IOptions<T>. Read CurrentValue at the point of use.
 
-Failure mode #3: LIFETIME. Badge is on the table slide; name it here.
 ```
 
 ---
@@ -2463,6 +2551,7 @@ percentage or targeting flag's value is THIS evaluation, for THIS context.
 ```
 
 ---
+
 # Slide 47
 
 ## Slide Content
@@ -2997,4 +3086,3 @@ ChangeToken.OnChange, and async DataAnnotations validation.
 ```
 
 ---
-

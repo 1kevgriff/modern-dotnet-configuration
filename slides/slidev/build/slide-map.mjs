@@ -81,21 +81,14 @@ export const map = {
     footnote: 'Each boundary changes *who supplies the value* and *what it costs to get it wrong*. The application does not change — only the answer to “where did this come from?” does.',
   },
 
-  11: {
-    layout: 'cards',
-    cols: 2,
-    cards: [
-      { n: '01', title: 'ORDER', body: 'A provider you forgot about is winning.' },
-      { n: '02', title: 'SHAPE', body: "The key you set doesn't produce the key the binder looks for." },
-      { n: '03', title: 'LIFETIME', body: 'You cached a value that was supposed to change — or vice versa.' },
-      { n: '04', title: 'TRUST', body: 'A secret is sitting in a file that ships with the app.' },
-    ],
-    from: 'OUTLINE.md slide 11 ## Notes — the four numbered definitions, verbatim',
-    prose: 'drop'
-  },
-
   // ---- ACT 1 - the shared baseline --------------------------------------------------
-  '11a': { layout: 'section' },
+  '11a': { layout: 'code', prose: 'keep' },
+  // the default load, demonstrated before it is theorised. Numbers verified in
+  // scratchpad/loadproof/EVIDENCE.txt on SDK 10.0.303.
+  '11b': { layout: 'code', prose: 'keep' },
+  '13a': { layout: 'default', prose: 'keep' },
+  '18a': { layout: 'code' },
+  '18b': { layout: 'code', prose: 'keep' },
 
   12: {
     layout: 'panels',
@@ -124,12 +117,12 @@ Weather:TimeoutSeconds   "5"
 same key, three providers - last one wins`,
       },
     ],
-    footnote: 'JSON nesting, `__` and `--` are just spellings. They all become `:`, and every value is a string.',
+    footnote: 'JSON nesting and an environment variable’s `__` both produce colon-separated keys. Every value arrives as text — or null.',
   },
 
   13: {
-    layout: 'statement',
-    prose: 'drop',
+    layout: 'code',
+    prose: 'keep',
   },
   14: { layout: 'code', prose: 'drop' },
   15: { layout: 'code' },
@@ -138,16 +131,13 @@ same key, three providers - last one wins`,
     prose: 'drop',   // the reading-direction label is the blockquote, rendered above the table
     // "row 1 beats row 8" is now the gold label above the table, so this keeps only the
     // fact that label does not carry.
-    footnote: 'Rows 5 and 6 are the ones almost nobody knows exist — and they apply to web apps too.',
+    footnote: '.NET 10 also loads the application-named settings files. They apply to web apps too, and almost nobody knows they exist.',
   },
   17: { layout: 'code', prose: 'drop' },
   18: {
-    // "The last row is bold navy with a large gold value." - OUTLINE.md slide 18.
-    // Rows are cumulative, so the marked row is the full stack.
-    markRow: 4,
-    markValue: true,
-    layout: 'default',
-    footnote: '*last one wins*',
+    // Observed outputs now, not a styled table - the values come from a real run.
+    layout: 'code',
+    prose: 'keep',
   },
 
   // ---- stage 1: local dev ----------------------------------------------------------
@@ -169,9 +159,12 @@ same key, three providers - last one wins`,
       {
         caption: 'appsettings.Development.json',
         lang: 'json',
-        from: 'demos/d01-provider-dump/appsettings.Development.json',
+        // Overrides TimeoutSeconds too, so this agrees with the 30 -> 120 the previous
+        // slide just measured. ApiKey is deliberately absent, to show what survives.
+        from: 'the running example, matching the measured 30 -> 120',
         body: `"Weather": {
-  "ApiBaseUrl": "https://localhost:7104"
+  "ApiBaseUrl": "https://localhost:7104",
+  "TimeoutSeconds": 120
 }`,
       },
       {
@@ -182,11 +175,11 @@ same key, three providers - last one wins`,
         // lose the base | override | result comparison that is the whole slide.
         from: 'the merged result of the two files above',
         body: `ApiBaseUrl       https://localhost:7104
-TimeoutSeconds   30           <- survived
-ApiKey           placeholder  <- survived`,
+TimeoutSeconds   120
+ApiKey           placeholder`,
       },
     ],
-    footnote: 'The surviving rows are the whole point. It merges key by key — it does not replace.',
+    footnote: '`ApiKey` is not in the Development file at all, so it survives from the base. The merge runs key by key; the file is not swapped out.',
   },
 
   21: {
@@ -241,8 +234,8 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   23: { layout: 'code' },
   24: {
     layout: 'default',
-    gold: true,
-    footnote: '**“Which one wins?”**',
+    prose: 'keep',
+    // the question is the blockquote in OUTLINE.md; a footnote copy rendered it twice
   },
   '24a': {
     layout: 'code',
@@ -284,7 +277,7 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   30: {
     layout: 'panels',
     panelCaptions: ['NAMED', 'GENERATED'],
-    footnote: 'Plus one line, not a panel: `<EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>`',
+    footnote: 'Enable generated binding in the project file: `<EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>`',
   },
 
   // ---- stage 2: deployment ---------------------------------------------------------
