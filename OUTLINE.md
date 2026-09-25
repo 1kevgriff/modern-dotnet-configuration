@@ -280,7 +280,7 @@ source you forgot about. The rest of the talk is about paying that cost on purpo
 ```
 
 > Change the database, rebuild, retest, redeploy. The failure mode was shipping
-> with the wrong line uncommented.
+with the wrong line uncommented.
 
 ## Notes
 
@@ -318,7 +318,7 @@ ConfigurationManager.AppSettings["Db"];
 ```
 
 > Wins on hard-coding and on per-environment values. But `Web.Release.config`
-> transforms ran at **build** time, so you shipped one artifact per environment.
+transforms ran at **build** time, so you shipped one artifact per environment.
 
 ## Notes
 
@@ -350,7 +350,7 @@ builder.Configuration.GetConnectionString("Default");
 ```
 
 > A provider chain, layering, binding, DI and reload — and the same model for a
-> web app, a worker, a console tool and a desktop app. All five reasons, finally.
+web app, a worker, a console tool and a desktop app. All five reasons, finally.
 
 ## Notes
 
@@ -521,7 +521,7 @@ Name them out loud as they come up:
   order on Same key. Four winners.    shape on Environment variables
   lifetime on the three interfaces    trust on User secrets
 
-By the anti-patterns slide the audience should be calling them before you do.
+By the end of the flags section the audience should be calling the mode before you do.
 that is when this slide has done its job.
 ```
 
@@ -1043,7 +1043,7 @@ $ dotnet run --environment Staging
 ```
 
 > `ASPNETCORE_ENVIRONMENT` is not just another setting. It is the input that picks
-> the rest of your inputs.
+the rest of your inputs.
 
 ## Notes
 
@@ -1157,7 +1157,7 @@ app.Logger.LogInformation("Configuration:\n{Dump}", dump);
 Beneath, in gold, because the slide must not imply that dumping configuration is safe:
 
 > That filter is a denylist, so it misses tokens, connection strings and certificates.
-> Gate it on `IsDevelopment()`, and prefer inspecting the handful of keys you care about.
+Gate it on `IsDevelopment()`, and prefer inspecting the handful of keys you care about.
 
 ## Notes
 
@@ -1399,7 +1399,7 @@ may not fire. Treat restart as the contract.
 | Azure Key Vault | `Weather--ApiKey` | `Weather:ApiKey` |
 
 > `:` is not portable in an environment variable name, and Key Vault forbids it in a
-> secret name. Hence `__` and `--`. Both are translated for you.
+secret name. Hence `__` and `--`. Both are translated for you.
 
 ## Notes
 
@@ -1686,67 +1686,11 @@ knowable." A validated option is more knowable than a buried constant.
 
 ---
 
-# Slide 36
-
-## Slide Content
-
-**Headline:** Tests must satisfy the same contract
-
-**Full-bleed code slide.** In-memory is just another provider, added last so it wins.
-
-```csharp
-public sealed class ApiFactory : WebApplicationFactory<Program>
-{
-    protected override void ConfigureWebHost(IWebHostBuilder builder) =>
-        builder.ConfigureAppConfiguration(config =>
-            config.AddInMemoryCollection(new Dictionary<string, string?>
-            {
-                ["Weather:ApiBaseUrl"]    = "http://localhost/stub",
-                ["Weather:TimeoutSeconds"] = "1",
-            }));
-}
-```
-
-## Notes
-
-```text
-[S4.8] IN-MEMORY - THE TESTING PROVIDER
-Snippet: lifted from d24
-60-min: cut the slide, keep the sentence
-
-Added last, so it beats everything. That is the entire trick.
-
-This is the right answer for WebApplicationFactory integration tests: you get
-the real application, the real provider chain, the real binding and validation
-- and then you overwrite exactly the handful of keys the test cares about.
-
-Why it beats the alternatives:
-- Mocking IConfiguration tests your mock, not your configuration.
-- A test appsettings.json is a second file to keep in sync with the first.
-- Environment variables in a test runner leak between tests.
-
-Say the ordering point out loud, because it is the whole reason this works:
-AddInMemoryCollection is appended, and reads walk the chain in reverse. It
-does not matter what appsettings.json says. It does not matter what the
-developer has in user secrets. The dictionary wins.
-
-same TRICK FOR FEATURE FLAGS - forward reference to S6.7. A flag is just
-configuration, so you set feature_management:feature_flags:0:enabled here and
-test both sides of the branch. That is the slide people photograph in the
-flags block.
-
-The other use, if anyone asks: in-memory as code DEFAULTS, added first so
-everything overrides it. Rarer, but it is how you ship a sane fallback
-without a file.
-```
-
----
-
 # Slide 36a
 
 ## Slide Content
 
-**Section divider.** Kicker ``, title **Production supplies the values. Nothing gets rebuilt to change one.**. Navy ground.
+**Section divider.** Kicker ``, title **Into production. What if we need to change a value?**. Navy ground.
 
 ## Notes
 
@@ -1766,40 +1710,6 @@ Three things are true here that were not true on your laptop:
 That third one is what the rest of this act is about. Say the line:
 "Nothing gets rebuilt to change a value. That is the whole point of the last
  forty minutes."
-```
-
----
-
-# Slide 36b
-
-## Slide Content
-
-**Headline-only slide.**
-
-> Production adds a question the other environments never asked:
-> **can this value change while the process is running?**
-
-Binding and validation answered *is it there, and is it valid*. Lifetime answers
-*and does it still hold five minutes from now*.
-
-## Notes
-
-```text
-[ACT 4] THE LIFETIME QUESTION
-60-min: keep - it is 20 seconds and it sets up the best beat in the talk
-
-On a laptop you restart the app without thinking. In production a restart is an
-event: dropped connections, a cold cache, a change window, maybe an approval.
-
-So production is the first place the question is worth asking at all:
-  "Can this value change without stopping the process?"
-
-That question has exactly three answers in .NET, and they are the three interfaces
-on the next slide. Do not list them here - just land the question and advance.
-
-This is also the slide to point back to from What Actually Reloads. The interface
-decides whether your code SEES a change; the provider decides whether a change
-ever ARRIVES. Both have to line up.
 ```
 
 ---
@@ -2013,7 +1923,10 @@ problem wearing a config hat.
 
 ## Slide Content
 
-**Section divider.** Kicker ``, title **One edit now has to reach every instance.**. Navy ground.
+**Section divider.** Kicker ``, title **Many instances. One place to change the value.**. Navy ground.
+
+> That place is **Azure App Configuration**: a store the app reads at startup and
+re-reads on demand, so a value can change without a deploy and without a restart.
 
 ## Notes
 
@@ -2127,6 +2040,9 @@ Also exists: Map() rewrites keys on the way in, e.g. App__Settings__X -> App:Set
 ## Slide Content
 
 **Section divider.** Kicker ``, title **A feature flag is configuration with an `if` statement attached.**. Navy ground.
+
+> Same providers, same precedence, same reload rules as every value so far.
+What is new is that it changes *behaviour*, so turning it on is a release.
 
 ## Notes
 
@@ -2277,7 +2193,10 @@ Microsoft.FeatureManagement.AspNetCore. The core package covers everything else.
 
 **Headline:** 50% of users, or 50% of calls?
 
-**Setup.** The flag definition, and a question.
+**Setup.** A flag that is on for half the traffic — and a question about what "half" means.
+
+`Microsoft.Percentage` is a built-in filter. `Value: 50` means the flag evaluates
+true half the time. The question is *half of what*.
 
 ```json
 {
@@ -2402,10 +2321,8 @@ var settings = new CheckoutLayoutSettings();
 variant.Configuration.Bind(settings);   // it's an IConfigurationSection
 ```
 
-The last line is the whole point: a variant hands you a configuration section, so you
-bind it like anything else in this talk.
-
-Cut entirely at 60 minutes — one spoken sentence that flags can return values.
+A variant hands back an `IConfigurationSection`, so it binds like anything else in
+this talk. A flag can return a value, not just a yes or no.
 
 ## Notes
 
@@ -2454,7 +2371,8 @@ The taxonomy, because lifetime differs by an order of magnitude.
 Beneath, in gold: **`NewCheckout` never gets deleted. `Checkout_V2_Rollout_2026Q1`
 files its own expiry.**
 
-Slide **46a** carries the deletion and inventory half — they do not fit here.
+The next slide shows what a flag actually looks like in code, and why deleting one
+is a pull request.
 
 ## Notes
 
@@ -2502,57 +2420,49 @@ branch behind a switch someone can flip at 2am.
 
 ## Slide Content
 
-**Headline:** Deleting a flag is a code change, not a config change
+**Headline:** Using a flag is a branch in your code
 
-Turning it off in the portal and walking away leaves the dead branch compiling forever.
-
-The health endpoint, which is the thing people actually steal:
+**Full-bleed code slide.** This is the part the portal cannot delete for you.
 
 ```csharp
-// internal diagnostics - authorize it; this leaks operational state
-app.MapGet("/flags", async (IVariantFeatureManager features, CancellationToken ct) =>
+if (await features.IsEnabledAsync("NewCheckout", ct))
 {
-    List<FlagRecord> inventory = [];
-    await foreach (string name in features.GetFeatureNamesAsync(ct))
-        inventory.Add(new FlagRecord(name, Category(name), Owner(name), Expiry(name),
-                                     await features.IsEnabledAsync(name, ct)));
-    return inventory;
-}).RequireAuthorization();
+    return await NewCheckoutAsync(cart, ct);
+}
+
+return await LegacyCheckoutAsync(cart, ct);
 ```
 
-Name and a boolean would not be enough — slide 46 just argued that **owner** and
-**expiry** are the things that matter. And say the caveat out loud: for a percentage
-or targeting flag that boolean is *this* evaluation, for *this* context. Slide 44 just
-proved it can differ on the next call.
-
-One line beneath: *ten live flags is up to 1,024 nominal combinations. You test three.*
+> Turning the flag off in the portal changes which branch runs. It does not remove
+either branch. Deleting the flag means deleting the `if`, the dead path, and its
+tests — a pull request, not a portal click.
 
 ## Notes
 
 ```text
-[FLAGS] DELETION AND INVENTORY
-Snippet: lifted from d32
-60-min: keep the first line; the endpoint is optional
+[flags] USING A FLAG IS A CODE CHANGE
+Snippet: the shape every demo in d28-d33 uses
+60-min: keep - it is the setup for flag debt
 
-The sentence people need to hear:
-"Turning a flag off in the portal is not deleting it. The dead branch is still
- there, still compiling, still something the next person has to reason about."
+Show the branch. It is deliberately boring, because the point is what it implies.
 
-Deleting a flag is a pull request, not a portal click. If that is not on
-someone's board, it does not happen.
+Both paths are compiled. Both paths are deployed. Both paths are yours to maintain.
+The flag only decides which one executes today.
 
-THE ENDPOINT IS THE THING PEOPLE STEAL. Two caveats, say both:
-- Name and a boolean is not enough. The previous slide argued owner and expiry
-  are what matter, so the record carries them.
-- For a percentage or targeting flag that boolean is this evaluation, for this
-  context. Slide 44 just proved it can differ on the very next call. It is an
-  inventory of what exists, not a global on/off state.
-- Authorize it. An open /flags endpoint hands an attacker your roadmap and your
-  operational posture.
+Say it plainly:
+"Turning it off in the portal is not deleting it. The dead branch is still there,
+ still compiling, still something the next person has to reason about."
+
+So deleting a flag is a pull request: remove the if, remove the branch nobody chose,
+remove its tests. If that work is not on someone's board, it does not happen - which
+is the previous slide's owner and expiry, made concrete.
+
+If asked about an inventory endpoint: yes, you can enumerate flags at runtime with
+GetFeatureNamesAsync. Authorize it - it leaks operational state - and remember a
+percentage or targeting flag's value is THIS evaluation, for THIS context.
 ```
 
 ---
-
 # Slide 47
 
 ## Slide Content
@@ -2601,7 +2511,9 @@ End the flags block on JUDGMENT, not tooling.
 
 ## Slide Content
 
-**Section divider.** Kicker ``, title **Who owns it? Is it secret? Who needs it? How fast must it change?**. Navy ground.
+**Section divider.** Kicker ``, title **So where does it go?**. Navy ground.
+
+> Who owns it · is it secret · who needs it · how fast must it change
 
 ## Notes
 
@@ -2665,111 +2577,6 @@ Say:
 That's the diagnostic. Most configuration pain people bring to you is a bucketing
 error, not a provider error - and they've been trying to solve it with provider
 order.
-```
-
----
-
-# Slide 49
-
-## Slide Content
-
-**Headline:** What I'd use for six common app types
-
-**The photograph slide.** Third and last deliberate table exception — it is reference
-material and that is exactly why people want it.
-
-| App shape | Baseline | Secrets | Change without redeploy? |
-| --- | --- | --- | --- |
-| ASP.NET Core on App Service | JSON + App Service settings | Key Vault refs | App Service settings restart; App Config doesn't |
-| Container / AKS | JSON + orchestrator env vars | key-per-file, or workload identity | restart the pod, or App Config |
-| Many microservices | App Config + labels | Key Vault references | yes — sentinel + refresh |
-| Worker / background | JSON + env vars | Key Vault via managed identity | `IOptionsMonitor` + explicit refresh |
-| Console / CLI | JSON + command line | user secrets in dev | no — short-lived process |
-| Desktop | JSON next to the EXE + AppData | **none in the client** | restart, or call your own API |
-
-Leave it up longer than feels comfortable. Count to five.
-
-## Notes
-
-```text
-[84-87 min] CHOOSING A STRATEGY - S7.2, S7.3
-60-min: keep - this is the one people photograph. Pause on it.
-
-LEAVE this UP LONGER than FEELS COMFORTABLE. Count to five. Let them get the shot.
-
-  ASP.NET Core on App Service   JSON + App Service settings; KV refs
-                                App Service settings RESTART the app;
-                                App Configuration doesn't
-  Container / AKS               JSON baked in + orchestrator env vars;
-                                key-per-file mount or KV via workload identity
-  Many microservices            App Configuration, labels + per-app key prefix;
-                                KV references; sentinel key + refresh
-  Worker / background service   JSON + env vars; KV via managed identity;
-                                IOptionsMonitor + explicit TryRefreshAsync
-  Console / CLI                 JSON + command line + env vars; user secrets in
-                                dev; NO hot reload - short-lived process
-  Desktop (WinForms/WPF/MAUI)   JSON next to the EXE + per-user AppData;
-                                NO SECRETS IN THE CLIENT
-
-SIX RULES OF THUMB (S7.3) - read 1, 2, and 5 aloud at minimum:
-  1. One artifact, many environments. A different binary per environment is
-     Web.Release.config again.
-  2. Commit defaults, never secrets. appsettings.json should be safe to publish.
-  3. Reach for cloud configuration when you have a REAL reason: more than one app
-     sharing values, or a need to change without a deploy. One app that redeploys
-     in five minutes does not need App Configuration.
-  4. Prefer restart to hot reload unless someone asked for hot reload.
-  5. Validate at startup, always. Cheapest guardrail on every strategy above.
-  6. Secrets get a rotation story or they aren't secure.
-
-Rule 2 is on the never-cut list at any talk length.
-```
-
----
-
-# Slide 50
-
-## Slide Content
-
-**Headline:** Don't do this
-
-**Reduced deliberately.** Eleven items shown for twenty seconds is theatre, not
-communication — so the slide shows the four failure modes again, each with its
-single worst offender, and the full list of eleven lives in the repo.
-
-| | The one that costs you most |
-| --- | --- |
-| **ORDER** | assuming an array in `appsettings.Production.json` replaces the base array |
-| **SHAPE** | `config["Some:Key"]!` with a null-forgiving operator and no validation |
-| **LIFETIME** | `IOptionsSnapshot<T>` injected into a singleton |
-| **TRUST** | secrets committed in `appsettings.json` — or worse, `appsettings.Production.json` |
-
-By now the room should be calling the mode before you say it. That is the the point
-for the motif.
-
-## Notes
-
-```text
-[87-90 min] ANTI-PATTERNS - S10
-60-min: keep, rapid-fire
-
-Read these FAST. Don't explain them - by now the audience has seen every one.
-The point is recognition, not instruction. If they're calling out the four
-failure modes before you do, this slide is working.
-
- 1. Secrets committed in appsettings.json - or worse, appsettings.Production.json.
- 2. IConfiguration injected into business classes instead of bound options.
- 3. config["Some:Key"]! with a null-forgiving operator and no validation.
- 4. IOptionsSnapshot<T> in a singleton.
- 5. IOptionsMonitor<T>.CurrentValue captured in a constructor field.
- 6. Building a throwaway ConfigurationBuilder mid-request to "get a fresh value."
- 7. Calling WebApplication.CreateBuilder() a second time just to read configuration.
- 8. if (env.IsProduction()) branches in code instead of environment-specific
-    configuration VALUES.
- 9. One Key Vault for every app and environment, separated by secret-name prefixes.
-10. Assuming an array in appsettings.Production.json replaces the base array.
-    It doesn't. (Callback to the array slide - they'll remember.)
-11. Logging GetDebugView() without redaction.
 ```
 
 ---
@@ -2879,8 +2686,8 @@ Questions you will get, and the short answers:
   No - Key Vault references. The store holds the pointer, not the secret.
 
 - "How do I test any of this?"
-  S4.8 in-memory provider, added last so it beats everything. Same answer for
-  feature flags (S6.7).
+  AddInMemoryCollection, added last so it beats everything. Same answer for
+  feature flags. Not a slide any more - it is in the repo (d24, d33).
 
 - "Does IOptionsMonitor work in a console app?"
   Yes, but nothing triggers a refresh for you. That's the S4.6 activity-driven

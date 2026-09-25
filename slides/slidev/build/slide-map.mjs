@@ -255,8 +255,7 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   26: {
     layout: 'panels',
     panelCaptions: ["DON'T", 'DO'],
-    gold: true,
-    footnote: 'That `!` is anti-pattern #3 on its own.',
+    prose: 'drop',
   },
 
   27: {
@@ -311,12 +310,10 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
     layout: 'default',
     footnote: '`--` becomes `:` because Key Vault forbids a colon in a secret name. No reload by default — `ReloadInterval` is null until you set it.',
   },
-  36: { layout: 'code' },
   37: { layout: 'code' },
 
   // ---- ACT 4 - production -----------------------------------------------------------
   '36a': { layout: 'section' },
-  '36b': { layout: 'statement', prose: 'keep' },
 
   38: { layout: 'section' },
   39: {
@@ -325,7 +322,7 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   },
   40: {
     layout: 'default',
-    footnote: 'The **No** rows are the ones that matter: changing an environment variable on a running container does nothing at all.',
+    footnote: 'Changing an environment variable on a running container does nothing at all.',
   },
 
   // ---- feature flags ---------------------------------------------------------------
@@ -360,8 +357,11 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
     footnote: '**`NewCheckout` never gets deleted. `Checkout_V2_Rollout_2026Q1` files its own expiry.**',
   },
   '46a': {
-    layout: 'default',
-    footnote: 'Turning it off in the portal leaves the dead branch compiling forever. *Ten live flags is up to 1,024 nominal combinations. You test three.*',
+    // `code`, not `default`: on the default layout a blockquote renders ABOVE the content
+    // (slide 16 needs its reading-direction label there), which put this slide's caveat
+    // above the branch it is describing.
+    layout: 'code',
+    footnote: '*Ten live flags is up to 1,024 nominal combinations. You test three.*',
   },
   47: {
     layout: 'statement',
@@ -372,17 +372,8 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   '47a': { layout: 'section' },
 
   48: {
-    layout: 'default',
-    gold: true,
-    footnote: '**If a value is in the wrong bucket, no amount of provider tuning fixes it.**',
-  },
-  49: {
-    layout: 'default',
     prose: 'drop',
-  },
-  50: {
     layout: 'default',
-    prose: 'drop',
   },
   51: {
     layout: 'default',
