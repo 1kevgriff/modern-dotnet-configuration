@@ -18,6 +18,18 @@ processes:
     auto_restart: false
     env: {}
 
+  Slides (tailnet):
+    # Same deck, reachable from your phone, the mac mini, anything on the tailnet.
+    # Binds ONLY the Tailscale address - not 0.0.0.0 - so it is not also published to
+    # whatever wifi you are on. Port 3031 so it can run beside the local "Slides".
+    # `--remote` enables presenter/remote control, so it takes a password: one is
+    # generated and printed on start, or pin it with SLIDEV_REMOTE_PASSWORD.
+    command: npm run dev:tailscale
+    working_dir: slides/slidev
+    auto_start: false
+    auto_restart: false
+    env: {}
+
   Outline watch:
     # Re-runs the generator whenever the outline or the sidecar changes, so the running
     # deck picks the edit up over HMR without restarting the server.
