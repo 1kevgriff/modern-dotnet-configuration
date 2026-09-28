@@ -24,7 +24,7 @@ S=<store>
 V=<vault>
 
 az appconfig kv set -n $S --key "Weather:Endpoint" --value "https://weather.internal" --yes
-az keyvault secret set --vault-name $V --name "weather-api-key" --value "wk_live_7f3a91c4"
+az keyvault secret set --vault-name $V --name "weather-api-key" --value "wk_test_not_a_real_key"
 
 SECRET_ID=$(az keyvault secret show --vault-name $V --name "weather-api-key" --query id -o tsv)
 az appconfig kv set-keyvault -n $S --key "Weather:ApiKey" --secret-identifier "$SECRET_ID" --yes

@@ -34,7 +34,7 @@ Identical output either way, apart from the mount path:
       ->  ConnectionStrings:Primary  =  Server=db;Database=weather
 
   Weather__ApiKey
-      ->  Weather:ApiKey  =  wk_live_7f3a91c4
+      ->  Weather:ApiKey  =  wk_test_not_a_real_key
 
   Weather__Endpoint
       ->  Weather:Endpoint  =  https://weather.internal

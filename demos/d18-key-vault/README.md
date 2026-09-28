@@ -19,7 +19,7 @@ The vault needs three secrets and the signed-in identity needs the **Key Vault S
 User** role:
 
 ```bash
-az keyvault secret set --vault-name <v> --name "Weather--ApiKey"          --value "wk_live_7f3a91c4"
+az keyvault secret set --vault-name <v> --name "Weather--ApiKey"          --value "wk_test_not_a_real_key"
 az keyvault secret set --vault-name <v> --name "Weather--Endpoint"        --value "https://weather.internal"
 az keyvault secret set --vault-name <v> --name "Weather--TimeoutSeconds"  --value "30"
 ```
