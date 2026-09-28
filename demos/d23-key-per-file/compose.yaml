@@ -1,0 +1,20 @@
+# Compose secrets are mounted at /run/secrets/<name> — the real mechanism, not a
+# bind mount that imitates it. The file name IS the configuration key.
+services:
+  demo:
+    build: .
+    secrets:
+      - ConnectionStrings__Primary
+      - Weather__ApiKey
+      - Weather__Endpoint
+      - Weather__TimeoutSeconds
+
+secrets:
+  ConnectionStrings__Primary:
+    file: ./secrets/ConnectionStrings__Primary
+  Weather__ApiKey:
+    file: ./secrets/Weather__ApiKey
+  Weather__Endpoint:
+    file: ./secrets/Weather__Endpoint
+  Weather__TimeoutSeconds:
+    file: ./secrets/Weather__TimeoutSeconds

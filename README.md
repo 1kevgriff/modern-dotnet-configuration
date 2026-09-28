@@ -16,6 +16,8 @@ without a redeploy.
 | **Speaker** | Kevin Griffin — [consultwithgriff.com/bio](https://consultwithgriff.com/bio) |
 | **Target** | .NET 10 / C# 14 |
 
+Full content spec with code examples: [SPEC.md](SPEC.md).
+
 ## Topics
 
 - `IConfiguration`, the provider chain, and how precedence really resolves

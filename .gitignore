@@ -505,3 +505,10 @@ exports/
 # Scratch
 scratch/
 tmp/
+
+# Tooling scratch
+.claude/
+.serena/
+
+# Local MCP server registration (not shared)
+.mcp.json

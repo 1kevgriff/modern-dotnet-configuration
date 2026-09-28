@@ -1,0 +1,52 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <EnforceCodeStyleInBuild>true</EnforceCodeStyleInBuild>
+    <AnalysisLevel>latest-recommended</AnalysisLevel>
+    <RootNamespace>D17.SourceGenerators</RootNamespace>
+    <AssemblyName>D17.SourceGenerators</AssemblyName>
+
+    <!--
+      PublishAot turns on the trim/AOT analyzers, so IL2026 and IL3050 show up on a
+      plain `dotnet build` in about two seconds instead of only on a slow publish.
+    -->
+    <PublishAot>true</PublishAot>
+    <InvariantGlobalization>true</InvariantGlobalization>
+
+    <!--
+      d17 is the ONE demo in this repo that does not treat warnings as errors.
+      Its "before" state exists to show IL2026/IL3050; failing the build on them
+      would delete the lesson. Every other demo keeps warnings-as-errors on.
+    -->
+    <TreatWarningsAsErrors>false</TreatWarningsAsErrors>
+  </PropertyGroup>
+
+  <!--
+    BEFORE. .NET 10 already switches the configuration binding generator on for you
+    whenever PublishAot is set, so we force it off here to show what reflection
+    binding was costing. Validation is still reflection-based by default.
+  -->
+  <PropertyGroup Condition="'$(UseGenerators)' != 'true'">
+    <EnableConfigurationBindingGenerator>false</EnableConfigurationBindingGenerator>
+  </PropertyGroup>
+
+  <!-- AFTER. Both opt-ins from SPEC 5.6, behind one switch: -p:UseGenerators=true -->
+  <PropertyGroup Condition="'$(UseGenerators)' == 'true'">
+    <EnableConfigurationBindingGenerator>true</EnableConfigurationBindingGenerator>
+    <DefineConstants>$(DefineConstants);USE_GENERATORS</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Extensions.Hosting" Version="10.0.11" />
+    <PackageReference Include="Microsoft.Extensions.Options.DataAnnotations" Version="10.0.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="appsettings.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+</Project>

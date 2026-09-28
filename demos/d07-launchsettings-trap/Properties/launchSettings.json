@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "d07": {
+      "commandName": "Project",
+      "environmentVariables": {
+        "Weather__ApiBaseUrl": "https://launchsettings.example.com"
+      }
+    }
+  }
+}
