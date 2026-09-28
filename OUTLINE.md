@@ -8,6 +8,26 @@ lifted from the matching project in `/demos`.
 
 ---
 
+# Slide 0
+
+## Slide Content
+
+**Holding slide.** Intentionally blank — nothing on screen while the room settles.
+
+## Notes
+
+```text
+[holding] BLANK
+60-min: on screen before you are introduced
+
+Nothing here on purpose. The cold open only works if the first thing anyone reads is
+the contradiction, not a title card sitting there during the walk-on.
+
+Leave this up until you are ready, then advance once into the cold open.
+```
+
+---
+
 # Slide 1
 
 ## Slide Content
@@ -110,7 +130,7 @@ into a conversation; the whole device depends on the room sitting with it.
 **Title slide.** Split panel, headshot right.
 
 - Headline: **Modern .NET Configuration**
-- Byline: Kevin Griffin · Microsoft MVP · .NET 10 / C# 14
+- Byline: Kevin Griffin · Microsoft MVP
 
 ## Notes
 
@@ -157,7 +177,7 @@ it actually does, where it cuts you, and what holds up in production.&quot;
 
 ## Slide Content
 
-**About slide.** Split panel, headshot right. Headline **Kevin Griffin**, four short lines: software consultant (.NET and Azure), Microsoft MVP, builds and runs Shows On Sale, consultwithgriff.com.
+**About slide.** Split panel, headshot right. Headline **Kevin Griffin**, four short lines: Independent Consultant, CTO for Shows On Sale, Microsoft MVP, consultwithgriff.com.
 
 ## Notes
 
@@ -181,40 +201,63 @@ the site, and the site is on the last slide.
 
 ---
 
-# Slide 5
+# Slide 4a
 
 ## Slide Content
 
-**Roadmap.** Narrow navy panel left (*Following one value*), five numbered lines right:
+**Headline:** Everything here is in the repo
 
-1. The shared baseline — what everyone gets
-2. My machine — differing without breaking yours
-3. The shared dev server — it left your laptop
-4. Production — ownership, trust, and change without a deploy
-5. Where should this value live?
+Every snippet, plus runnable demos for each idea — 33 folders, 35 projects.
 
-Caption beneath: *the same key, `Weather:TimeoutSeconds`, crosses all five.*
+```text
+github.com/1kevgriff/modern-dotnet-configuration
+```
 
 ## Notes
 
 ```text
-[roadmap]
-60-min: keep - it&apos;s the map, and at 60 minutes the map does more work
+[repo] THE LINK, EARLY
+60-min: 20 seconds
 
-Five beats. Read them fast; it&apos;s a map, not a stop. Twenty seconds.
+People photograph this at the start, not the end - that is the only reason it is here as
+well as on the closing slide.
 
-  01  The shared baseline - what everyone gets
-  02  My machine - differing without breaking yours
-  03  The shared dev server - it left your laptop
-  04  Production - ownership, trust, change without a deploy
-  05  Where should this value live?
+Mention that most of what you will show has a runnable project behind it, and that
+demos/verify.ps1 builds all 35 in one go. Do not promise every single number on every
+slide traces to a run; some of the tables are reference material.
+```
 
-Say that one key - Weather:TimeoutSeconds - crosses all five, so they have
-something to follow. Point at 04 and say this is about a quarter of the talk,
-and it's the half people don't expect.
+---
 
-Then get off this slide. The cold open is still unexplained and that tension is
-doing work for you until S2.1.
+# Slide 5
+
+## Slide Content
+
+**Headline:** What we mean by configuration
+
+> Configuration is the settings your app reads: which database, which URL, how long to wait.
+
+The handful of values that decide how one build behaves in one place.
+
+## Notes
+
+```text
+[definition] WHAT CONFIGURATION IS
+60-min: keep, 30 seconds. This replaced an agenda slide.
+
+Define it before defending it. Most rooms have never been given a definition, only
+examples, which is why "should this be configurable" is such a slippery argument.
+
+  which database    a connection string
+  which URL         an endpoint the app calls
+  how long to wait  a timeout
+
+Then the boundary, which is the useful half. Plenty of things vary without being
+configuration in this sense - user preferences, tenant records, pricing rules. Some of
+those genuinely do live in a config store; most are better off in a database. The
+question to ask is who owns the value and how it gets changed, not what type it is.
+
+Weather:TimeoutSeconds is the example for the rest of the talk - "how long to wait".
 ```
 
 ---
@@ -267,7 +310,7 @@ source you forgot about. The rest of the talk is about paying that cost on purpo
 
 ## Slide Content
 
-**Headline:** 2002 — you recompiled to change a value
+**Headline:** In 2007, this is how we did it.
 
 **Full-bleed code slide.** The value is not data. It is code.
 
@@ -304,9 +347,9 @@ Say so; it gets a laugh and it is the point.
 
 ## Slide Content
 
-**Headline:** 2005 — the value left the binary, but not the build
+**Headline:** Then the value left the binary — but not the build
 
-**Full-bleed code slide.** One string-keyed bag, resolved at build time.
+**Full-bleed code slide.** Same era, better answer: one string-keyed bag, resolved at build time.
 
 ```xml
 <appSettings>
@@ -407,42 +450,38 @@ Comes back twice:
 
 ## Slide Content
 
-**Headline-only slide.**
+**Headline:** A flag is configuration you read at a branch
 
-> **If two environments need different answers, it's configuration.**
-> **If behaviour must change without shipping, it's a flag.**
+Both are values the app reads. The difference is what the value decides.
 
-Two lines, stacked. The word *operational* is doing real work: user preferences,
-tenant data and business rules all vary without belonging in application
-configuration — and slide 51 says exactly that about desktop.
+| | |
+| --- | --- |
+| `Weather:TimeoutSeconds` = `30` | how long to wait |
+| `ConnectionStrings:Default` | which database |
+| `NewCheckout` = `true` | **which code runs** |
+
+A feature flag is not the opposite of configuration. It is configuration used to pick a
+branch: the flag definitions come from the same providers, in the same precedence order.
 
 ## Notes
 
 ```text
-[13-16 min] THESIS - S1.3
-60-min: keep - this is the organizing claim
+[thesis] CONFIGURATION AND FLAGS
+60-min: keep - it sets up the whole flags section
 
-State it plainly:
+Walk the three rows. A timeout decides how long, a connection string decides where, a
+flag decides which code runs. Only the third one changes behaviour, which is why turning
+one on is a release rather than a tweak.
 
-"If a value could ever differ between two environments, two deployments, or two
-moments in time, it belongs in configuration. If a behavior could ever need to
-change without a deploy, it belongs behind a feature flag."
+Worth being precise here, because the flags section depends on it: the flag DEFINITIONS
+are ordinary configuration - same JSON file, same providers, same precedence. What
+happens after you read them is not. A filter like TimeWindow re-evaluates on every call
+against the clock, with no configuration reload involved at all, and the feature manager
+does its own caching on top. So "it is just configuration" is true about where the
+definitions come from, and not about when the answer changes.
 
-The bar is COULD EVER, not DOES TODAY. Moving a value into configuration later is
-a code change under time pressure. Putting it there now costs one line. Same
-argument for flags: adding one before you ship is cheap; adding one during an
-incident is not.
-
-HANDLE TWO OBJECTIONS OUT LOUD - both are fair:
-
-- "Then everything is configurable and nothing is knowable."
-  True if you stop at externalizing. That's why S5 binding + ValidateOnStart
-  exist. A configurable value that's validated at startup is more knowable than
-  a constant buried in code - it's declared, typed, and checked in one place.
-
-- "That's a lot of flags."
-  Yes, and every one is debt. S6.6 is the discipline that makes this position
-  survivable rather than reckless.
+If someone asks why flags get their own section: because the value decides control flow,
+and that is a different risk than a wrong timeout.
 ```
 
 ---
@@ -451,7 +490,7 @@ HANDLE TWO OBJECTIONS OUT LOUD - both are fair:
 
 ## Slide Content
 
-**Section divider.** Kicker ``, title **One application. Four places it has to run.**. Navy ground.
+**Section divider.** Kicker ``, title **From the team's defaults to production**. Navy ground.
 
 > **the team's baseline** → **my machine** → **a shared dev server** → **production**
 
@@ -613,7 +652,6 @@ covers .NET 10's null handling.
 **Headline:** The environment picks the second file
 
 ```text
-# bash
 $ dotnet run --no-launch-profile
   Weather timeout is 30 seconds.          appsettings.json only
 
@@ -623,9 +661,7 @@ $ ASPNETCORE_ENVIRONMENT=Development dotnet run --no-launch-profile
 
 Both files load. The environment one is added second, so its keys win.
 
-> `Production` is the fallback when nothing sets the name. Locally the name usually
-> comes from `launchSettings.json` — which is why plain `dotnet run` and
-> `dotnet run --no-launch-profile` can disagree.
+> `WebApplication.CreateBuilder`: `DOTNET_ENVIRONMENT` wins over `ASPNETCORE_ENVIRONMENT`.
 
 ## Notes
 
@@ -637,11 +673,16 @@ Verified: loadproof cases 1 and 2 - Production -> 30, Development -> 120
 EnvironmentName decides which second file is probed. It is the input that selects the
 rest of your inputs.
 
-Where the name comes from:
+Where the name comes from - this came OFF the slide, so say it:
   launchSettings.json      locally, under F5 or plain dotnet run
   DOTNET_ENVIRONMENT       honoured by WebApplication too, not just workers
   ASPNETCORE_ENVIRONMENT   what most deployment platforms set
   Production               the fallback when nothing set it
+
+Production is the fallback when nothing sets the name at all. And locally the name
+usually comes from launchSettings.json, which is why plain dotnet run and
+dotnet run --no-launch-profile can disagree - that is the trap two slides from now,
+so plant it here and do not spend time on it yet.
 
 Measured on SDK 10.0.303, and it surprises people: when BOTH variables are set,
 DOTNET_ENVIRONMENT wins. ASPNETCORE_ENVIRONMENT=Staging with
@@ -655,6 +696,7 @@ Two other things worth a sentence:
 ```
 
 ---
+
 # Slide 20
 
 ## Slide Content
@@ -729,7 +771,7 @@ builder.Configuration.AddJsonFile("weather.json",
 ```
 
 ```text
-# bash - weather.json says 77, the env var says 10, the command line says 5
+# weather.json says 77, the env var says 10, the command line says 5
 $ Weather__TimeoutSeconds=10 dotnet run --no-launch-profile -- --Weather:TimeoutSeconds=5
   Weather timeout is 77 seconds.
 ```
@@ -760,6 +802,62 @@ asked for it by name.
 ```
 
 ---
+
+# Slide 18c
+
+## Slide Content
+
+**Headline:** The `.local.json` file nobody loads for you
+
+**Full-bleed code slide.** A common convention — and it does nothing until you register it.
+
+```csharp
+var builder = WebApplication.CreateBuilder(args);
+
+builder.Configuration.AddJsonFile(
+    $"appsettings.{builder.Environment.EnvironmentName}.local.json",
+    optional: true, reloadOnChange: true);
+```
+
+```text
+appsettings.json                      30
+appsettings.Development.json         120
+appsettings.Development.local.json    99   <- registered last, so it wins
+
+without the AddJsonFile line above  ->  120
+with it                             ->   99
+```
+
+> `CreateBuilder` probes `appsettings.json` and `appsettings.{Environment}.json` by name.
+> It has never heard of `.local.json`. Add it last, mark it `optional`, and git-ignore it.
+
+## Notes
+
+```text
+[act 1] THE CONVENTION THAT IS ONLY A CONVENTION
+Verified: isolated web app - 120 without the registration, 99 with it, and the file
+appears last in the provider list
+60-min: 30 seconds, but it lands - most rooms have someone using this already
+
+A lot of teams keep an appsettings.Development.local.json for personal overrides that
+should never be committed. It is a good habit. It is also not a framework feature.
+
+The failure it produces is quiet and expensive: the file is there, it is named
+correctly, it is git-ignored, and it does absolutely nothing - because nothing loads
+it. People conclude their value is being ignored and start editing the committed file
+instead, which is exactly what the convention was supposed to prevent.
+
+Position matters as much as presence. Registered here it is appended after the two
+defaults, so it wins over both. Registered before CreateBuilder's own sources it would
+lose to them and look equally broken.
+
+If someone asks why not user secrets: secrets are for credentials and live outside the
+repo entirely - that is the next act. This is for ordinary values you want different on
+your machine.
+```
+
+---
+
 # Slide 18b
 
 ## Slide Content
@@ -908,6 +1006,55 @@ we move the same application into shared dev.
 
 ---
 
+# Slide 23
+
+## Slide Content
+
+**Headline:** User secrets live outside the repo
+
+**Full-bleed code slide.** The whole lifecycle is five commands.
+
+```bash
+dotnet user-secrets init
+dotnet user-secrets set "Weather:ApiKey" "dev-key-12345"
+dotnet user-secrets list
+dotnet user-secrets remove "Weather:ApiKey"
+dotnet user-secrets clear
+
+# .NET 10 - file-based apps, no .csproj anywhere
+dotnet user-secrets set "ApiKey" "value" --file app.cs
+```
+
+## Notes
+
+```text
+[S4.4] USER SECRETS - THE COMMANDS
+Snippet: lifted from d09
+60-min: keep, fast
+
+Five commands and one .NET 10 addition. Do not read them out. Let people
+photograph it and say what matters instead.
+
+What matters:
+- 'init' writes the UserSecretsId into the .csproj. That id is the only thing
+  the repo ever learns about your secrets.
+- Values are set by KEY PATH using the colon form - "Weather:ApiKey", not
+  nested JSON. The provider flattens it exactly like everything else.
+- Bulk load exists: pipe a JSON file into 'dotnet user-secrets set'. Useful
+  when onboarding someone. Do not then commit that JSON file.
+
+THE .NET 10 LINE IS THE ONE TO CALL OUT:
+'dotnet run app.cs' programs get a stable UserSecretsId derived from a hash of
+the FILE PATH. A single-file app with no .csproj anywhere still gets user
+secrets, addressed with --file.
+
+That is genuinely new and it lands well - a five-line program reading
+configuration properly with no project file. Worth mentioning that moving the
+file changes the hash, and therefore changes which secrets it sees.
+```
+
+---
+
 # Slide 22
 
 ## Slide Content
@@ -972,60 +1119,11 @@ Storage paths, for the record - and tell them not to write code against these:
 
 ---
 
-# Slide 23
-
-## Slide Content
-
-**Headline:** User secrets live outside the repo
-
-**Full-bleed code slide.** The whole lifecycle is five commands.
-
-```bash
-dotnet user-secrets init
-dotnet user-secrets set "Weather:ApiKey" "dev-key-12345"
-dotnet user-secrets list
-dotnet user-secrets remove "Weather:ApiKey"
-dotnet user-secrets clear
-
-# .NET 10 - file-based apps, no .csproj anywhere
-dotnet user-secrets set "ApiKey" "value" --file app.cs
-```
-
-## Notes
-
-```text
-[S4.4] USER SECRETS - THE COMMANDS
-Snippet: lifted from d09
-60-min: keep, fast
-
-Five commands and one .NET 10 addition. Do not read them out. Let people
-photograph it and say what matters instead.
-
-What matters:
-- 'init' writes the UserSecretsId into the .csproj. That id is the only thing
-  the repo ever learns about your secrets.
-- Values are set by KEY PATH using the colon form - "Weather:ApiKey", not
-  nested JSON. The provider flattens it exactly like everything else.
-- Bulk load exists: pipe a JSON file into 'dotnet user-secrets set'. Useful
-  when onboarding someone. Do not then commit that JSON file.
-
-THE .NET 10 LINE IS THE ONE TO CALL OUT:
-'dotnet run app.cs' programs get a stable UserSecretsId derived from a hash of
-the FILE PATH. A single-file app with no .csproj anywhere still gets user
-secrets, addressed with --file.
-
-That is genuinely new and it lands well - a five-line program reading
-configuration properly with no project file. Worth mentioning that moving the
-file changes the hash, and therefore changes which secrets it sees.
-```
-
----
-
 # Slide 24
 
 ## Slide Content
 
-**Headline:** The launchSettings trap
+**Headline:** Why does `dotnet run` change my value?
 
 **Setup / reveal pair.** This slide is the setup only — do not show the answer yet.
 
@@ -1045,11 +1143,18 @@ Two things are true at once. One shell, one project.
 Snippet: lifted from d07
 60-min: keep if at all possible - this is the block's whole payoff
 
-THE #1 "works on my machine" configuration story:
+THE #1 "works on my machine" configuration story.
 
-launchSettings.json environment variables OVERRIDE machine and user environment
-variables during local F5 / dotnet run - and launchSettings.json is a
-DEVELOPMENT-only file that never deploys.
+The mechanism, which is deliberately NOT on the slide - ask the room first, then
+explain it on the reveal:
+
+launchSettings.json is not a configuration provider. The tooling reads it and sets
+PROCESS ENVIRONMENT VARIABLES before your app starts, so by the time CreateBuilder
+runs they look exactly like any other environment variable - and they were set later,
+over the top of the one you exported in the shell. That is why the profile wins.
+
+And it is a development-only file: dotnet publish does not include
+launchSettings.json by default, so none of this follows you to production.
 
 So: you set an env var, you run locally, nothing changes, you conclude env vars
 don't work. Or worse - it works locally because of launchSettings, and the value
@@ -1078,10 +1183,9 @@ $ dotnet run
   Weather timeout is 45 seconds.
 ```
 
-Caption, gold: **`launchSettings.json` is a development-only file that never deploys.**
+The launch profile sets this process’s environment variable to 45.
 
-So the value you carefully set is beaten locally by a file that will not exist in
-production — where your environment variable is the only thing left.
+Caption, gold: **`dotnet publish` does not include `launchSettings.json` by default.**
 
 ## Notes
 
@@ -1380,6 +1484,17 @@ Two panels, same shape as the flat-dictionary slide so the rhyme is obvious.
 | `Weather__AllowedOrigins__0` | `Weather:AllowedOrigins:0` |
 | `ConnectionStrings__Default` | `ConnectionStrings:Default` |
 
+```csharp
+builder.Configuration.AddEnvironmentVariables(prefix: "WEATHERAPP_");
+```
+
+```text
+WEATHERAPP_Weather__TimeoutSeconds=10   ->   Weather:TimeoutSeconds
+```
+
+The prefix is stripped, then `__` becomes `:`. A prefix keeps your keys out of the
+hundreds of unrelated variables already in the environment.
+
 Caption beneath: **`:` is not portable in an environment variable name. `__` is.**
 
 ## Notes
@@ -1426,11 +1541,18 @@ container does nothing. Env vars are read once at startup. Restart the container
 A directory becomes configuration. `AddKeyPerFile` ships in
 **`Microsoft.Extensions.Configuration.KeyPerFile`** — it is not in the default chain.
 
-```text
-/run/secrets/
-  Weather__ApiKey            ->   Weather:ApiKey
-  ConnectionStrings__Default ->   ConnectionStrings:Default
+```csharp
+builder.Configuration.AddKeyPerFile("/run/secrets", optional: false);
 ```
+
+```text
+/run/secrets/Weather__ApiKey        <- the file NAME is the key
+  wk_test_not_a_real_key            <- the file CONTENTS are the value
+
+                       reads back as   Weather:ApiKey
+```
+
+One file, one value. The path must be absolute.
 
 Beneath, in gold, the thing that is easy to get wrong:
 
@@ -2011,10 +2133,10 @@ problem wearing a config hat.
 
 ## Slide Content
 
-**Section divider.** Kicker ``, title **Many instances. One place to change the value.**. Navy ground.
+**Section divider.** Kicker ``, title **Several apps. Several instances. Shared settings.**. Navy ground.
 
-> That place is **Azure App Configuration**: a store the app reads at startup and
-re-reads on demand, so a value can change without a deploy and without a restart.
+> I’ve got three apps using this setting. I don’t want to update three deployments
+to change it.
 
 ## Notes
 
@@ -2024,6 +2146,12 @@ re-reads on demand, so a value can change without a deploy and without a restart
 
 The problem this stage solves:
 Many apps and instances; values that change without a deploy.
+
+The divider now states that problem in the room’s own words and does NOT name a
+product - so you name it: Azure App Configuration, a store the app reads at startup
+and re-reads on demand, so a value can change without a deploy and without a restart.
+Say it once, here, then go to the labels slide. Naming the product on the divider
+answered a question nobody had been asked yet.
 
 Note this block is only 5 minutes even at 90, because S6 now carries App
 Configuration's most interesting behavior. Show the sentinel key here and let
@@ -2039,19 +2167,55 @@ which is what forces the discipline: sentinel keys, validation, flag hygiene.
 
 ## Slide Content
 
-**Headline:** Azure App Configuration
+**Headline:** One key, one store, a label per environment
 
-The sentinel pattern, drawn as a sequence — this is the slide people take back to work.
+The same key twice: an unlabelled default, and a Production override.
+
+| Key | Label | Value |
+| --- | --- | --- |
+| `Weather:TimeoutSeconds` | *(no label)* | 30 |
+| `Weather:TimeoutSeconds` | `Production` | 5 |
+
+```csharp
+builder.Configuration.AddAzureAppConfiguration(options =>
+    options.Connect(endpoint, new DefaultAzureCredential())
+           .Select(KeyFilter.Any, LabelFilter.Null)
+           .Select(KeyFilter.Any, builder.Environment.EnvironmentName));
+```
+
+Load unlabelled defaults, then override with this environment’s label.
+
+## Notes
 
 ```text
-1.  edit  Weather:Timeout      ->  60
-2.  edit  Weather:Retries      ->  5
-3.  edit  Weather:Sentinel     ->  v4      <-- last, always
-                                             |
-   next request TRIGGERS a refresh ---------+  it may still serve the OLD
-                                               values; later requests see
-                                               all three change together
+[shared] LABELS, AND ASKING FOR THEM
+60-min: keep - this is the slide that makes App Configuration make sense
+
+A label is just a second dimension on the key. Same key name, different label, different
+value. That is the whole idea.
+
+The part people get wrong, and it is worth saying twice - it is no longer on the slide,
+so it has to come from you: labels are NOT matched to your environment automatically. If you only call Select(KeyFilter.Any), you get the unlabelled
+values and nothing else, in every environment, and it looks like the store is ignoring you.
+
+Order matters in the same way it has all talk. The second Select is registered after the
+first, so environment-labelled values win. Same rule as appsettings.Development.json
+landing on top of appsettings.json - it is the same mechanism, one level up.
+
+LabelFilter.Null is how you say "the ones with no label". It is not "any label".
+
+Keep the key the same as everywhere else: Weather:TimeoutSeconds.
 ```
+
+---
+
+# Slide 39a
+
+## Slide Content
+
+**Headline:** A sentinel key, changed last
+
+Refresh is not automatic either. You register which key to watch.
 
 ```csharp
 .ConfigureRefresh(refresh =>
@@ -2061,64 +2225,48 @@ The sentinel pattern, drawn as a sequence — this is the slide people take back
 })
 ```
 
-Labels are the environment axis; they go in the notes rather than on screen.
+```text
+1.  edit  Weather:TimeoutSeconds  ->  60
+2.  edit  Weather:Retries         ->  5
+3.  edit  Weather:Sentinel        ->  v4      <-- last, always
+```
+
+> After the refresh interval, a request triggers a check. Later requests see the
+> update. Each instance refreshes separately.
 
 ## Notes
 
 ```text
-[59-64 min] APP CONFIGURATION - S4.6
-Snippet: lifted from d20. No Azure dependency now.
-60-min: keep, compressed - labels and the sentinel key are the two ideas
+[shared] THE SENTINEL
+60-min: keep - this is the slide people take back to work
 
-Packages: Microsoft.Extensions.Configuration.AzureAppConfiguration
-        + Microsoft.Azure.AppConfiguration.AspNetCore (refresh middleware)
+The problem it solves: you are editing three keys in a portal while the app is serving
+traffic. Without a sentinel, a refresh can land between edit one and edit three, and an
+instance runs on a half-applied change.
 
-The six things worth saying:
+So you register ONE key as the trigger with refreshAll: true, and you change it last.
+Nothing re-reads until the sentinel moves, and when it moves everything is already in
+place.
 
-1. LABELS ARE THE ENVIRONMENT AXIS. One store, Development/Staging/Production
-   labels, Selected in order so labeled values overlay unlabeled defaults.
-   Select("Weather:*", LabelFilter.Null) then Select("Weather:*", envName).
-   Load a SLICE, not the whole store.
+BE CAREFUL WITH THE CLAIM, and say this out loud:
+Per instance, the three values arrive together. Across the fleet they do not - each
+instance refreshes on its own next request, on its own interval. There is no moment when
+the whole fleet flips. The store is not transactional across keys either; do not say
+"atomic".
 
-2. REFRESH IS not AUTOMATIC. You must call ConfigureRefresh and then RegisterAll()
-   or Register(key). Feature flags are the exception - UseFeatureFlags self-registers.
-   This trips up everyone exactly once.
+The refresh is also activity-driven, and the wording matters. A request AFTER the
+refresh interval has elapsed TRIGGERS the check - it does not wait for it. That request
+is typically served with the old value; later requests see the new one. So an idle
+instance does not poll at all, and can serve the old value long after you made the
+edit. That surprises people during a demo.
 
-3. REFRESH IS ACTIVITY-DRIVEN in ASP.NET Core. The middleware checks on an
-   incoming request once the interval has elapsed. AN IDLE APP never REFRESHES.
-   It is also ASYNCHRONOUS: the request that TRIGGERS the refresh does not
-   block on it and may still serve the OLD values. Later requests see the new
-   ones. Say this - people assume the triggering request gets the update.
-   Background services must inject IConfigurationRefresherProvider and call
-   TryRefreshAsync() themselves. Say this slowly - it's the #1 surprise.
-   Also: app.UseAzureAppConfiguration() must go EARLY in the pipeline, or another
-   middleware short-circuits before refresh ever runs.
+And none of it happens by itself. You need the middleware wired up -
+builder.Services.AddAzureAppConfiguration() plus app.UseAzureAppConfiguration() - or
+you call refresher.TryRefreshAsync() yourself. Register ConfigureRefresh without one of
+those two and nothing ever re-reads, which looks exactly like a broken sentinel.
 
-4. THE SENTINEL KEY PATTERN - the thing to actually take home.
-   Instead of RegisterAll(), watch ONE key you bump after every other edit lands:
-     refresh.Register("Weather:Sentinel", refreshAll: true)
-   Update the sentinel last. Each instance then reloads the selected values
-   together in one refresh, so no single process sees a half-applied edit.
-   Don't say "atomic" - the store is not transactional across keys, and
-   instances refresh independently, so they do not all switch at the same
-   moment. It answers "half-applied", not "everywhere at once".
-
-5. FAILURE MODE IS GRACEFUL - a failed refresh keeps last known-good and retries.
-   STARTUP now retries with backoff, bounded by ConfigureStartupOptions =>
-   options.Timeout. If it still cannot load when that budget runs out the
-   failure surfaces during startup and normally aborts the process. So
-   "a failed connection at startup crashes you" is true but incomplete -
-   it retries first.
-
-6. KEY VAULT REFERENCES live in the store as pointers with a distinct content
-   type; ConfigureKeyVault dereferences them. Give them their OWN cadence with
-   SetSecretRefreshInterval(key, TimeSpan) - a rotated secret is otherwise cached
-   forever. MINIMUM is one minute - a shorter interval throws ArgumentOutOfRangeException
-   rather than being silently floored. This is the
-   App Configuration provider resolving Key Vault REFERENCES, not the
-   standalone Key Vault provider, which has its own ReloadInterval. (Same rotation argument as the Key Vault slide.)
-
-Also exists: Map() rewrites keys on the way in, e.g. App__Settings__X -> App:Settings:X.
+Labels and refresh are separate concerns: the previous slide chose WHICH values, this one
+decides WHEN they are re-read.
 ```
 
 ---
@@ -2129,14 +2277,23 @@ Also exists: Map() rewrites keys on the way in, e.g. App__Settings__X -> App:Set
 
 **Section divider.** Kicker ``, title **A feature flag is configuration with an `if` statement attached.**. Navy ground.
 
-> Same providers, same precedence, same reload rules as every value so far.
-What is new is that it changes *behaviour*, so turning it on is a release.
+> Remember `NewCheckout`? Now let’s decide when it turns on.
 
 ## Notes
 
 ```text
 [64-84 min] FEATURE FLAGS - S6
 60-min: 10 min - S6.1-6.4 plus S6.6. Cut variants entirely.
+
+The callback is on the slide, so you do not have to set it up. NewCheckout has been
+sitting in the flags-vs-config table since early in the talk; that table already did
+the definitional work, which is why this block can open on a decision rather than a
+definition.
+
+Two things to say here that are no longer written down. First, the definitions come
+from the same providers in the same precedence order as every value so far - nothing
+about the plumbing is new. Second, what IS new is that the value picks a branch, so
+turning one on is a release rather than a tweak.
 
 ROUGHLY A QUARTER OF THE TALK. Not an appendix to Azure App Configuration - this
 is the second half of the thesis from S1.3, and the only part of the
@@ -2167,9 +2324,9 @@ Three rows — the same journey from the start of the talk, now carrying flags.
 
 | Stage | Where the flag lives | What you get |
 | --- | --- | --- |
-| **Local dev** | `appsettings.json` | Branch in code without branching in git. Zero cloud. |
+| **Local dev** | `appsettings.json` | Branch in code, not in git. Zero cloud. |
 | **Deployment** | environment variable | Ship dark, enable per environment |
-| **Shared** | App Configuration | Flip at runtime, target a cohort, roll back in seconds |
+| **Shared** | App Configuration | Flip at runtime, roll back without a deploy |
 
 Row one is highlighted. It is the row that makes flags feel free, and it is the one
 to land before anyone sees Azure.
@@ -2196,7 +2353,10 @@ FLAGS LIVE AT ALL THREE STAGES OF THE SPINE - this is why the slide matters:
   DEPLOYMENT   environment variable per environment
                Ship dark, enable per environment at deploy time.
   SHARED       Azure App Configuration
-               Flip at runtime, target a cohort, roll back in seconds.
+               Flip at runtime, target a cohort, roll back without a deploy.
+               Careful with the speed here - turning it off is quick to do, not
+               instant to take effect. Each instance picks it up on its own
+               refresh. That caveat lands properly at the end of the block.
 
 SHOW THE FIRST ROW BEFORE ANYONE SEES AZURE.
 It's the row that makes flags feel FREE. Most of the room believes feature flags
@@ -2275,121 +2435,55 @@ Microsoft.FeatureManagement.AspNetCore. The core package covers everything else.
 
 ---
 
-# Slide 44
+# Slide 43a
 
 ## Slide Content
 
-**Headline:** 50% of users, or 50% of calls?
+**Headline:** Turn holiday pricing on for December
 
-**Setup.** A flag that is on for half the traffic — and a question about what "half" means.
-
-`Microsoft.Percentage` is a built-in filter. `Value: 50` means the flag evaluates
-true half the time. The question is *half of what*.
+**Full-bleed code slide.**
 
 ```json
 {
-  "id": "NewCheckout",
+  "id": "HolidayPricing",
   "enabled": true,
   "conditions": {
     "client_filters": [
-      { "name": "Microsoft.Percentage", "parameters": { "Value": 50 } }
+      { "name": "Microsoft.TimeWindow",
+        "parameters": {
+          "Start": "2026-12-01T00:00:00Z",
+          "End":   "2026-12-26T00:00:00Z" } }
     ]
   }
 }
 ```
 
-Ask: **"Same user, same session, checks this flag twice. Same answer both times?"**
+```text
+clock 2026-11-30  OFF     clock 2026-12-10  ON     clock 2026-12-26  OFF
+```
 
-Let them say yes. Then advance to **44a**.
-
-This is on the never-cut list at any talk length.
+On from 1 December until the 26th. Nobody flips it; the flag reads the clock.
 
 ## Notes
 
 ```text
-[72-77 min] FILTERS - S6.4
-Snippets: lifted from d29 and d30
-60-min: KEEP THE GOTCHA even if you cut the filter catalogue. Never-cut list.
+[flags] THE SIMPLEST USEFUL FILTER
+Snippet and output: lifted from d30
+60-min: keep - it is the friendliest filter and it needs no cloud
 
-BUILT IN, registered automatically by AddFeatureManagement() - except targeting,
-which needs .WithTargeting<T>():
+A filter is a condition attached to a flag. enabled: true stops meaning "on" and starts
+meaning "eligible - now go ask the filter".
 
-  Microsoft.Percentage   progressive rollout: 5% -> 25% -> 100%
-  Microsoft.TimeWindow   scheduled enable/disable, Recurrence for daily/weekly
-  Microsoft.Targeting    named users, groups, per-group percentages, exclusions
+Microsoft.TimeWindow is the one to lead with because there is nothing to misunderstand:
+a start, an end, and the clock decides. Holiday pricing that switches itself on in
+December and off on Boxing Day, with nobody awake to flip it.
 
-Targeting needs an ITargetingContextAccessor so the library knows who the current
-user is:
-  services.AddFeatureManagement().WithTargeting<HttpContextTargetingContextAccessor>();
+It also supports Recurrence - d30 has a NightlyBatch flag that is on daily from 01:00 to
+03:00 - which is worth one sentence and no slide.
 
-*** THE SLIDE THAT EARNS ITS OWN MINUTE ***
-
-PLAIN Microsoft.Percentage IS EVALUATED PER CALL, not PER USER.
-
-A 50% flag checked twice in one request can answer DIFFERENTLY EACH TIME. A user
-can watch the feature flicker between page loads. Nav bar says new checkout,
-checkout page says old.
-
-THIS IS THE MOST COMMON FEATURE-FLAG BUG IN THE WILD.
-
-THE FIX: targeting, or variant allocation with a seed. That's what gives a STABLE
-per-user assignment.
-
-d29 is the flicker, d30 the stable version. If you only have room for one,
-show the flicker and describe the fix - the bug is the memorable half.
-
-CUSTOM FILTERS: implement IFeatureFilter (one method, EvaluateAsync), register
-with .AddFeatureFilter<TenantFilter>(). Good example: a flag enabled per tenant.
-```
-
----
-
-# Slide 44a
-
-## Slide Content
-
-**Reveal.** The captured output.
-
-One user. One process. Ten consecutive checks — this is `d29`'s actual output shape,
-with the targeting row underneath for contrast.
-
-```text
-  D29 - Microsoft.Percentage is per-call, not per-user
-
-  percentage   true  false true  true  false false true  false true  true
-  targeting    true  true  true  true  true  true  true  true  true  true
-```
-
-Caption, gold: **`Microsoft.Percentage` is evaluated per call, not per user.**
-
-The nav bar says new checkout, the checkout page says old. It is a common and
-genuinely nasty flag bug, and it is invisible in a single test run.
-
-The fix, one line beneath: targeting, or variant allocation with a `seed` — that is
-what gives a stable per-user assignment.
-
-## Notes
-
-```text
-[FLAGS] THE REVEAL - PER CALL, NOT PER USER
-Snippet: lifted from d29
-60-min: KEEP THE GOTCHA even if you cut the filter catalogue. Never-cut list.
-
-Ten checks. One user. One process. The percentage row flickers; the targeting
-row does not. That contrast is the slide.
-
-Say:
-"Microsoft.Percentage does not know who you are. It rolls the dice on every
- call. Fifty percent means half the CALLS, not half the USERS."
-
-WHY IT IS NASTY: it is invisible in a single test run and invisible in code
-review. It shows up as a user watching a feature flicker between page loads -
-nav bar says new checkout, checkout page says old.
-
-THE FIX, and say it immediately so nobody leaves with only the problem:
-targeting with an ITargetingContextAccessor, or variant allocation with a seed.
-Either gives a stable per-user assignment. A shared seed keeps that assignment
-consistent across flags, which is what you want for a coherent experiment.
+What to land before moving on: the flag is still just configuration. Same JSON file, same
+provider, same precedence. The filter is only a condition the library evaluates when you
+ask.
 ```
 
 ---
@@ -2427,7 +2521,8 @@ pattern meet, which is why it belongs in this talk and not a generic flags talk.
   variant.Configuration.Bind(settings);   // it's an IConfigurationSection -
                                           // bind it like anything else
 
-That last line is the whole point. Land it and you can move on.
+Land that last line, then move on: a variant hands back a configuration section, so
+it binds like anything else you have done all talk.
 
 ALLOCATION is evaluated in order: user -> group -> percentile, falling back to
 default_when_enabled, or default_when_disabled when the flag is off.
@@ -2469,15 +2564,12 @@ is a pull request.
 Snippet: lifted from d32, the flag inventory endpoint
 60-min: never cut. This is the closing argument.
 
-THIS SECTION IS WHAT SEPARATES THE TALK FROM THE DOCUMENTATION.
-It's the thing nobody else in the room will say.
+Every flag leaves a branch behind, and somebody has to own removing it.
 
-Every flag is a permanent if-statement with an owner and an expiry date.
+- A flag doubles the paths through that code. A handful of live flags is more
+  combinations than anyone tests, and the untested ones are where it bites.
 
-- A FLAG DOUBLES your CODE PATHS. Ten live flags is up to 1,024 nominal
-  combinations. You test maybe three of them.
-
-- NAME FLAGS FOR THEIR REMOVAL.
+- Name flags for their removal.
   "NewCheckout" never gets deleted. It'll be there in 2031 and it will still be
   called New.
   "Checkout_V2_Rollout_2026Q1" files its own expiry.
@@ -2562,7 +2654,9 @@ percentage or targeting flag's value is THIS evaluation, for THIS context.
 
 Beneath, smaller:
 
-> You gain instant rollback. You lose *"the code that ran is the code in the commit."*
+> The code is already deployed. The flag decides which path runs.
+
+> Turning it off still depends on how quickly each instance sees the change.
 
 This is the callback. Point back at the build-time/runtime slide from the opening and
 say: **same trade, one level up.**
@@ -2577,7 +2671,18 @@ Someone in the room is going to think it, so say it first:
 
 FLAGS CONVERT A DEPLOYMENT PROBLEM INTO A RUNTIME PROBLEM.
 
-You gain instant rollback. You lose "the code that ran is the code in the commit."
+Two corrections worth making precisely, because the loose version of each is what
+the room already believes:
+
+1. NOT "instant rollback". Turning a flag off is quick to do and not instant to take
+   effect. Once the refresh interval has elapsed, a request triggers the check -
+   that request usually still gets the old answer, and later ones see the new value.
+   An idle instance is not checking at all. Same behaviour as the sentinel slide.
+   What you actually gain is a rollback that needs no deploy.
+
+2. NOT "you lose the code that ran is the code in the commit". The code that ran IS
+   in the deployed commit - all of it. What the commit no longer tells you is WHICH
+   PATH ran. The decision moved out of the artifact.
 
 A flag flipped in a portal is a PRODUCTION CHANGE WITH NO PR, NO REVIEW, AND NO
 DIFF - unless the store keeps history and you treat flag changes as deploys.
@@ -2845,6 +2950,125 @@ the PDF is complete for whoever reads it later.
 
 Each one is technically sound and each one interrupts the laptop -> shared dev ->
 production story, which is why they are back here.
+```
+
+---
+
+# Slide 44
+
+## Slide Content
+
+**Headline:** 50% of users, or 50% of calls?
+
+**Setup.** A flag that is on for half the traffic — and a question about what "half" means.
+
+`Microsoft.Percentage` is a built-in filter. `Value: 50` means the flag evaluates
+true half the time. The question is *half of what*.
+
+```json
+{
+  "id": "NewCheckout",
+  "enabled": true,
+  "conditions": {
+    "client_filters": [
+      { "name": "Microsoft.Percentage", "parameters": { "Value": 50 } }
+    ]
+  }
+}
+```
+
+Ask: **"Same user, same session, checks this flag twice. Same answer both times?"**
+
+Let them say yes. Then advance to **44a**.
+
+This is on the never-cut list at any talk length.
+
+## Notes
+
+```text
+[72-77 min] FILTERS - S6.4
+Snippets: lifted from d29 and d30
+60-min: KEEP THE GOTCHA even if you cut the filter catalogue. Never-cut list.
+
+BUILT IN, registered automatically by AddFeatureManagement() - except targeting,
+which needs .WithTargeting<T>():
+
+  Microsoft.Percentage   progressive rollout: 5% -> 25% -> 100%
+  Microsoft.TimeWindow   scheduled enable/disable, Recurrence for daily/weekly
+  Microsoft.Targeting    named users, groups, per-group percentages, exclusions
+
+Targeting needs an ITargetingContextAccessor so the library knows who the current
+user is:
+  services.AddFeatureManagement().WithTargeting<HttpContextTargetingContextAccessor>();
+
+*** THE SLIDE THAT EARNS ITS OWN MINUTE ***
+
+PLAIN Microsoft.Percentage IS EVALUATED PER CALL, not PER USER.
+
+A 50% flag checked twice in one request can answer DIFFERENTLY EACH TIME. A user
+can watch the feature flicker between page loads. Nav bar says new checkout,
+checkout page says old.
+
+THIS IS THE MOST COMMON FEATURE-FLAG BUG IN THE WILD.
+
+THE FIX: targeting, or variant allocation with a seed. That's what gives a STABLE
+per-user assignment.
+
+d29 is the flicker, d30 the stable version. If you only have room for one,
+show the flicker and describe the fix - the bug is the memorable half.
+
+CUSTOM FILTERS: implement IFeatureFilter (one method, EvaluateAsync), register
+with .AddFeatureFilter<TenantFilter>(). Good example: a flag enabled per tenant.
+```
+
+---
+
+# Slide 44a
+
+## Slide Content
+
+**Reveal.** The captured output.
+
+One user. One process. Ten consecutive checks — this is `d29`'s actual output shape,
+with the targeting row underneath for contrast.
+
+```text
+  D29 - Microsoft.Percentage is per-call, not per-user
+
+  percentage   true  false true  true  false false true  false true  true
+  targeting    true  true  true  true  true  true  true  true  true  true
+```
+
+Caption, gold: **`Microsoft.Percentage` is evaluated per call, not per user.**
+
+The nav bar says new checkout, the checkout page says old. It is a common and
+genuinely nasty flag bug, and it is invisible in a single test run.
+
+The fix, one line beneath: targeting, or variant allocation with a `seed` — that is
+what gives a stable per-user assignment.
+
+## Notes
+
+```text
+[FLAGS] THE REVEAL - PER CALL, NOT PER USER
+Snippet: lifted from d29
+60-min: KEEP THE GOTCHA even if you cut the filter catalogue. Never-cut list.
+
+Ten checks. One user. One process. The percentage row flickers; the targeting
+row does not. That contrast is the slide.
+
+Say:
+"Microsoft.Percentage does not know who you are. It rolls the dice on every
+ call. Fifty percent means half the CALLS, not half the USERS."
+
+WHY IT IS NASTY: it is invisible in a single test run and invisible in code
+review. It shows up as a user watching a feature flicker between page loads -
+nav bar says new checkout, checkout page says old.
+
+THE FIX, and say it immediately so nobody leaves with only the problem:
+targeting with an ITargetingContextAccessor, or variant allocation with a seed.
+Either gives a stable per-user assignment. A shared seed keeps that assignment
+consistent across flags, which is what you want for a coherent experiment.
 ```
 
 ---

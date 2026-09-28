@@ -49,6 +49,10 @@ const page = await browser.newPage({ viewport: { width: 1280, height: 720 } })
 
 // Derive the count from slides.md. A hardcoded default silently stopped checking once
 // the deck grew past it, which is exactly when new slides are most likely to overflow.
+//
+// Every slide carries a provenance comment, including the blank holding slide, so this
+// count is exact - and outline-to-slidev.mjs now ASSERTS that before writing, so a layout
+// that stops emitting one fails the build instead of quietly shrinking this loop.
 const SLIDES = path.resolve(HERE, '../slides.md')
 const total = Number(process.argv[2])
   || (readFileSync(SLIDES, 'utf8').match(/^<!-- OUTLINE\.md # Slide /gm) || []).length

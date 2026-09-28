@@ -1,6 +1,6 @@
 <!-- Split panel, headshot right. Title, about and thanks slides share it. -->
 <script setup lang="ts">
-defineProps<{ variant?: string; image?: string; kicker?: string }>()
+defineProps<{ variant?: string; image?: string; kicker?: string; qr?: string }>()
 </script>
 
 <template>
@@ -8,6 +8,7 @@ defineProps<{ variant?: string; image?: string; kicker?: string }>()
     <div class="left">
       <div v-if="kicker" class="kicker">{{ kicker }}</div>
       <slot />
+      <img v-if="qr" :src="qr" class="cover-qr" alt="QR code linking to the repository" />
     </div>
     <div class="right" :style="image ? { backgroundImage: `url(${image})` } : undefined" />
   </div>
@@ -50,6 +51,12 @@ defineProps<{ variant?: string; image?: string; kicker?: string }>()
   padding-left: 0.95rem;
   position: relative;
 }
+.cover-qr {
+  width: 6.4rem;
+  height: 6.4rem;
+  margin-top: 1.1rem;
+}
+
 .left :deep(li)::before {
   content: '';
   position: absolute;

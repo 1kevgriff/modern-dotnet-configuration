@@ -46,8 +46,24 @@ Promises the abstract makes, and where they're paid off:
 | Choosing a strategy | §7 |
 | **"cloud-native microservices *or desktop apps*"** | §4.11 |
 
-Not in the abstract but now ~25% of the talk: **feature flags** (§6). If the abstract is ever
-resubmitted, add a clause — the current text only implies them via "Azure App Configuration."
+Not in the abstract but now ~25% of the talk: **feature flags** (§6). The text above only
+implies them via "Azure App Configuration."
+
+**Proposed revision — LOCAL ONLY, never submitted.** The block above is the historical record of
+what was actually submitted and must stay verbatim. This one adds the feature-flags clause and
+keeps the desktop scope; use it only if the abstract is ever resubmitted:
+
+> Remember the good ol' days when configuration meant hardcoding a few constants and commenting out
+> everything but PRODUCTION before a commit? Life was simple—and dangerous. Thankfully, things have
+> evolved. Since the introduction of the .NET Generic Host, we've gained a powerful and flexible
+> configuration system that works across all types of applications. But with great power comes great
+> complexity. In this talk, we'll dive deep into the .NET configuration model. We'll explore when to
+> use configuration files, environment variables, and cloud-based solutions like Azure App
+> Configuration — and how feature flags extend the same model to values that decide which code runs.
+> We'll also cover common pitfalls, real-world patterns, and how to choose the right configuration
+> strategy for your app. Whether you're building cloud-native microservices or desktop apps, you'll
+> leave with a clear understanding of how to wrangle configuration in a clean, secure, and scalable
+> way.
 
 ---
 

@@ -17,7 +17,7 @@
 .slidev-layout {
   background: var(--cream);
   color: var(--navy);
-  font-family: 'Manrope', ui-sans-serif, system-ui, sans-serif;
+  font-family: 'Source Sans 3', ui-sans-serif, system-ui, sans-serif;
   font-weight: 400;
   padding: 2.2rem 3rem;
 }
@@ -243,4 +243,14 @@
 .slidev-layout .panel.dark :not(pre) > code {
   background: rgba(247, 246, 243, 0.16);
   color: var(--cream);
+}
+
+/* ---- repo QR -------------------------------------------------------------------- */
+/* Generated from the actual git remote by build/, committed as SVG so the deck has no
+   runtime dependency on a QR library. */
+
+.slidev-layout .repo-qr {
+  width: 9rem;
+  height: 9rem;
+  margin-top: 0.9rem;
 }

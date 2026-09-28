@@ -211,6 +211,17 @@ function caption(text, gold) {
 
 const goldCaption = s => caption(s.goldCaption, true)
 
+/**
+ * The repo QR.
+ *
+ * This is built here rather than written into OUTLINE.md, because prose is escaped on the
+ * way out - an <img> tag authored in the outline reaches the slide as literal text. Slide
+ * content that needs an element has to come from the sidecar and be emitted, not typed.
+ */
+const qrImage = cfg => (cfg.qr
+  ? `<img src="${esc(cfg.qr)}" class="repo-qr" alt="QR code linking to the repository" />`
+  : '')
+
 /** All caption text a slide will render, for the height budget. */
 const captionText = (s, cfg) =>
   [s.quote, s.goldCaption, cfg.footnote ?? (cfg.prose === 'keep' ? s.residualProse.join(' ') : '')]
@@ -252,13 +263,19 @@ const LAYOUTS = {
     }
   },
 
+  // A holding screen. Renders nothing on purpose.
+  // A holding screen. Renders nothing on purpose.
+  blank() {
+    return { front: { layout: 'blank' }, body: '<!-- intentionally blank -->' }
+  },
+
   cover(s, cfg) {
     const front = { layout: 'cover', variant: cfg.variant, image: '/kevin-griffin.png' }
     if (cfg.kicker) front.kicker = cfg.kicker
     const lines = (cfg.lines || []).map(l => `- ${l}`).join(NL)
     return {
       front,
-      body: chunks(provenance(cfg.from), `# ${cfg.headline}`, lines),
+      body: chunks(provenance(cfg.from), `# ${cfg.headline}`, lines, qrImage(cfg)),
     }
   },
 
@@ -269,8 +286,19 @@ const LAYOUTS = {
     }
   },
 
+  /**
+   * `lede` splits a multi-paragraph statement into ONE claim plus supporting lines.
+   *
+   * layouts/statement.vue already styles `.caption` as supporting text for exactly this
+   * reason, but every blockquote paragraph was going into the 2.1rem claim type - so a
+   * slide whose outline says "Beneath, smaller" rendered as competing headlines instead.
+   */
   statement(s, cfg) {
-    return { front: { layout: 'statement' }, body: chunks(s.quote, footnote(s, cfg)) }
+    const paras = String(s.quote || '').split(NL + NL).filter(Boolean)
+    const body = cfg.lede && paras.length > 1
+      ? chunks(paras[0], caption(paras.slice(1).join(NL + NL)), footnote(s, cfg))
+      : chunks(s.quote, footnote(s, cfg))
+    return { front: { layout: 'statement' }, body }
   },
 
   /**
@@ -293,13 +321,16 @@ const LAYOUTS = {
   },
 
   cards(s, cfg) {
+    // `clicks` reveals the cards one at a time. Slidev counts v-click per slide, so the
+    // click budget has to be declared in the headmatter or the last card never appears.
     const cards = cfg.cards
       .map(c =>
-        `<Card n="${esc(c.n)}" title="${esc(c.title)}"${c.accent ? ' accent' : ''}>` +
+        `<Card n="${esc(c.n)}" title="${esc(c.title)}"${c.accent ? ' accent' : ''}` +
+        `${cfg.clicks ? ' v-click' : ''}>` +
         `${c.body ? esc(c.body) : ''}</Card>`)
       .join(NL)
     return {
-      front: { layout: 'default' },
+      front: { layout: 'default', ...(cfg.clicks ? { clicks: cfg.cards.length } : {}) },
       body: chunks(
         heading(s),
         provenance(cfg.from),
@@ -368,6 +399,7 @@ const LAYOUTS = {
         cfg.bigNum ? `<BigNum from="${esc(cfg.bigNum.from)}" to="${esc(cfg.bigNum.to)}" />` : '',
         caption(s.quote, true),
         outlineBlocks(s),
+        qrImage(cfg),
         footnote(s, cfg),
         goldCaption(s),
       ),
@@ -399,7 +431,7 @@ const HEADMATTER = [
   // provider:none - the fonts are self-hosted in public/fonts and declared in styles/fonts.css.
   // A conference machine with no network would otherwise fall back and change every metric.
   'fonts:',
-  '  sans: Manrope',
+  '  sans: Source Sans 3',
   '  mono: JetBrains Mono',
   '  provider: none',
 ].join(NL)
@@ -485,7 +517,17 @@ function main() {
     process.exit(1)
   }
 
-  guardedWrite(OUT, out.join(NL + NL) + NL)
+  // check-overflow.mjs sizes its loop by counting provenance comments, so a slide that
+  // does not emit one is never checked. Fail here rather than let the gate quietly run short.
+  const doc = out.join(NL + NL)
+  const stamped = (doc.match(/^<!-- OUTLINE\.md # Slide /gm) || []).length
+  if (stamped !== slides.length) {
+    throw new Error(
+      `${slides.length} slides but ${stamped} provenance comments - check-overflow.mjs ` +
+      `would check ${stamped} of them`)
+  }
+
+  guardedWrite(OUT, doc + NL)
 
   const counts = slides.reduce(
     (a, s) => ({

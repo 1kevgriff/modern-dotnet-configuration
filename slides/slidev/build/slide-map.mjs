@@ -17,6 +17,7 @@ const SITE = 'consultwithgriff.com'
 
 export const map = {
   // ---- cold open -------------------------------------------------------------------
+  0: { layout: 'blank', prose: 'drop' },
   1: { layout: 'code' },
   2: { layout: 'code' },
 
@@ -26,7 +27,7 @@ export const map = {
     headline: 'Modern .NET Configuration',
     // No kicker. A three-noun strapline over the title is exactly the filler Kevin cut
     // from the PowerPoint deck; it does not come back.
-    lines: ['Kevin Griffin', 'Microsoft MVP', '.NET 10 / C# 14'],
+    lines: ['Kevin Griffin', 'Microsoft MVP'],
     from: 'OUTLINE.md slide 3 byline',
     prose: 'drop'
   },
@@ -36,21 +37,18 @@ export const map = {
     variant: 'bio',
     headline: 'Kevin Griffin',
     lines: [
-      'Software consultant — .NET and Azure',
+      'Independent Consultant',
+      'CTO, Shows On Sale',
       'Microsoft MVP',
-      'Builds and runs Shows On Sale',
-      SITE,
+      SITE + '  ·  @1kevgriff',
     ],
     from: 'OUTLINE.md slide 4 + README.md §Speaker',
   },
 
-  5: {
-    layout: 'roadmap',
-    panelTitle: 'Following one value',
-    // The five acts themselves live in OUTLINE.md. Keeping a copy here is what let the
-    // deck keep showing the old agenda after the outline was rewritten.
-    footnote: 'The same key, `Weather:TimeoutSeconds`, crosses all five.',
-  },
+  '4a': { layout: 'default', prose: 'keep', qr: '/repo-qr.svg' },
+
+  // no longer a roadmap - a definition, stated once
+  5: { layout: 'statement', prose: 'keep' },
 
   6: {
     layout: 'cards',
@@ -62,6 +60,7 @@ export const map = {
       { n: '04', title: 'Trust', accent: true },
       { n: '05', title: 'Ownership', accent: true },
     ],
+    clicks: true,
     from: 'OUTLINE.md slide 6 — card titles inline, emphasis as described',
     prose: 'drop',
   },
@@ -71,8 +70,10 @@ export const map = {
   '7b': { layout: 'code' },
   8: { layout: 'statement' },
   9: {
-    layout: 'statement',
-    prose: 'drop',
+    // NOT `statement`: that layout renders only a blockquote, and this slide's content is
+    // a headline plus a table. As a statement it rendered completely blank.
+    layout: 'default',
+    prose: 'keep',
   },
 
   // ---- the journey -----------------------------------------------------------------
@@ -88,6 +89,7 @@ export const map = {
   '11b': { layout: 'code', prose: 'keep' },
   '13a': { layout: 'default', prose: 'keep' },
   '18a': { layout: 'code' },
+  '18c': { layout: 'code', prose: 'keep' },
   '18b': { layout: 'code', prose: 'keep' },
 
   12: {
@@ -239,7 +241,7 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   },
   '24a': {
     layout: 'code',
-    footnote: 'So the value you carefully set is beaten locally by a file that will not exist in production — where your environment variable is the only thing left.',
+    prose: 'keep',
   },
 
   // ---- options ---------------------------------------------------------------------
@@ -313,6 +315,9 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
     layout: 'default',
     prose: 'drop',
   },
+  '39a': { layout: 'default', prose: 'keep' },
+  '43a': { layout: 'code', prose: 'keep' },
+
   40: {
     layout: 'default',
     footnote: 'Changing an environment variable on a running container does nothing at all.',
@@ -342,7 +347,7 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   },
   45: {
     layout: 'code',
-    footnote: 'The last line is the whole point: a variant hands you a configuration section, so you bind it like anything else in this talk.',
+    footnote: 'A variant hands back an `IConfigurationSection`, so it binds like anything else in this talk.',
   },
   46: {
     layout: 'default',
@@ -354,10 +359,11 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
     // (slide 16 needs its reading-direction label there), which put this slide's caveat
     // above the branch it is describing.
     layout: 'code',
-    footnote: '*Ten live flags is up to 1,024 nominal combinations. You test three.*',
   },
   47: {
     layout: 'statement',
+    // "Beneath, smaller" - OUTLINE.md slide 47. One claim, then two supporting lines.
+    lede: true,
     prose: 'drop',
   },
 
@@ -391,6 +397,7 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
   54: {
     layout: 'cover',
     variant: 'thanks',
+    qr: '/repo-qr.svg',
     headline: "Let's keep talking.",
     lines: [
       SITE,
