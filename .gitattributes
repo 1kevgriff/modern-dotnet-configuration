@@ -1,0 +1,25 @@
+# The outline parser is line-anchored, and Git's core.autocrlf=true rewrites every text
+# file with CRLF on checkout. That made `npm run generate` REFUSE TO WRITE on a fresh
+# Windows clone - the deck could not be rebuilt from its own source. Normalise to LF in
+# the working tree, not just in the repository, so every machine builds the same deck.
+#
+# parse-outline.mjs also strips CR defensively, so a machine that ignores this file still
+# works. Both, because the failure is silent-looking: it reads as missing slide content.
+* text=auto eol=lf
+
+# Fonts, images and the exported deck are binary. Never touch their bytes.
+*.woff2 binary
+*.woff  binary
+*.ttf   binary
+*.otf   binary
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.pdf   binary
+*.pptx  binary
+
+# Key-per-file demo secrets: the FILE CONTENTS are the configuration value, so a stray
+# newline would change what the demo reads back. Leave them exactly as written.
+demos/d23-key-per-file/secrets/** -text

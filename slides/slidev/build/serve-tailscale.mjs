@@ -83,6 +83,13 @@ ${name ? `    http://${name}:${PORT}/        (MagicDNS)\n` : ''}
   password   ${password}${generated ? '   (generated; set SLIDEV_REMOTE_PASSWORD to pin it)' : ''}
 
   Remote control and presenter mode are reachable by anyone on your tailnet.
+
+  Slidev is about to print a "remote control" line for EVERY network interface on
+  this machine - LAN, WSL, sometimes a public address. Ignore them. It enumerates
+  interfaces for display; it does not reflect what is bound. Only ${ip} is
+  listening, and the others refuse connections. Verify any time with:
+
+    Get-NetTCPConnection -LocalPort ${PORT} -State Listen
 `)
 
 // Run the CLI entrypoint with this same node. Spawning `npx`/`npx.cmd` fails with

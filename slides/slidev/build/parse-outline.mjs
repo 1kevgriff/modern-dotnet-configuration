@@ -107,7 +107,14 @@ const DIRECTIVE = [
 ]
 
 export function parseOutline(path) {
-  const raw = readFileSync(path, 'utf8')
+  // Strip CR before anything looks at a line.
+  //
+  // Every pattern below is line-anchored, and a trailing \r makes them miss: a fence
+  // stops closing, prose stops being classified, and the generator refuses to write.
+  // On Windows that is the DEFAULT state - core.autocrlf rewrites the file with CRLF on
+  // checkout, so a fresh clone could not build the deck at all. Normalising here means
+  // the parser does not care how the file arrived.
+  const raw = readFileSync(path, 'utf8').replace(/\r\n?/g, '\n')
   const lines = raw.split('\n')
 
   // Index every "# Slide N" heading. Ids are strings: 24a and 28b are real slides.
