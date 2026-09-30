@@ -72,5 +72,7 @@ defineProps<{ variant?: string; image?: string; kicker?: string; qr?: string }>(
 .v-title { background: var(--navy); }
 .v-title .left :deep(h1) { color: var(--cream); }
 .v-title .kicker { color: var(--gold); }
-.v-title .left :deep(li) { color: rgba(247, 246, 243, 0.86); }
+.v-title .left :deep(li) { color: rgba(247, 246, 243, 0.86); padding-left: 0; }
+/* the title card is a byline, not a list - no gold dots */
+.v-title .left :deep(li)::before { display: none; }
 </style>

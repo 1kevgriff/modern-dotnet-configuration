@@ -19,7 +19,9 @@ fonts:
   sans: Source Sans 3
   mono: JetBrains Mono
   provider: none
-layout: "blank"
+layout: "cover"
+variant: "title"
+image: "/kevin-griffin.png"
 ---
 
 <!--
@@ -33,14 +35,19 @@ layout: "blank"
 
 <!-- OUTLINE.md # Slide 0 -->
 
-<!-- intentionally blank -->
+<!-- from: copy of slide 3, the title slide -->
+
+# Modern .NET Configuration
+
+- Kevin Griffin
+- Microsoft MVP
 
 <!--
-[holding] BLANK
+[holding] TITLE PLACEHOLDER
 60-min: on screen before you are introduced
 
-Nothing here on purpose. The cold open only works if the first thing anyone reads is
-the contradiction, not a title card sitting there during the walk-on.
+The title card, so anyone walking in knows they are in the right room. The real title
+slide still comes after the cold open.
 
 Leave this up until you are ready, then advance once into the cold open.
 -->

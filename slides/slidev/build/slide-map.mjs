@@ -17,7 +17,16 @@ const SITE = 'consultwithgriff.com'
 
 export const map = {
   // ---- cold open -------------------------------------------------------------------
-  0: { layout: 'blank', prose: 'drop' },
+  // A copy of the title slide, up on screen while the room fills. Slide 3 stays where it
+  // is, after the cold open; this one is only the placeholder before the talk starts.
+  0: {
+    layout: 'cover',
+    variant: 'title',
+    headline: 'Modern .NET Configuration',
+    lines: ['Kevin Griffin', 'Microsoft MVP'],
+    from: 'copy of slide 3, the title slide',
+    prose: 'drop',
+  },
   1: { layout: 'code' },
   2: { layout: 'code' },
 

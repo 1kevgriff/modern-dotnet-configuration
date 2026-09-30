@@ -12,16 +12,16 @@ lifted from the matching project in `/demos`.
 
 ## Slide Content
 
-**Holding slide.** Intentionally blank — nothing on screen while the room settles.
+**Holding slide.** A copy of the title slide (slide 3), on screen while the room fills.
 
 ## Notes
 
 ```text
-[holding] BLANK
+[holding] TITLE PLACEHOLDER
 60-min: on screen before you are introduced
 
-Nothing here on purpose. The cold open only works if the first thing anyone reads is
-the contradiction, not a title card sitting there during the walk-on.
+The title card, so anyone walking in knows they are in the right room. The real title
+slide still comes after the cold open.
 
 Leave this up until you are ready, then advance once into the cold open.
 ```
