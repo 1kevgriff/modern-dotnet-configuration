@@ -207,8 +207,6 @@ the site, and the site is on the last slide.
 
 **Headline:** Everything here is in the repo
 
-Every snippet, plus runnable demos for each idea — 33 folders, 35 projects.
-
 ```text
 github.com/1kevgriff/modern-dotnet-configuration
 ```
@@ -1127,14 +1125,11 @@ Storage paths, for the record - and tell them not to write code against these:
 
 **Setup / reveal pair.** This slide is the setup only — do not show the answer yet.
 
-Two things are true at once. One shell, one project.
-
-| You set an environment variable | The project has this file |
+| Set in your terminal | Set in `Properties/launchSettings.json` |
 | --- | --- |
-| `$env:Weather__TimeoutSeconds = "10"` | `Properties/launchSettings.json` |
-| then `dotnet run` | `"environmentVariables": { "Weather__TimeoutSeconds": "45" }` |
+| `$env:Weather__TimeoutSeconds = "10"` | `"Weather__TimeoutSeconds": "45"` |
 
-> **Which one wins?**
+Caption, gold: **Which one wins?**
 
 ## Notes
 
@@ -1160,6 +1155,11 @@ So: you set an env var, you run locally, nothing changes, you conclude env vars
 don't work. Or worse - it works locally because of launchSettings, and the value
 simply isn't there in production.
 
+The table is one row on purpose: the two places the value is set, side by side, in the
+syntax they are actually written in. Say the setup out loud rather than reading it off
+the slide - one terminal, one project file, both true at the same time. Then let the
+question sit before you advance.
+
 Show the two side by side: the env var you set, and the launchSettings entry
 that quietly beats it. Then the same app with that entry deleted.
 
@@ -1183,9 +1183,9 @@ $ dotnet run
   Weather timeout is 45 seconds.
 ```
 
-The launch profile sets this process’s environment variable to 45.
+`dotnet publish` does not include `launchSettings.json` by default.
 
-Caption, gold: **`dotnet publish` does not include `launchSettings.json` by default.**
+Caption, gold: **The launch profile sets this process’s environment variable to 45.**
 
 ## Notes
 
@@ -1294,9 +1294,6 @@ $ dotnet run --no-launch-profile -- --environment Staging
     EnvironmentVariablesConfigurationProvider
     CommandLineConfigurationProvider        <-- wins the final read
 ```
-
-> `ASPNETCORE_ENVIRONMENT` is not just another setting. It is the input that picks
-the rest of your inputs.
 
 ## Notes
 
@@ -2373,7 +2370,8 @@ require LaunchDarkly or a platform team. They require a JSON file.
 
 **Full-bleed code slide.** A JSON section and a NuGet package.
 
-```json
+```jsonc
+// appsettings.json
 {
   "feature_management": {
     "feature_flags": [
@@ -2494,23 +2492,34 @@ ask.
 
 **Headline:** Boolean flags are not enough
 
-**Full-bleed code slide.** A variant hands back a configuration section, so you bind it like anything else.
+**Full-bleed code slide.** The configuration half: each variant carries a value, not a bool.
 
-```csharp
-Variant variant = await features.GetVariantAsync("CheckoutLayout", ct);
-
-var settings = new CheckoutLayoutSettings();
-variant.Configuration.Bind(settings);   // it's an IConfigurationSection
+```jsonc
+// appsettings.json - inside feature_management.feature_flags
+{
+  "id": "CheckoutLayout",
+  "enabled": true,
+  "variants": [
+    { "name": "Big",
+      "configuration_value": { "ButtonSize": "large", "Columns": 1, "ShowUpsell": true } },
+    { "name": "Small",
+      "configuration_value": { "ButtonSize": "small", "Columns": 3, "ShowUpsell": false } }
+  ],
+  "allocation": {
+    "default_when_enabled":  "Big",
+    "default_when_disabled": "Small"
+  }
+}
 ```
 
-A variant hands back an `IConfigurationSection`, so it binds like anything else in
-this talk. A flag can return a value, not just a yes or no.
+Flag on: `Big`. Flag off: `Small`. A flag can return a value, not just a yes or no.
 
 ## Notes
 
 ```text
 [77-80 min] VARIANTS - S6.5
-Snippet: lifted from d31 - optional even at 90
+Snippet: simplified from d31 - no targeting on the slide, verified to run as shown.
+d31 itself adds per-user and percentile allocation. Optional even at 90.
 60-min: CUT. Mention in one sentence that flags can return values, move on.
 
 A variant flag returns a VALUE - string, number, bool, or a whole configuration
@@ -2518,8 +2527,15 @@ object - instead of a boolean. This is where feature flags and the options
 pattern meet, which is why it belongs in this talk and not a generic flags talk.
 
   Variant variant = await features.GetVariantAsync("CheckoutLayout", ct);
-  variant.Configuration.Bind(settings);   // it's an IConfigurationSection -
+  var layout = variant.Configuration.Get<CheckoutLayoutSettings>();
+                                          // it's an IConfigurationSection -
                                           // bind it like anything else
+
+Point at the JSON first: each variant carries a configuration_value, which is just a
+config object. The two defaults decide which one is served: flag on gets Big, flag
+off gets Small. Verified - flipping enabled to false serves Small with no other
+change. Choosing a variant per user or by percentage is what the rest of allocation is
+for; mention that it exists and move on.
 
 Land that last line, then move on: a variant hands back a configuration section, so
 it binds like anything else you have done all talk.
@@ -2532,6 +2548,52 @@ the same seed. (This is the fix for the S6.4 gotcha.)
 status_override (None / Enabled / Disabled) lets a variant flag also answer
 IsEnabledAsync, so you can adopt variants without rewriting existing call sites.
 You cannot override a flag whose enabled is false.
+```
+
+---
+
+# Slide 45a
+
+## Slide Content
+
+**Headline:** A variant comes back as configuration
+
+**Full-bleed code slide.** The reading half.
+
+```csharp
+internal sealed class CheckoutLayoutSettings
+{
+    public required string ButtonSize { get; init; }
+    public required int    Columns    { get; init; }
+    public required bool   ShowUpsell { get; init; }
+}
+```
+
+```csharp
+Variant variant = await features.GetVariantAsync("CheckoutLayout", ct);
+
+// variant.Configuration is an IConfigurationSection
+var layout = variant.Configuration.Get<CheckoutLayoutSettings>();
+```
+
+The same `Get<T>` you have used all talk. A variant is just another configuration section.
+
+## Notes
+
+```text
+[77-80 min] VARIANTS, READING - S6.5
+Snippet: lifted from d31 - CheckoutLayoutSettings.cs and Program.cs
+60-min: CUT with the previous slide
+
+An ordinary options class - nothing flag-specific about it. The property names match
+the keys inside configuration_value on the previous slide, and that is the whole
+contract.
+
+Then the two lines that matter: GetVariantAsync returns a Variant, and its
+Configuration property is an IConfigurationSection. Get<T> binds it exactly the way
+you bound Weather:TimeoutSeconds at the start of the talk.
+
+Run as shown, this binds the Big variant: ButtonSize large, Columns 1, ShowUpsell True.
 ```
 
 ---
@@ -2889,6 +2951,40 @@ Questions you will get, and the short answers:
 
 If the room goes quiet, go to the flag-inventory endpoint (d32). It's the
 thing people ask about afterward anyway.
+```
+
+---
+
+# Slide 53a
+
+## Slide Content
+
+**Headline:** Rate this session
+
+Two minutes, and it decides what gets programmed next year.
+
+```text
+cloudandaisummit.com/content/sessionfeedback/1121716
+```
+
+## Notes
+
+```text
+[close] SESSION FEEDBACK
+60-min: 20 seconds, and do not skip it
+
+Put this up as Q&A starts, not as you are packing up - people answer it while they
+are still sitting down, and almost nobody does it from the hallway.
+
+Say the honest version: feedback is what decides whether this talk gets accepted
+again, and the organisers read it. That is more persuasive than "please rate me."
+
+ONE THING TO WARN THEM ABOUT: the link goes to the event site, and if they are not
+already signed in it lands on a login page first with a redirect back. Tell them
+that up front or half of them will assume the QR is broken and give up.
+
+If the room is quiet, leave it up through the first question or two, then move to
+the contact slide for the rest of the time.
 ```
 
 ---

@@ -219,7 +219,7 @@ const goldCaption = s => caption(s.goldCaption, true)
  * content that needs an element has to come from the sidecar and be emitted, not typed.
  */
 const qrImage = cfg => (cfg.qr
-  ? `<img src="${esc(cfg.qr)}" class="repo-qr" alt="QR code linking to the repository" />`
+  ? `<img src="${esc(cfg.qr)}" class="repo-qr" alt="${esc(cfg.qrAlt || 'QR code linking to the repository')}" />`
   : '')
 
 /** All caption text a slide will render, for the height budget. */

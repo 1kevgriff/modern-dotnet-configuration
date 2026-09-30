@@ -345,10 +345,8 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
     layout: 'reveal', headline: '50% of users, or 50% of calls?',
     footnote: 'The nav bar says new checkout, the checkout page says old, and it is invisible in a single test run. The fix: targeting, or variant allocation with a `seed` — that is what gives a stable per-user assignment.',
   },
-  45: {
-    layout: 'code',
-    footnote: 'A variant hands back an `IConfigurationSection`, so it binds like anything else in this talk.',
-  },
+  45: { layout: 'code', prose: 'keep' },
+  '45a': { layout: 'code', prose: 'keep' },
   46: {
     layout: 'default',
     gold: true,
@@ -392,6 +390,12 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
 
   // ---- close -----------------------------------------------------------------------
   53: { layout: 'section' },
+  '53a': {
+    layout: 'default',
+    prose: 'keep',
+    qr: '/feedback-qr.svg',
+    qrAlt: 'QR code linking to the session feedback form',
+  },
   // ---- appendix - off the main path -------------------------------------------------
   '54a': { layout: 'section' },
   54: {

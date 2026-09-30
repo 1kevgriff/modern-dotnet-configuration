@@ -250,7 +250,16 @@
    runtime dependency on a QR library. */
 
 .slidev-layout .repo-qr {
+  display: block;
   width: 9rem;
   height: 9rem;
-  margin-top: 0.9rem;
+  margin: 0.9rem auto 0;
+}
+
+/* The closing slide's QR sits in the cover layout's left column, underneath the contact
+   lines. Centring it there would break that column's left edge, so it keeps its original
+   alignment - only the standalone repo slide centres. */
+.slidev-layout.layout-cover .repo-qr {
+  margin-left: 0;
+  margin-right: 0;
 }
