@@ -399,12 +399,6 @@ Weather:AllowedOrigins:2  = https://c.example.com   base, survived`,
 
   // ---- close -----------------------------------------------------------------------
   53: { layout: 'section' },
-  '53a': {
-    layout: 'default',
-    prose: 'keep',
-    qr: '/feedback-qr.svg',
-    qrAlt: 'QR code linking to the session feedback form',
-  },
   // ---- appendix - off the main path -------------------------------------------------
   '54a': { layout: 'section' },
   54: {

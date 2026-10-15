@@ -12,7 +12,7 @@ without a redeploy.
 
 | | |
 | --- | --- |
-| **Presented at** | [Cloud & AI Summit](https://www.cloudandaisummit.com/) (debut) |
+| **Presented at** | [Cloud & AI Summit](https://www.cloudandaisummit.com/) 2026 (debut) · [TechBash](https://techbash.com/) 2026 |
 | **Speaker** | Kevin Griffin — [consultwithgriff.com/bio](https://consultwithgriff.com/bio) |
 | **Target** | .NET 10 / C# 14 |
 

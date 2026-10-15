@@ -12,11 +12,13 @@ Sources: [Configuration in .NET](https://learn.microsoft.com/dotnet/core/extensi
 
 ## 0. The session
 
+| Event | Slot | Room | Running order |
+| --- | --- | --- | --- |
+| [Cloud & AI Summit](https://www.cloudandaisummit.com/) 2026 (debut) | Wednesday, September 30 · 10:15 AM – 11:45 AM | Discovery Ballroom C | **90 minutes** — §11.1 |
+| [TechBash](https://techbash.com/) 2026 | Thursday, October 15 · 4:00 PM – 5:00 PM | Rosewood | **60 minutes** — §11.2 |
+
 | | |
 | --- | --- |
-| **Event** | [Cloud & AI Summit](https://www.cloudandaisummit.com/) |
-| **Slot** | Wednesday, September 30 · 10:15 AM – 11:45 AM (**90 minutes**) |
-| **Room** | Discovery Ballroom C |
 | **Track / level** | Pro Code · Intermediate |
 
 **Abstract as submitted:**
@@ -1441,7 +1443,7 @@ Notes:
   Show the sentinel key there and let flags do the rest.
 - §6.6 flag debt is the closing argument. It's the thing nobody else in the room will say.
 
-### 11.2 Running order — 60 minutes
+### 11.2 Running order — 60 minutes (TechBash)
 
 Flags get 10 of the 51 content minutes (~20%) — the ratio holds. Budget 51, not 56, and let
 questions ride along; a packed 56 overruns the moment a hand goes up during Options.
@@ -1684,7 +1686,7 @@ Verification before the talk: from each demo folder, `dotnet build` clean with z
   `IConfiguration`), or leave it out for time?
 - How deep on feature management — variant flags and targeting, or one flag and move on?
 - Include a `web.config` → `IConfiguration` migration slide for the legacy crowd?
-- ~~Session length~~ — resolved: the Cloud & AI Summit slot is 90 minutes. Both running orders are in §11.1 and §11.2.
+- ~~Session length~~ — resolved: Cloud & AI Summit is 90 minutes (§11.1), TechBash is 60 (§11.2).
 
 ---
 

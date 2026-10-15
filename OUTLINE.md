@@ -2955,40 +2955,6 @@ thing people ask about afterward anyway.
 
 ---
 
-# Slide 53a
-
-## Slide Content
-
-**Headline:** Rate this session
-
-Two minutes, and it decides what gets programmed next year.
-
-```text
-cloudandaisummit.com/content/sessionfeedback/1121716
-```
-
-## Notes
-
-```text
-[close] SESSION FEEDBACK
-60-min: 20 seconds, and do not skip it
-
-Put this up as Q&A starts, not as you are packing up - people answer it while they
-are still sitting down, and almost nobody does it from the hallway.
-
-Say the honest version: feedback is what decides whether this talk gets accepted
-again, and the organisers read it. That is more persuasive than "please rate me."
-
-ONE THING TO WARN THEM ABOUT: the link goes to the event site, and if they are not
-already signed in it lands on a login page first with a redirect back. Tell them
-that up front or half of them will assume the QR is broken and give up.
-
-If the room is quiet, leave it up through the first question or two, then move to
-the contact slide for the rest of the time.
-```
-
----
-
 # Slide 54
 
 ## Slide Content
