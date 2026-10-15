@@ -1,5 +1,6 @@
 ---
 theme: default
+colorSchema: light
 title: Modern .NET Configuration
 info: |
   ## Modern .NET Configuration

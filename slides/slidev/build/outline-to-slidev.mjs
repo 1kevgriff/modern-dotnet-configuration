@@ -413,6 +413,9 @@ const LAYOUTS = {
 
 const HEADMATTER = [
   'theme: default',
+  // The cream ground is painted unconditionally, so an OS in dark mode gave inline code
+  // Slidev's dark chip: navy text on near-black, invisible in headlines.
+  'colorSchema: light',
   'title: Modern .NET Configuration',
   'info: |',
   '  ## Modern .NET Configuration',
